@@ -1,0 +1,1 @@
+A neural network is a computational system loosely modeled after the human brain, designed to process information and learn patterns from data. It consists of layers of interconnected nodes, often called neurons, which perform bulk processing tasks.

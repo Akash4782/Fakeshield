@@ -1,0 +1,81 @@
+{
+    "accuracy": 83.33333333333334,
+    "total_tested": 6,
+    "correct_predictions": 5,
+    "details": {
+        "real_closeup.mp4": {
+            "ground_truth": "LIKELY_REAL",
+            "prediction": "LIKELY_REAL",
+            "score": 28.0,
+            "match": true,
+            "signals": {
+                "spatial": 33.0,
+                "temporal_core": 21.1,
+                "motion_raft": 64.0,
+                "multimodal": 50.0,
+                "biological": 50.0,
+                "audio_gen": 50.0,
+                "audio_sync": 50.0
+            }
+        },
+        "real_diverse.mp4": {
+            "ground_truth": "LIKELY_REAL",
+            "prediction": "LIKELY_REAL",
+            "score": 14.8,
+            "match": true,
+            "signals": {
+                "spatial": 83.5,
+                "temporal_core": 0.3,
+                "motion_raft": 4.8,
+                "multimodal": 50.0,
+                "biological": 50.0,
+                "audio_gen": 62.0,
+                "audio_sync": 50.0
+            }
+        },
+        "real_laughing.mp4": {
+            "ground_truth": "LIKELY_REAL",
+            "prediction": "AI_GENERATED",
+            "score": 97.3,
+            "match": false,
+            "signals": {
+                "spatial": 72.0,
+                "temporal_core": 78.6,
+                "motion_raft": 59.2,
+                "multimodal": 50.0,
+                "biological": 50.0,
+                "audio_gen": 50.0,
+                "audio_sync": 50.0
+            }
+        },
+        "real_neon.mp4": {
+            "ground_truth": "LIKELY_REAL",
+            "prediction": "LIKELY_REAL",
+            "score": 40.8,
+            "match": true,
+            "signals": {
+                "spatial": 37.3,
+                "temporal_core": 53.5,
+                "motion_raft": 3.1,
+                "multimodal": 50.0,
+                "biological": 50.0,
+                "audio_gen": 62.0,
+                "audio_sync": 50.0
+            }
+        },
+        "sora_claymation.mp4": {
+            "ground_truth": "LIKELY_AI",
+            "prediction": "AI_GENERATED",
+            "score": 95.0,
+            "match": true,
+            "signals": {}
+        },
+        "sora_donuts.mp4": {
+            "ground_truth": "LIKELY_AI",
+            "prediction": "AI_GENERATED",
+            "score": 95.0,
+            "match": true,
+            "signals": {}
+        }
+    }
+}

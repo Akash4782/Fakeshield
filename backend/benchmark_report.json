@@ -1,0 +1,73 @@
+{
+    "timestamp": "Tue Mar 31 06:15:50 2026",
+    "total_samples": 3,
+    "correct": 3,
+    "accuracy_pct": 100.0,
+    "results": [
+        {
+            "filename": "real_closeup.mp4",
+            "ground_truth": "REAL",
+            "verdict": "LIKELY_REAL",
+            "score": 32.2,
+            "is_correct": true,
+            "elapsed_sec": 282.6,
+            "signal_scores": {
+                "temporal_core": 2.0,
+                "spatial": 62.2,
+                "identity": 50.0,
+                "flow": 50.8,
+                "blink": 45.0,
+                "consistency": 39.5,
+                "biological": 50.0,
+                "audio": 50.0,
+                "lipsync": 50.0
+            },
+            "robustness": {
+                "original_score": 0.622,
+                "compressed_score": 0.691,
+                "score_delta": 0.069,
+                "jpeg_quality": 70,
+                "frames_tested": 8,
+                "flip_threshold": 0.25
+            },
+            "provenance": {
+                "codec": "mov,mp4,m4a,3gp,3g2,mj2",
+                "bit_rate": "4540587",
+                "tags": {
+                    "major_brand": "mp42",
+                    "minor_version": "0",
+                    "compatible_brands": "mp42mp41isomavc1",
+                    "creation_time": "2017-06-04T15:18:09.000000Z"
+                }
+            }
+        },
+        {
+            "filename": "sora_claymation.mp4",
+            "ground_truth": "AI",
+            "verdict": "AI_GENERATED",
+            "score": 95.0,
+            "is_correct": true,
+            "elapsed_sec": 0.07,
+            "signal_scores": {},
+            "robustness": {},
+            "provenance": {
+                "definitive": true,
+                "reason": "AI provenance detected in metadata: {'ai_tool_found': 'sora', 'c2pa_ai_credential': True, 'codec': 'mov,mp4,m4a,3gp,3g2,mj2', 'bit_rate': '4052790', 'tags': {'major_brand': 'isom', 'minor_version': '512', 'compatible_brands': 'isomiso2avc1mp41', 'encoder': 'Lavf60.16.100'}}"
+            }
+        },
+        {
+            "filename": "sora_donuts.mp4",
+            "ground_truth": "AI",
+            "verdict": "AI_GENERATED",
+            "score": 95.0,
+            "is_correct": true,
+            "elapsed_sec": 0.07,
+            "signal_scores": {},
+            "robustness": {},
+            "provenance": {
+                "definitive": true,
+                "reason": "AI provenance detected in metadata: {'ai_tool_found': 'sora', 'c2pa_ai_credential': True, 'codec': 'mov,mp4,m4a,3gp,3g2,mj2', 'bit_rate': '4740571', 'tags': {'major_brand': 'isom', 'minor_version': '512', 'compatible_brands': 'isomiso2avc1mp41', 'encoder': 'Lavf60.16.100'}}"
+            }
+        }
+    ]
+}

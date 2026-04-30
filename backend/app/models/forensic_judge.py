@@ -1,0 +1,150 @@
+import google.generativeai as genai
+from app.config import settings
+import json
+import re
+
+class ForensicJudge:
+    """
+    ForensicJudge v10.0 (Core Reasoning Intelligence)
+    Promoted from 'explainer' to 'primary forensic analyzer'.
+    Uses the 2026 'Industrial Master Brain' prompt for behavior-based detection.
+    """
+
+    def __init__(self, api_key: str = None):
+        api_key = api_key or settings.GEMINI_API_KEY
+        self.enabled = False
+        if api_key:
+            genai.configure(api_key=api_key)
+            # Build model list: Priority from settings + hardcoded fallbacks
+            # We use names verified for 2026-era SDKs and legacy fallbacks
+            model_list = [
+                "gemini-1.5-flash", 
+                "gemini-1.5-pro", 
+                "gemini-1.5-flash-8b",
+                "gemini-2.0-flash", 
+                "gemini-3.1-pro-preview", 
+                "gemini-3-flash-preview"
+            ]
+            if settings.GEMINI_MODEL:
+                # Clean up name if it has aliases (e.g. "Gemini 3 Flash" -> "gemini-3-flash-preview")
+                preferred = settings.GEMINI_MODEL.lower().replace(" ", "-")
+                if "gemini-3-flash" in preferred: preferred = "gemini-3-flash-preview"
+                
+                if preferred not in model_list:
+                    model_list.insert(0, preferred)
+                else:
+                    model_list.remove(preferred)
+                    model_list.insert(0, preferred)
+
+            for model_name in model_list:
+                try:
+                    # Fix: Ensure model names are correctly formatted for the SDK
+                    # Some environments require 'models/' prefix, others don't. 
+                    # We try the raw name first as it's the 2026 standard.
+                    self.model = genai.GenerativeModel(model_name)
+                    # Real verification: Dummy call (short)
+                    self.model.generate_content("ok", generation_config={"max_output_tokens": 1})
+                    self.enabled = True
+                    self.active_model = model_name
+                    print(f"[ForensicJudge v10] Initialized with {model_name}")
+                    break
+                except Exception as e:
+                    err_str = str(e)
+                    # If we get a 429 (Quota), the model EXISTS and the key is VALID.
+                    # However, we should try to find another model that ISN'T rate limited first.
+                    if "429" in err_str or "quota" in err_str.lower():
+                        print(f"[ForensicJudge] {model_name} is currently rate-limited (429). Trying fallbacks...")
+                        if not hasattr(self, 'fallback_model'):
+                            self.fallback_model = model_name
+                        continue
+                    
+                    # If we get a 404, the model name might need a prefix or is unavailable
+                    if "404" in err_str:
+                        alt_name = f"models/{model_name}" if not model_name.startswith("models/") else model_name.replace("models/", "")
+                        try:
+                            self.model = genai.GenerativeModel(alt_name)
+                            self.model.generate_content("ok", generation_config={"max_output_tokens": 1})
+                            self.enabled = True
+                            self.active_model = alt_name
+                            print(f"[ForensicJudge v10] Initialized with {alt_name} (via prefix fallback)")
+                            break
+                        except:
+                            pass # Still failed, move to next model in list
+                    
+                    print(f"[ForensicJudge] Debug: Skipping {model_name} due to error: {err_str[:100]}...")
+                    continue
+            
+            # If no model worked perfectly but we found a rate-limited one, use it as fallback
+            if not self.enabled and hasattr(self, 'fallback_model'):
+                self.enabled = True
+                self.active_model = self.fallback_model
+                self.model = genai.GenerativeModel(self.active_model)
+                print(f"[ForensicJudge v10] Initialized with {self.active_model} (Status: Rate Limited/Quota Mode)")
+
+        
+        if not self.enabled:
+            print("[ForensicJudge] Warning: Reasoning Engine DISABLED (API Key or Model Issue).")
+            print("[ForensicJudge] Check GEMINI_API_KEY in .env and verify model availability.")
+
+    def evaluate(self, text: str, metrics: dict) -> dict:
+        """
+        Performs a deep forensic audit and returns a reasoning score + JSON data.
+        This is the PRIMARY reasoning signal for v10.
+        """
+        if not self.enabled:
+            return {"score": 0.5, "verdict": "Uncertain", "explanation": "Judge offline."}
+
+        # v10.2 Strict Reasoning Brain (Template DNA Focus)
+        prompt = f"""
+You are an elite forensic AI linguist. Analyze this text for "Artificial Cleanliness".
+LLM models (even 2026 versions) follow a specific 'DNA' of logical progression.
+
+TEXT SAMPLE:
+\"\"\"{text[:1000]}...\"\"\"
+
+STATISTICAL FOOTPRINT:
+- Neural Confidence: {metrics.get('neural_classifier', 0)*100}%
+- Structural Strength: {metrics.get('structural_strength', 'N/A')}
+- Lexical AI Pattern Density: {metrics.get('lexical_score', 'N/A')}
+- Perplexity (PPL): {metrics.get('ppl_score', 'N/A')}
+
+V10.2 DETECTION FOCUS:
+1. **The Explainer Template**: Does it follow a rigid Intro -> Mechanism -> Types -> Summary structure common in LLMs?
+2. **Artificial Transitions**: Flag "Moreover", "Furthermore", "In conclusion" if used in a perfectly rhythmic, repetitive sequence.
+3. **Academic/Technical Nuance**: **IMPORTANT**: High-quality academic writing is often "clean" but has organic sentence length variance and specific domain depth that LLMs sometimes lack.
+4. **Narrative/Creative Soul**: **CRITICAL**: If the text is a STORY, fiction, or creative narrative, it may have high "predictability" in plot but should have organic, varied linguistic flow. Do not penalize creative storytelling or character-driven dialogue unless it feels mechanically generated by a prompt template.
+5. MODERN LLM DNA:
+- Look for the 'Helpful Assistant' persona (overly polite, repetitive clarifications).
+- Check for 'Instructional DNA' (even if it's not a list, is the rhythm too logical?).
+- Look for 'Semantic Smoothness' (does every sentence flow perfectly into the next with no human-like jitter?).
+- Detect 'Template Reasoning' (does the text follow a predictable opening-body-conclusion structure?).
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+{{
+  "ai_probability": (0.0-1.0),
+  "verdict": "Likely AI" | "Uncertain" | "Likely Human" | "Human",
+  "reasoning": "Forensic reasoning emphasizing template detection vs organic nuance.",
+  "suspicious_indicators": ["Synthetic balance", "Template-driven logic", "Machine-perfect rhythm"]
+}}
+"""
+        try:
+            response = self.model.generate_content(
+                prompt, 
+                generation_config={"response_mime_type": "application/json"}
+            )
+            # Clean up response if it contains markdown markers
+            clean_text = re.sub(r'```json\s*|\s*```', '', response.text.strip())
+            data = json.loads(clean_text)
+            return data
+        except Exception as e:
+            print(f"[ForensicJudge] Evaluation failed: {e}")
+            return {"ai_probability": 0.5, "verdict": "Uncertain", "reasoning": "Reasoning engine failure."}
+
+    def explain(self, text: str, metrics: dict, verdict: str) -> str:
+        """Generates a professional forensic explanation (Legacy support/UI display)."""
+        if not self.enabled:
+            return "Forensic reasoning unavailable."
+            
+        # Re-using evaluate for better consistency in v10
+        evaluation = self.evaluate(text, metrics)
+        return f"Forensic Analysis: {evaluation.get('reasoning', 'Analysis complete.')}"
