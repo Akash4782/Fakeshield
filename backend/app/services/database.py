@@ -14,7 +14,9 @@ async def get_pool():
             _pool = await asyncpg.create_pool(
                 dsn=settings.DATABASE_URL,
                 min_size=2,
-                max_size=10,
+                max_size=5,
+                command_timeout=5,
+                timeout=5,
             )
             await _create_table()
             print("[DB] PostgreSQL connected.")
@@ -33,6 +35,7 @@ async def _create_table():
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS text_scans (
                 id               SERIAL PRIMARY KEY,
+                user_email       TEXT NOT NULL,
                 scan_id          TEXT UNIQUE NOT NULL,
                 verdict          TEXT,
                 threat_level     TEXT,
@@ -49,14 +52,18 @@ async def _create_table():
             );
             
             -- Ensure existing tables have new columns
+            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS user_email TEXT;
             ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS confidence_level TEXT;
             ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS agreement_score  INTEGER;
             ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stability_score  FLOAT;
             ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stylometric_details JSONB;
+            
+            CREATE INDEX IF NOT EXISTS idx_text_scans_user_email ON text_scans(user_email);
         """)
 
 
 async def save_scan(
+    user_email: str,
     scan_id: str,
     verdict: str,
     threat_level: str,
@@ -79,14 +86,14 @@ async def save_scan(
     async with pool.acquire() as conn:
         await conn.execute("""
             INSERT INTO text_scans
-                (scan_id, verdict, threat_level, confidence,
+                (user_email, scan_id, verdict, threat_level, confidence,
                  confidence_level, agreement_score, stability_score,
                  signals, linguistic_profile, stylometric_details,
                  word_count, processing_time, text_preview)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
             ON CONFLICT (scan_id) DO NOTHING;
         """,
-            scan_id, verdict, threat_level, confidence,
+            user_email, scan_id, verdict, threat_level, confidence,
             confidence_level, agreement_score, stability_score,
             json.dumps(signals),
             json.dumps(linguistic_profile),
@@ -95,7 +102,7 @@ async def save_scan(
         )
 
 
-async def get_scan_history(limit: int = 50) -> list:
+async def get_scan_history(user_email: str, limit: int = 50) -> list:
     pool = await get_pool()
     if not pool:
         return []
@@ -104,9 +111,10 @@ async def get_scan_history(limit: int = 50) -> list:
             SELECT scan_id, verdict, threat_level, confidence,
                    word_count, text_preview, created_at
             FROM text_scans
+            WHERE user_email = $1
             ORDER BY created_at DESC
-            LIMIT $1;
-        """, limit)
+            LIMIT $2;
+        """, user_email, limit)
         return [dict(r) for r in rows]
 
 

@@ -1,8 +1,9 @@
 import asyncio
 import base64
 import io
+import time
 from PIL import Image
-from app.services.image_pipeline import run_image_pipeline
+from app.models.image_detector import analyze_image
 
 async def test_pipeline():
     # 1. Create a dummy solid color image (Real-looking noise-free)
@@ -11,23 +12,22 @@ async def test_pipeline():
     img.save(buf, format='JPEG')
     image_bytes = buf.getvalue()
 
-    print("--- Running AI Image Forensic Pipeline v8.1 ---")
+    print("--- Running AI Image Forensic Pipeline v8.0 (Batched) ---")
+    t0 = time.time()
     try:
-        result = await run_image_pipeline(image_bytes)
+        # analyze_image is synchronous, but we can run it in a thread for realism
+        result = await asyncio.to_thread(analyze_image, image_bytes)
+        elapsed = time.time() - t0
         
         print(f"Verdict: {result['verdict']} ({result['threat_level']})")
         print(f"AI Probability: {result['ai_probability']}")
         print(f"Confidence: {result['confidence']}%")
+        print(f"Processing Time: {result['processing_time']}")
+        print(f"Wall Clock Time: {elapsed:.2f}s")
+        
         print("\nSignals:")
         for k, v in result['signals'].items():
             print(f"  - {k}: {v}")
-        
-        print("\nReasons:")
-        for r in result['reasons']:
-            print(f"  - {r}")
-            
-        print(f"\nProcessing Time: {result['processing_time']}s")
-        print("-----------------------------------------------")
         
     except Exception as e:
         import traceback

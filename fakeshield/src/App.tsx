@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './hooks/useTheme';
+import { AuthProvider, useAuth } from './hooks/useAuth.tsx';
 import LandingPage from './pages/Landing/LandingPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import ForensicLab from './pages/ForensicLab/ForensicLab';
@@ -8,61 +9,72 @@ import TextLabPage from './pages/TextLab/TextLabPage';
 import AudioLabPage from './pages/AudioLab/AudioLabPage';
 import ImageLabPage from './pages/ImageLab/ImageLabPage';
 import VideoLabPage from './pages/VideoLab/VideoLabPage';
-import AnalyticsPage from './pages/Analytics/AnalyticsPage';
+import AboutPage from './pages/About/AboutPage';
+import ContactPage from './pages/Contact/ContactPage';
+import SubscriptionPage from './pages/Subscription/SubscriptionPage';
 import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
 import SettingsPage from './pages/Settings/SettingsPage';
+import PrivacyPage from './pages/Legal/PrivacyPage';
+import TermsPage from './pages/Legal/TermsPage';
+import FAQPage from './pages/Legal/FAQPage';
 import './App.css';
 
-// Simple Error Boundary
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#020617]">
+        <div className="w-16 h-16 border-4 border-[#00E5CC] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
-  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
-  componentDidCatch(error: any, errorInfo: any) { console.error("[ErrorBoundary] Caught:", error, errorInfo); }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ padding: '40px', color: '#EF4444', background: '#020617', minHeight: '100vh', fontFamily: 'monospace' }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Forensic Console Exception</h1>
-          <p style={{ color: '#94a3b8' }}>A critical runtime error occurred in the linguistic engine visualization.</p>
-          <div style={{ marginTop: '20px', padding: '20px', background: '#0B0E14', border: '1px solid #334155', borderRadius: '12px' }}>
-            <p><strong>Error:</strong> {this.state.error?.message}</p>
-            <pre style={{ marginTop: '10px', fontSize: '12px', opacity: 0.7, overflowX: 'auto' }}>{this.state.error?.stack}</pre>
-          </div>
-          <button onClick={() => window.location.reload()} style={{ marginTop: '20px', padding: '10px 20px', background: '#00E5CC', color: '#020617', fontWeight: 'bold', borderRadius: '8px' }}>
-            Re-initialize UI
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
-}
+
+  return <>{children}</>;
+};
+
+// Paid Route Component
+const PaidRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (user?.subscription_tier !== 'paid') return <Navigate to="/subscription" replace />;
+  return <>{children}</>;
+};
 
 function App() {
   return (
-    <ErrorBoundary>
+    <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/lab" element={<ForensicLab />} />
-            <Route path="/text-lab" element={<TextLabPage />} />
-            <Route path="/image-lab" element={<ImageLabPage />} />
-            <Route path="/audio-lab" element={<AudioLabPage />} />
-            <Route path="/video-lab" element={<VideoLabPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
+            <Route path="/text-lab" element={<ProtectedRoute><TextLabPage /></ProtectedRoute>} />
+            <Route path="/image-lab" element={<PaidRoute><ImageLabPage /></PaidRoute>} />
+            <Route path="/audio-lab" element={<PaidRoute><AudioLabPage /></PaidRoute>} />
+            <Route path="/video-lab" element={<PaidRoute><VideoLabPage /></PaidRoute>} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/faq" element={<FAQPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
-    </ErrorBoundary>
+    </AuthProvider>
   );
 }
 

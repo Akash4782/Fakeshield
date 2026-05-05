@@ -22,8 +22,9 @@ import {
 import TimelineChart from "./TimelineChart";
 import AudioVisualSync from "./AudioVisualSync";
 import VLMReasoningPanel from "./VLMReasoningPanel";
+import { useAuth } from '../../hooks/useAuth.tsx';
 
-const API = "http://localhost:8001/api/v1"; 
+const API = "http://127.0.0.1:8001/api/v1"; 
 
 const SIGNAL_META: Record<string, { label: string; icon: any; desc: string; color: string }> = {
   spatial:   { label: 'Spatial Neural', icon: Cpu, desc: 'Detects facial textures & diffusion artifacts', color: '#a78bfa' },
@@ -40,17 +41,25 @@ const VERDICT_CONFIG = {
   'LIKELY REAL': { color: '#22c55e', bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.3)',  icon: CheckCircle2,   label: 'AUTHENTIC',    badge: 'LOW' },
 };
 
+import DashboardLayout from '../../components/layout/DashboardLayout';
+
 const VideoLabPage = () => {
+  const { token } = useAuth();
   const [phase, setPhase] = useState<"idle" | "uploading" | "polling" | "done" | "error">("idle");
   const [result, setResult] = useState<any | null>(null);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fileNameRef = useRef<string>('');
 
   const pollJob = useCallback(async (jobId: string) => {
     try {
-      const res = await fetch(`${API}/video/status/${jobId}`);
+      const res = await fetch(`${API}/video/status/${jobId}`, {
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        }
+      });
       if (!res.ok) throw new Error("Poll failed");
       const data = await res.json();
 
@@ -71,6 +80,7 @@ const VideoLabPage = () => {
   const handleFile = useCallback(async (file: File) => {
     setPhase("uploading");
     setProgress("Injecting payload...");
+    fileNameRef.current = file.name;
 
     const form = new FormData();
     form.append("file", file);
@@ -78,6 +88,9 @@ const VideoLabPage = () => {
     try {
       const res = await fetch(`${API}/video/analyze/async`, {
         method: "POST",
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         body: form,
       });
       if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
@@ -108,24 +121,12 @@ const VideoLabPage = () => {
   const vCfg = result?.data ? (VERDICT_CONFIG[result.data.verdict as keyof typeof VERDICT_CONFIG] || VERDICT_CONFIG['UNCERTAIN']) : null;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" }}>
-      <Sidebar activeTab="Video Lab" />
-
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar" style={{ scrollBehavior: 'smooth' }}>
+    <DashboardLayout activeTab="Video lab">
+      <div className="flex-1 flex flex-col min-w-0" style={{ scrollBehavior: 'smooth' }}>
         {/* Header */}
-        <header className="flex items-center justify-between px-8 py-4 z-50 sticky top-0 backdrop-blur-md border-b transition-colors" style={{ background: 'var(--glass-bg)', borderColor: 'var(--panel-border)' }}>
-          <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-inactive)' }}>
-            <Activity className="w-3.5 h-3.5 text-[#00E5CC]" />
-            <span>Forensic Intelligence</span>
-            <ChevronRight className="w-3 h-3 opacity-30" />
-            <span style={{ color: 'var(--text-primary)' }}>Consistency Auditor v10.0</span>
-            <span className="ml-2 px-1.5 py-0.5 bg-[#00E5CC]/10 text-[#00E5CC] rounded border border-[#00E5CC]/20 animate-pulse">STARTUP-GRADE</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-[9px] font-mono opacity-50">ENGINE: AIGC_SHIELD_V10.0_CONSISTENCY</div>
-            <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
-              <Info className="w-4 h-4 text-[#00E5CC]" />
-            </button>
+        <header className="flex items-center justify-between px-6 py-4 md:py-6 z-50 sticky top-0 backdrop-blur-md border-b transition-colors" style={{ background: 'var(--glass-bg)', borderColor: 'var(--panel-border)' }}>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-800">Video lab</h1>
           </div>
         </header>
 
@@ -135,7 +136,7 @@ const VideoLabPage = () => {
               <motion.div key="idle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
                 <div className="text-center space-y-4">
                   <h1 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-[#00E5CC] to-[#2DD4BF] bg-clip-text text-transparent">
-                    Video AI Forensic Lab
+                    Video analysis lab
                   </h1>
                   <p className="text-sm max-w-lg mx-auto opacity-60 leading-relaxed">
                     Slight pixel-motion variations and frequency anomalies distinguish natural photon noise from diffusion dreaming.
@@ -190,10 +191,8 @@ const VideoLabPage = () => {
                 {/* Result Hero */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Verdict Card */}
-                  <div className="lg:col-span-2 p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-5">
-                      <ScanSearch className="w-32 h-32" />
-                    </div>
+                  <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--panel-border)] bg-white relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-sm">
+
                     
                     <div className="relative shrink-0">
                       <svg width="140" height="140" viewBox="0 0 100 100">
@@ -205,64 +204,77 @@ const VideoLabPage = () => {
                           transition={{ duration: 1.5, ease: "easeOut" }}
                           transform="rotate(-90 50 50)"
                         />
-                        <text x="50" y="48" textAnchor="middle" dominantBaseline="middle" className="text-2xl font-black fill-white">
+                        <text x="50" y="48" textAnchor="middle" dominantBaseline="middle" className="text-3xl font-bold" style={{ fill: vCfg?.color }}>
                           {Math.round(result.data.ai_probability * 100)}%
                         </text>
-                        <text x="50" y="62" textAnchor="middle" dominantBaseline="middle" className="text-[6px] font-black fill-white/40 uppercase tracking-widest">
-                          AI Probability
+                        <text x="50" y="65" textAnchor="middle" dominantBaseline="middle" className="text-[7px] font-bold fill-slate-400 uppercase tracking-widest">
+                          AI PROBABILITY
                         </text>
                       </svg>
                     </div>
 
-                    <div className="flex-1 space-y-4 text-center md:text-left">
-                      <div className="flex flex-col md:flex-row md:items-center gap-3">
-                        <h2 className="text-3xl font-black tracking-tighter uppercase italic" style={{ color: vCfg?.color }}>
+                    <div className="flex-1 space-y-5 text-center md:text-left">
+                      <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <h2 className="text-4xl font-bold tracking-tight text-slate-800">
                           {vCfg?.label}
                         </h2>
-                        <span className="px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest self-center md:self-start" style={{ background: vCfg?.bg, borderColor: vCfg?.border, color: vCfg?.color }}>
-                          {vCfg?.badge} RISK
+                        <span className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider self-center md:self-start" style={{ background: vCfg?.bg, borderColor: vCfg?.border, color: vCfg?.color }}>
+                          {vCfg?.badge} THREAT
                         </span>
                       </div>
-                      <p className="text-sm opacity-60 leading-relaxed max-w-md">
-                        Analysis of {result.data.metadata?.total_frames || '8'} frames reveals {result.data.verdict.toLowerCase()} status with {result.data.agreement_count} module agreement. Logic: {result.data.logic_version || 'v10.0'}.
+                      
+                      <p className="text-sm text-slate-600 leading-relaxed max-w-lg">
+                        Our forensic ensemble has detected consistent patterns of synthetic generation. 
+                        The analysis of {result.data.metadata?.total_frames || '8'} frames confirms a 
+                        <span className="font-bold mx-1" style={{ color: vCfg?.color }}>{result.data.verdict.toLowerCase()}</span> 
+                        status with {result.data.agreement_count} module agreement.
                       </p>
-                      <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold">
-                          <Activity className="w-3 h-3 text-[#00E5CC]" /> {result.data.processing_time}
+
+                      <div className="flex flex-wrap gap-4 justify-center md:justify-start items-center pt-2">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500">
+                          <Activity className="w-4 h-4 text-slate-400" />
+                          <span>Process: <span className="text-slate-800 font-bold">{result.data.processing_time}</span></span>
                         </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold">
-                          <BarChart2 className="w-3 h-3 text-[#00E5CC]" /> {result.data.metadata?.dimensions}
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500">
+                          <BarChart2 className="w-4 h-4 text-slate-400" />
+                          <span>Resolution: <span className="text-slate-800 font-bold">{result.data.metadata?.dimensions}</span></span>
                         </div>
-                        <button onClick={reset} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#00E5CC]/10 border border-[#00E5CC]/20 text-[10px] font-black uppercase text-[#00E5CC] hover:bg-[#00E5CC]/20 transition-all shadow-[0_4px_12px_rgba(0,229,204,0.1)]">
-                          <RotateCcw className="w-3 h-3" /> Start New Audit
+                        <button 
+                          onClick={reset} 
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold uppercase tracking-wider transition-all shadow-sm hover:opacity-90 active:scale-95"
+                          style={{ background: '#00E5CC', color: '#000', fontSize: '11px' }}
+                        >
+                          <RotateCcw className="w-4 h-4" /> 
+                          New Audit
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Signals Panel */}
-                  <div className="p-6 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] space-y-6 flex flex-col justify-center">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 px-2">Forensic Signals</h3>
-                    <div className="space-y-4">
+                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-white space-y-8 flex flex-col justify-center shadow-sm">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 px-1">Forensic Signals</h3>
+                    <div className="space-y-6">
                       {Object.entries(result.data.signals).map(([key, val]: any) => {
                         const meta = SIGNAL_META[key];
                         if (!meta) return null;
                         const pct = Math.round(val * 100);
                         const Icon = meta.icon;
                         return (
-                          <div key={key} className="space-y-2">
-                            <div className="flex items-center justify-between px-2">
-                              <div className="flex items-center gap-2">
-                                <Icon className="w-3 h-3 text-[#00E5CC]" />
-                                <span className="text-[10px] font-bold opacity-70">{meta.label}</span>
+                          <div key={key} className="space-y-3">
+                            <div className="flex justify-between items-center text-[11px] font-bold">
+                              <div className="flex items-center gap-2.5 text-slate-500">
+                                <Icon className="w-4 h-4" style={{ color: meta.color }} />
+                                <span className="uppercase tracking-tight text-slate-700">{meta.label}</span>
                               </div>
-                              <span className="text-[10px] font-black transition-colors" style={{ color: pct > 50 ? '#f87171' : '#34d399' }}>{pct}%</span>
+                              <span className="font-bold text-sm" style={{ color: meta.color }}>{pct}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-50">
                               <motion.div 
-                                initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, delay: 0.5 }}
-                                className="h-full rounded-full shadow-[0_0_10px_rgba(0,229,204,0.3)]"
-                                style={{ background: `linear-gradient(90deg, ${meta.color}50, ${meta.color})` }}
+                                initial={{ width: 0 }} 
+                                animate={{ width: `${pct}%` }} 
+                                className="h-full rounded-full" 
+                                style={{ background: meta.color }}
                               />
                             </div>
                           </div>
@@ -275,45 +287,54 @@ const VideoLabPage = () => {
                 {/* Evidence Spotlight & RAFT Heatmap */}
                 {result.data.evidence_heatmap && (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 p-8 rounded-3xl border border-[var(--panel-border)] bg-[#00E5CC]/[0.02] relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-2xl border-l-[6px] border-l-[#00E5CC]">
-                      <div className="shrink-0 w-full md:w-1/2 relative group">
-                         <div className="absolute -inset-1 bg-[#00E5CC] rounded-xl blur opacity-10 group-hover:opacity-20 transition duration-500"></div>
-                         <img src={result.data.evidence_heatmap} alt="Optical Flow Heatmap" className="relative rounded-xl border border-[#00E5CC]/20 shadow-2xl w-full aspect-video object-cover" />
-                         <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[8px] font-mono text-[#00E5CC] uppercase tracking-widest border border-[#00E5CC]/20">
-                           RAFT Flow Evidence
+                    <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--panel-border)] bg-white relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-sm">
+                      <div className="shrink-0 w-full md:w-1/2 relative">
+                         <img src={result.data.evidence_heatmap} alt="Optical Flow Heatmap" className="relative rounded-xl border border-slate-200 shadow-sm w-full aspect-video object-cover" />
+                         <div className="absolute bottom-2 right-2 px-2 py-1 bg-slate-900/80 backdrop-blur-sm rounded text-[8px] font-bold text-white uppercase tracking-widest border border-white/10">
+                           RAFT FLOW ANALYSIS
                          </div>
                       </div>
                       <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                          <Eye className="w-4 h-4 text-[#00E5CC]" />
-                          <h3 className="text-xs font-black uppercase tracking-widest text-[#00E5CC]">Evidence Spotlight</h3>
+                          <Eye className="w-4 h-4 text-slate-400" />
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Evidence Spotlight</h3>
                         </div>
-                        <p className="text-xs opacity-70 leading-relaxed font-medium">
-                          The RAFT-Optical Flow engine has isolated a **mass-discontinuity** in the temporal flux. Real-world motion is rigid; AI motion exhibits "cloudy" or "vibrating" pixel residuals, captured here as a forensic heatmap.
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          The RAFT-Optical Flow engine has isolated a <span className="text-slate-800 font-bold">mass-discontinuity</span> in the temporal flux. 
+                          Natural motion is rigid, while AI-generated pixels exhibit "morphing" residuals captured in this forensic heatmap.
                         </p>
-                        <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-lg bg-[#00E5CC]/10 flex items-center justify-center">
-                              <Layers className="w-4 h-4 text-[#00E5CC]" />
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
+                              <Layers className="w-5 h-5 text-slate-400" />
                            </div>
-                           <div className="text-[10px] font-bold opacity-60 italic">"Physical reality breaks detected at frame {Math.round(result.data.metadata?.total_frames / 2)}"</div>
+                           <div className="text-[11px] font-medium text-slate-500 italic leading-snug">
+                             "Physical reality breaks detected near <span className="text-slate-800 font-bold not-italic">frame {Math.round(result.data.metadata?.total_frames / 2)}</span>"
+                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] flex flex-col justify-center space-y-6">
-                       <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 px-2 flex items-center gap-2">
-                         <Thermometer className="w-3 h-3" /> Consistency Score
+                    <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-white flex flex-col justify-center space-y-6 shadow-sm">
+                       <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 px-1 flex items-center gap-2">
+                         <Thermometer className="w-4 h-4" /> CONSISTENCY SCORE
                        </h3>
                        <div className="space-y-6">
                           <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-bold opacity-50 uppercase tracking-tighter">Physics Match</span>
-                            <span className="text-2xl font-black text-[#00E5CC]">{result.data.signals?.reasoning > 0.6 ? 'POOR' : 'EXCELLENT'}</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase">Physics Validation</span>
+                            <span className="text-3xl font-bold" style={{ color: result.data.signals?.reasoning > 0.6 ? '#ef4444' : '#22c55e' }}>
+                              {result.data.signals?.reasoning > 0.6 ? 'POOR' : 'EXCELLENT'}
+                            </span>
                           </div>
-                          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                             <motion.div initial={{ width: 0 }} animate={{ width: `${(1 - (result.data.signals?.reasoning || 0)) * 100}%` }} className="h-full bg-gradient-to-r from-[#00E5CC] to-[#2DD4BF] shadow-[0_0_8px_rgba(0,229,204,0.3)]" />
+                          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                             <motion.div 
+                              initial={{ width: 0 }} 
+                              animate={{ width: `${(1 - (result.data.signals?.reasoning || 0)) * 100}%` }} 
+                              className="h-full"
+                              style={{ background: result.data.signals?.reasoning > 0.6 ? '#ef4444' : '#22c55e' }}
+                             />
                           </div>
-                          <p className="text-[9px] opacity-40 leading-relaxed">
-                            A high consistency score indicates that the video obeys mass-conservation and lighting-physics constraints.
+                          <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                            Measures adherence to mass-conservation and lighting-physics constraints. High scores indicate physical reality.
                           </p>
                        </div>
                     </div>
@@ -359,60 +380,62 @@ const VideoLabPage = () => {
                 {/* Sub Panels */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Evidence List */}
-                  <div className="p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] space-y-6">
+                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-white space-y-6 shadow-sm">
                     <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-[#00E5CC]" />
-                      <h3 className="text-xs font-black uppercase tracking-widest pb-1 border-b-2 border-[#00E5CC]/20">Forensic Brief</h3>
+                      <Eye className="w-4 h-4 text-slate-400" />
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Forensic Brief</h3>
                     </div>
                     <div className="space-y-4">
                       {result.data.reasons.map((reason: string, i: number) => (
                         <motion.div 
                           key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                          className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:border-[#00E5CC]/30 transition-all hover:bg-white/[0.07]"
+                          className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 group hover:border-slate-200 transition-all"
                         >
-                          <div className="w-6 h-6 rounded-lg bg-[#00E5CC]/10 flex items-center justify-center shrink-0 mt-1">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#00E5CC]" />
+                          <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-1 shadow-sm">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-slate-400" />
                           </div>
-                          <p className="text-xs font-medium leading-relaxed opacity-80">{reason}</p>
+                          <p className="text-[13px] font-medium leading-relaxed text-slate-600">{reason}</p>
                         </motion.div>
                       ))}
                     </div>
                   </div>
 
                   {/* Physics Info */}
-                  <div className="p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] space-y-6">
+                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-white space-y-6 shadow-sm">
                     <div className="flex items-center gap-2">
-                      <BarChart2 className="w-4 h-4 text-[#00E5CC]" />
-                      <h3 className="text-xs font-black uppercase tracking-widest pb-1 border-b-2 border-[#00E5CC]/20">Temporal Evidence</h3>
+                      <BarChart2 className="w-4 h-4 text-slate-400" />
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Temporal Evidence</h3>
                     </div>
                     <div className="space-y-6">
-                      <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                      <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-4">
                         <div className="flex justify-between items-end">
                           <div>
-                            <div className="text-[10px] font-bold opacity-30 uppercase mb-1">Motion Stability</div>
-                            <div className="text-2xl font-black text-[#00E5CC]">{result.data.signals.temporal_flow > 0.7 ? 'UNSTABLE' : 'STABLE'}</div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Motion Stability</div>
+                            <div className="text-2xl font-bold" style={{ color: result.data.signals.temporal_flow > 0.7 ? '#ef4444' : '#22c55e' }}>
+                              {result.data.signals.temporal_flow > 0.7 ? 'UNSTABLE' : 'STABLE'}
+                            </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-[10px] font-bold opacity-30 uppercase mb-1">PAVR Ratio</div>
-                            <div className="text-sm font-mono font-black italic">{(result.data.signals.temporal_flow * 15).toFixed(2)}x</div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">PAVR Ratio</div>
+                            <div className="text-sm font-mono font-bold text-slate-800">{(result.data.signals.temporal_flow * 15).toFixed(2)}x</div>
                           </div>
                         </div>
-                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                           <div className="h-full bg-[#00E5CC] shadow-[0_0_8px_rgba(0,229,204,0.5)]" style={{ width: `${result.data.signals.temporal_flow * 100}%` }} />
+                        <div className="h-2 w-full bg-white border border-slate-200 rounded-full overflow-hidden">
+                           <div className="h-full" style={{ width: `${result.data.signals.temporal_flow * 100}%`, background: result.data.signals.temporal_flow > 0.7 ? '#ef4444' : '#22c55e' }} />
                         </div>
-                        <p className="text-[10px] opacity-40 leading-relaxed font-medium">
+                        <p className="text-[10px] text-slate-500 leading-relaxed font-medium italic">
                           Video sequences generated by diffusion models (Sora/Gen-3) exhibit significant peaks in pixel-mass variance where objects undergo non-physical morphing.
                         </p>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center">
-                          <div className="text-[10px] font-bold opacity-30 uppercase mb-1">Total Frames</div>
-                          <div className="text-xl font-black">{result.data.metadata?.total_frames}</div>
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                          <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Frames</div>
+                          <div className="text-xl font-bold text-slate-800">{result.data.metadata?.total_frames}</div>
                         </div>
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center">
-                          <div className="text-[10px] font-bold opacity-30 uppercase mb-1">Frame Rate</div>
-                          <div className="text-xl font-black">{result.data.metadata?.fps} <span className="text-[10px] opacity-40">fps</span></div>
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                          <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Frame Rate</div>
+                          <div className="text-xl font-bold text-slate-800">{result.data.metadata?.fps} <span className="text-[10px] text-slate-400 font-medium">fps</span></div>
                         </div>
                       </div>
                     </div>
@@ -439,13 +462,7 @@ const VideoLabPage = () => {
         </main>
       </div>
 
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-      `}</style>
-    </div>
+    </DashboardLayout>
   );
 };
 

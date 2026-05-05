@@ -73,7 +73,7 @@ const AnomalyMarkers: React.FC<AnomalyMarkersProps> = ({
   ];
 
   const SEV_STYLES = {
-    ok:    { bg: 'rgba(0, 229, 204, 0.1)',   border: 'rgba(0, 229, 204, 0.2)',   color: '#00E5CC',   dot: '#00E5CC' },
+    ok:    { bg: 'var(--accent-green-transparent)',   border: 'var(--accent-green-border)',   color: 'var(--accent-green)',   dot: 'var(--accent-green)' },
     warn:  { bg: 'var(--accent-yellow-transparent)', border: 'var(--accent-yellow-border)', color: 'var(--accent-yellow)', dot: '#eab308' },
     alert: { bg: 'var(--accent-red-transparent)',    border: 'var(--accent-red-border)',    color: 'var(--accent-red)',    dot: '#ef4444' },
   };
@@ -81,14 +81,14 @@ const AnomalyMarkers: React.FC<AnomalyMarkersProps> = ({
   return (
     <div className="p-4 rounded-xl border border-[var(--panel-border)] bg-[var(--bg-secondary)]">
       <div className="flex items-center justify-between mb-4">
-        <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)]">
+        <h5 className="text-sm font-semibold text-[var(--text-primary)]">
           Codec &amp; Physical Anomalies
         </h5>
         <span
-          className="text-[9px] font-mono px-2 py-0.5 rounded"
+          className="text-xs px-2 py-1 rounded-md font-semibold"
           style={{
-            background: aiProbability > 65 ? 'var(--accent-red-transparent)' : 'rgba(0, 229, 204, 0.1)',
-            color: aiProbability > 65 ? 'var(--accent-red)' : '#00E5CC',
+            background: aiProbability > 65 ? 'var(--accent-red-transparent)' : 'var(--accent-green-transparent)',
+            color: aiProbability > 65 ? 'var(--accent-red)' : 'var(--accent-green)',
           }}
         >
           {anomalies.filter(a => a.severity === 'alert').length} anomalies
@@ -115,14 +115,14 @@ const AnomalyMarkers: React.FC<AnomalyMarkersProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-bold font-mono uppercase tracking-tight" style={{ color: s.color }}>
+                  <span className="text-xs font-bold uppercase tracking-tight" style={{ color: s.color }}>
                     {a.label}
                   </span>
-                  <span className="text-[10px] font-mono font-bold flex-shrink-0" style={{ color: s.color }}>
+                  <span className="text-xs font-bold flex-shrink-0" style={{ color: s.color }}>
                     {a.value}
                   </span>
                 </div>
-                <p className="text-[9px] text-[var(--text-muted)] mt-0.5 leading-tight font-mono">
+                <p className="text-xs text-[var(--text-muted)] mt-1 leading-tight">
                   {a.description}
                 </p>
               </div>
@@ -134,7 +134,7 @@ const AnomalyMarkers: React.FC<AnomalyMarkersProps> = ({
       {/* Stability scores bar */}
       {stabilityReport?.scores && (
         <div className="mt-4 pt-3 border-t border-[var(--panel-border)]">
-          <p className="text-[9px] font-mono uppercase tracking-[0.15em] text-[var(--text-muted)] mb-2">
+          <p className="text-xs font-semibold text-[var(--text-primary)] mb-2">
             Robustness Passes
           </p>
           <div className="flex gap-2">
@@ -142,10 +142,10 @@ const AnomalyMarkers: React.FC<AnomalyMarkersProps> = ({
               const pct = Math.round(val * 100);
               return (
                 <div key={key} className="flex-1 text-center">
-                  <div className="text-[9px] font-mono text-[var(--text-muted)] mb-1 capitalize">{key}</div>
+                  <div className="text-xs text-[var(--text-secondary)] mb-1 capitalize">{key}</div>
                   <div
-                    className="text-xs font-bold font-mono"
-                    style={{ color: pct > 70 ? 'var(--accent-red)' : '#00E5CC' }}
+                    className="text-sm font-semibold"
+                    style={{ color: pct > 70 ? 'var(--accent-red)' : 'var(--accent-green)' }}
                   >
                     {pct}%
                   </div>

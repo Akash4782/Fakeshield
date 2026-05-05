@@ -62,16 +62,16 @@ class VideoFusionEngine:
         
         # --- Categorization ---
         if ai_prob >= 0.75:
-            verdict = "DEEPFAKE"
+            verdict = "AI-Generated"
             threat = "CRITICAL"
         elif ai_prob >= 0.55:
-            verdict = "LIKELY FAKE"
+            verdict = "AI-Generated"
             threat = "HIGH"
         elif ai_prob >= 0.35:
-            verdict = "UNCERTAIN"
+            verdict = "Suspicious"
             threat = "MEDIUM"
         else:
-            verdict = "LIKELY REAL"
+            verdict = "Authentic"
             threat = "LOW"
             
         # --- Explainability (Phase 3: Deep Analysis) ---

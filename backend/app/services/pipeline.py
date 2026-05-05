@@ -72,9 +72,10 @@ def run_detection(text: str, mode: str, include_highlights: bool) -> dict:
 # STEP 3 — SAVE TO POSTGRESQL
 # Replaces n8n's Postgres node
 # ─────────────────────────────────────────────────────────────
-async def save_to_database(scan_id: str, result: dict, text: str):
+async def save_to_database(user_email: str, scan_id: str, result: dict, text: str):
     try:
         await save_scan(
+            user_email=user_email,
             scan_id=scan_id,
             verdict=result["verdict"],
             threat_level=result["threat_level"],
@@ -176,6 +177,7 @@ def create_pdf_report(scan_id: str, result: dict, text: str) -> bytes:
 # This IS the n8n workflow, written in Python
 # ─────────────────────────────────────────────────────────────
 async def run_text_pipeline(
+    user_email: str,
     text: str,
     mode: str = "deep",
     include_highlights: bool = True,
@@ -193,12 +195,13 @@ async def run_text_pipeline(
 
     # ── Step 2: Detect (with retry) ──────────────────────────
     try:
-        result = run_detection(clean_text, mode, include_highlights)
+        # run_detection is synchronous and heavy, run it in a thread to keep the event loop alive
+        result = await asyncio.to_thread(run_detection, clean_text, mode, include_highlights)
     except Exception as e:
         # Retry detection once on failure
         print(f"[Pipeline] Detection failed, retrying: {e}")
         await asyncio.sleep(1)
-        result = run_detection(clean_text, mode, include_highlights)
+        result = await asyncio.to_thread(run_detection, clean_text, mode, include_highlights)
 
     # ── Step 3: Enrich result ────────────────────────────────
     result["scan_id"]      = scan_id
@@ -208,11 +211,11 @@ async def run_text_pipeline(
 
     # ── Step 4: Save to DB (background — non-blocking) ───────
     asyncio.create_task(
-        save_to_database(scan_id, result, clean_text)
+        save_to_database(user_email, scan_id, result, clean_text)
     )
 
     # ── Step 5: CRITICAL alert (background — non-blocking) ───
-    if result["threat_level"] == "CRITICAL":
+    if result.get("threat_level") == "CRITICAL":
         asyncio.create_task(
             asyncio.to_thread(
                 send_critical_alert,

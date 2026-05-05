@@ -1,349 +1,274 @@
 import React, { useState } from 'react';
-import Sidebar from '../../components/layout/Sidebar';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { 
-  Settings, 
-  Cpu, 
-  Key, 
-  Database, 
-  ShieldCheck, 
-  Fingerprint, 
-  Activity, 
-  Copy, 
-  RefreshCw, 
-  Cloud, 
-  Trash2, 
+  User, 
+  Shield, 
+  CreditCard, 
+  MessageSquare, 
+  Download, 
+  Palette,
   ChevronRight,
-  Monitor,
   Globe,
-  Zap
+  Phone,
+  Info,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  Plus,
+  ExternalLink,
+  Receipt,
+  FileJson,
+  FileSpreadsheet,
+  History,
+  AlertCircle,
+  Bell,
+  Zap,
+  Activity,
+  ShieldCheck,
+  Monitor
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth.tsx';
+
+import TopBar from '../../components/layout/TopBar';
 
 const SettingsPage: React.FC = () => {
-  const [sensitivity, setSensitivity] = useState(75);
-  const [ephemeralMode, setEphemeralMode] = useState(false);
-  const [biometrics, setBiometrics] = useState(true);
-  const [apiKey] = useState('fs_live_xxxxxxxxxxxxxxxxxxxxxxxxxx4d2e');
-  const [showKey, setShowKey] = useState(false);
+  const { user, updateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('Personal information');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Form State - Personal Info
+  const [firstName, setFirstName] = useState(user?.name?.split(' ')[0] || '');
+  const [lastName, setLastName] = useState(user?.name?.split(' ')[1] || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState('');
+  const [about, setAbout] = useState('');
+  const [country, setCountry] = useState('United States');
+  const [language, setLanguage] = useState('English');
+  const [reportTone, setReportTone] = useState('Detailed Technical');
 
-  // Stats for Audit Logs
-  const auditLogs = [
-    { id: 1, event: 'Login Successful', ip: '192.168.1.1', device: 'Windows 11 / Chrome', time: '2 mins ago' },
-    { id: 2, event: 'API Key Generated', ip: '192.168.1.1', device: 'Windows 11 / Chrome', time: '1 hour ago' },
-    { id: 3, event: 'MFA Verified', ip: '192.168.1.1', device: 'mobile_app', time: '1 hour ago' },
-    { id: 4, event: 'Login Successful', ip: '10.0.0.42', device: 'MacOS / Safari', time: '5 hours ago' },
+  // Form State - Password
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+
+  // Privacy State
+  const [ephemeralMode, setEphemeralMode] = useState(false);
+
+  const tabs = [
+    { id: 'Personal information', label: 'Personal info', icon: User, color: '#00E5CC' },
+    { id: 'Change password', label: 'Password', icon: Lock, color: '#FFB800' },
+    { id: 'Billing information', label: 'Billing', icon: CreditCard, color: '#0092ff' },
+    { id: 'Privacy & Logic', label: 'Privacy', icon: ShieldCheck, color: '#7c5cfc' },
+    { id: 'Activity Log', label: 'Activity', icon: Activity, color: '#64748b' },
+    { id: 'Messages', label: 'Messages', icon: Bell, color: '#ef4444' },
+    { id: 'Data export', label: 'Export', icon: Download, color: '#FF00FF' },
   ];
 
+  // Mock Data
+  const invoices = [
+    { id: 'INV-001', date: 'May 01, 2026', amount: '$29.00', status: 'Paid' },
+    { id: 'INV-002', date: 'Apr 01, 2026', amount: '$29.00', status: 'Paid' },
+  ];
+
+  const activityLog = [
+    { id: 1, event: 'Success Login', ip: '192.168.1.1', device: 'Chrome on Windows 11', location: 'Mumbai, IN', time: '2 mins ago' },
+    { id: 2, event: 'Password Changed', ip: '192.168.1.1', device: 'Chrome on Windows 11', location: 'Mumbai, IN', time: '3 hours ago' },
+    { id: 3, event: 'Success Login', ip: '10.0.0.42', device: 'Safari on MacOS', location: 'London, UK', time: '1 day ago' },
+    { id: 4, event: 'Failed Login', ip: '45.123.5.67', device: 'Firefox on Linux', location: 'Moscow, RU', time: '2 days ago' },
+  ];
+
+  const notifications = [
+    { id: 1, type: 'Critical', title: 'Deepfake Detected', text: 'Critical AI signature found in video scan #8234', time: '2h ago', icon: AlertCircle, color: '#ef4444' },
+    { id: 2, type: 'Success', title: 'Scan Complete', text: 'Text Forensic Analysis finished.', time: '5h ago', icon: CheckCircle, color: '#00E5CC' },
+  ];
+
+  const handleSaveProfile = () => {
+    updateUser({ name: `${firstName} ${lastName}`, email });
+    alert("Profile updated successfully.");
+  };
+
   return (
-    <div className="flex h-screen bg-[var(--bg-primary)] overflow-hidden font-sans">
-      <Sidebar activeTab="Settings" />
-      
-      <main className="flex-1 overflow-y-auto custom-scrollbar relative">
-        {/* Background Glows */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--accent-blue-transparent)] rounded-full blur-[120px] pointer-events-none -z-10" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[var(--accent-purple-transparent)] rounded-full blur-[120px] pointer-events-none -z-10" />
+    <DashboardLayout activeTab="Settings">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 space-y-8 md:space-y-0 md:flex gap-12 pb-16">
+          
+          {/* LEFT SIDEBAR TABS */}
+          <div className="w-full md:w-64 flex-shrink-0">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-6 md:mb-8">Settings</h1>
+            <nav className="flex md:flex-col overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 gap-1 md:gap-1 no-scrollbar">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-shrink-0 md:w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
+                      isActive 
+                        ? 'bg-[rgba(0,229,204,0.1)] text-[#00b8a5] border border-[rgba(0,229,204,0.2)]' 
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${isActive ? 'scale-110 shadow-[0_0_10px_rgba(0,229,204,0.3)]' : ''}`} style={{ background: tab.color }}>
+                      <Icon size={12} className="text-white" />
+                    </div>
+                    <span className="text-[13px] font-bold capitalize whitespace-nowrap">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-        <div className="p-8 max-w-6xl mx-auto">
-          {/* Header */}
-          <header className="mb-10 animate-fade-in text-[var(--text-primary)]">
-            <div className="flex items-center gap-3 mb-2 text-[#00E5CC]">
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-bold uppercase tracking-widest">Configuration Suite</span>
-            </div>
-            <h1 className="text-4xl font-bold text-[var(--text-heading)] mb-2">Systems & Logic</h1>
-            <p className="text-[var(--text-secondary)]">Program your Forensic AI workflows and manage enterprise-grade security protocols.</p>
-          </header>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            {/* 1. Forensic Model Calibration */}
-            <section className="p-6 rounded-[2rem] border-[var(--panel-border)] border animate-fade-in-up" style={{ background: 'var(--panel-bg)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-[rgba(0,229,204,0.1)] rounded-2xl text-[#00E5CC]">
-                  <Cpu className="w-6 h-6" />
+          {/* MAIN CONTENT AREA */}
+          <div className="flex-1">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-black text-slate-900 mb-10">{activeTab}</h2>
+              
+              {activeTab === 'Personal information' && (
+                <div className="space-y-12 animate-in fade-in duration-500">
+                  <section>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">First name</label><input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
+                      <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Last name</label><input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
+                    </div>
+                    <div className="space-y-2 mb-6"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
+                    <div className="pt-8 border-t border-slate-200 flex justify-end"><button onClick={handleSaveProfile} className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#020617] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Save Changes</button></div>
+                  </section>
                 </div>
-                <h2 className="text-xl font-bold text-[var(--text-heading)]">Forensic Model Calibration</h2>
-              </div>
+              )}
 
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-sm font-semibold text-[var(--text-secondary)]">Sensitivity Threshold</label>
-                    <span className="text-xs font-bold px-2 py-1 bg-[rgba(0,229,204,0.1)] text-[#00E5CC] rounded-lg">{sensitivity}%</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={sensitivity} 
-                    onChange={(e) => setSensitivity(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-[var(--panel-border)] rounded-lg appearance-none cursor-pointer accent-[#00E5CC]"
-                  />
-                  <div className="flex justify-between mt-2 text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-tighter">
-                    <span>Fast Scan</span>
-                    <span>Deep Forensic</span>
+              {activeTab === 'Change password' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-200">
+                    <form className="space-y-6">
+                      <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Current Password</label><input type="password" placeholder="••••••••" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">New Password</label><input type="password" placeholder="New password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Confirm New Password</label><input type="password" placeholder="Repeat new password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div></div>
+                      <div className="pt-6 flex justify-end"><button type="submit" className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#020617] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Update Password</button></div>
+                    </form>
                   </div>
                 </div>
+              )}
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--panel-border)]">
-                    <div className="flex items-center gap-3">
-                      <Zap className="w-4 h-4 text-[var(--text-active)]" />
-                      <div>
-                        <p className="text-sm font-bold text-[var(--text-heading)]">rPPG Heartbeat Monitor</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Analyze subtle skin tone variations for video liveness.</p>
+              {activeTab === 'Billing information' && (
+                <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+                   <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#00E5CC] to-[#00b8a5] text-[#020617] overflow-hidden shadow-2xl shadow-[#00E5CC]/20">
+                      <div className="relative z-10 flex justify-between items-center"><div><span className="px-3 py-1 bg-[#020617]/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#020617]/10">Current Plan</span><h3 className="text-4xl font-black mt-3">Pro Forensic</h3></div><div className="text-right"><p className="text-3xl font-black">$29.00</p><p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">per month</p></div></div>
+                   </div>
+                </div>
+              )}
+
+              {activeTab === 'Privacy & Logic' && (
+                <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                   {/* Ephemeral Mode */}
+                   <section className="p-8 rounded-[2.5rem] border border-slate-200 bg-slate-50 group hover:border-[#00E5CC]/30 transition-all">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-5">
+                            <div className={`p-4 rounded-2xl transition-colors ${ephemeralMode ? 'bg-[#00E5CC] text-[#020617]' : 'bg-white text-slate-400'}`}>
+                               <Zap size={24} />
+                            </div>
+                            <div>
+                               <h3 className="text-lg font-bold text-slate-900">Ephemeral Privacy Mode</h3>
+                               <p className="text-xs text-slate-500 mt-1 max-w-[400px]">When active, nothing is saved to the cloud after a scan is finished. This is critical for high-security forensic workflows.</p>
+                            </div>
+                         </div>
+                         <div onClick={() => setEphemeralMode(!ephemeralMode)} className={`w-14 h-7 rounded-full relative cursor-pointer transition-all duration-300 ${ephemeralMode ? 'bg-[#00E5CC]' : 'bg-slate-300'}`}>
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300 ${ephemeralMode ? 'right-1' : 'left-1'}`} />
+                         </div>
                       </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-[var(--btn-secondary-bg)] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#00E5CC] after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--panel-border)]">
-                    <div className="flex items-center gap-3">
-                      <Activity className="w-4 h-4 text-[var(--accent-purple)]" />
-                      <div>
-                        <p className="text-sm font-bold text-[var(--text-heading)]">Spectrogram Neural-Sync</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Cross-reference audio peaks with facial phoneme data.</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-[var(--btn-secondary-bg)] rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#00E5CC] after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-semibold text-[var(--text-secondary)] block mb-3">LLM Reasoner Report Tone</label>
-                  <select className="w-full bg-[var(--bg-primary)] border border-[var(--panel-border)] text-[var(--text-primary)] text-sm rounded-2xl p-4 outline-none focus:border-[#00E5CC]/50 transition-colors">
-                    <option>Detailed Technical Analyst</option>
-                    <option>Executive Summary (Non-Technical)</option>
-                    <option>Legal Compliance Standard</option>
-                  </select>
-                </div>
-              </div>
-            </section>
-
-            {/* 2. API & Webhook Management */}
-            <section className="p-6 rounded-[2rem] border-[var(--panel-border)] border animate-fade-in-up delay-100" style={{ background: 'var(--panel-bg)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-[rgba(0,229,204,0.1)] rounded-2xl text-[#00E5CC]">
-                  <Key className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-bold text-[var(--text-heading)]">n8n Gateway & APIs</h2>
-              </div>
-
-              <div className="space-y-6">
-                <div className="p-5 bg-[var(--bg-primary)] rounded-3xl border border-[var(--panel-border)] relative overflow-hidden group">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-[10px] font-black uppercase text-[#00E5CC] tracking-widest">Active Shield-Key</span>
-                    <button onClick={() => setShowKey(!showKey)} className="text-[10px] font-bold text-[var(--text-muted)] hover:text-[#00E5CC] transition-colors">
-                      {showKey ? 'HIDE' : 'SHOW'}
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <code className="flex-1 text-sm text-[var(--text-primary)] font-mono tracking-tight overflow-hidden">
-                      {showKey ? apiKey : apiKey.replace(/./g, '•')}
-                    </code>
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-[var(--text-muted)] hover:text-[#00E5CC] transition-colors">
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 hover:bg-white/10 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent-red)] transition-colors">
-                      <RefreshCw className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <button className="flex-1 bg-gradient-to-r from-[#00E5CC] to-[#00b8a5] text-[#020617] text-[10px] font-bold py-2 rounded-xl hover:shadow-lg transition-all">
-                      GENERATE NEW KEY
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                      <span className="text-xs font-bold text-[var(--text-secondary)]">Inbound n8n Webhook</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <input 
-                        readOnly 
-                        value="https://n8n.fakeshield.ai/webhook/v1/trigger-scan" 
-                        className="flex-1 bg-[var(--bg-primary)] border border-[var(--panel-border)] text-[var(--text-muted)] text-[10px] rounded-xl px-4 py-3 outline-none"
-                      />
-                      <button className="p-3 bg-[var(--bg-primary)] border border-[var(--panel-border)] rounded-xl text-[var(--text-muted)] hover:text-[#00E5CC] transition-colors">
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Monitor className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                      <span className="text-xs font-bold text-[var(--text-secondary)]">Outbound Push Endpoint</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <input 
-                        placeholder="https://your-server.com/alerts"
-                        className="flex-1 bg-[var(--bg-primary)] border border-[var(--panel-border)] text-[var(--text-primary)] text-[11px] rounded-xl px-4 py-3 outline-none focus:border-[#00E5CC]/50 transition-colors"
-                      />
-                      <button className="px-4 bg-[var(--btn-secondary-bg)] border border-[var(--panel-border)] text-[var(--text-heading)] text-[10px] font-bold rounded-xl hover:bg-[var(--btn-secondary-hover)] transition-all">
-                        SAVE
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 3. Storage & Compliance */}
-            <section className="p-6 rounded-[2rem] border-[var(--panel-border)] border animate-fade-in-up delay-200" style={{ background: 'var(--panel-bg)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-[var(--accent-purple-transparent)] rounded-2xl text-[var(--accent-purple)]">
-                  <Database className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-bold text-[var(--text-heading)]">Storage & Compliance</h2>
-              </div>
-
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest pl-1">Auto-Archive Destinations</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['Google Drive', 'AWS S3', 'Dropbox', 'Custom SFTP'].map(dest => (
-                      <button key={dest} className="flex items-center justify-between p-3 bg-[var(--bg-primary)] rounded-xl border border-[var(--panel-border)] hover:border-[var(--accent-purple)]/30 transition-all text-left group">
-                        <div className="flex items-center gap-2">
-                          <Cloud className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-purple)] transition-colors" />
-                          <span className="text-[11px] font-bold text-[var(--text-secondary)]">{dest}</span>
+                      {ephemeralMode && (
+                        <div className="mt-6 p-4 bg-[#00E5CC]/10 border border-[#00E5CC]/20 rounded-2xl flex items-center gap-3 text-[#00b8a5] text-[10px] font-black uppercase tracking-widest">
+                           <ShieldCheck size={14} /> Stealth Protocol Active • Cloud Records Disabled
                         </div>
-                        <div className="w-2 h-2 rounded-full bg-[var(--accent-red)]"></div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                      )}
+                   </section>
 
-                <div className={`p-5 rounded-3xl border transition-all duration-500 cursor-pointer ${ephemeralMode ? 'bg-[var(--accent-red-transparent)] border-[var(--accent-red-border)]' : 'bg-[var(--bg-primary)] border-[var(--panel-border)]'}`} onClick={() => setEphemeralMode(!ephemeralMode)}>
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className={`p-2 rounded-xl ${ephemeralMode ? 'bg-[var(--accent-red)] text-white' : 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)]'}`}>
-                      <Trash2 className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-[var(--text-heading)]">Ephemeral Privacy Mode</p>
-                      <p className="text-[10px] text-[var(--text-muted)]">Instantly wipe all file traces & reports after scan completion.</p>
-                    </div>
-                    <div className={`w-12 h-6 rounded-full relative ${ephemeralMode ? 'bg-[var(--accent-red)]' : 'bg-[var(--btn-secondary-bg)]'} transition-colors`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${ephemeralMode ? 'right-1' : 'left-1'}`} />
-                    </div>
-                  </div>
-                  {ephemeralMode && (
-                    <div className="animate-pulse flex items-center gap-2 text-[9px] font-bold text-[var(--accent-red)] uppercase tracking-widest mt-2">
-                      <ShieldCheck className="w-3 h-3" /> Zero-Footprint Protocol Active
-                    </div>
-                  )}
+                   {/* AI Report Tone */}
+                   <section className="p-8 rounded-[2.5rem] border border-slate-200">
+                      <div className="mb-8">
+                         <h3 className="text-lg font-bold text-slate-900">AI Report Tone</h3>
+                         <p className="text-xs text-slate-500 mt-1">Calibrate how the AI Reasoner explains forensic findings in your reports.</p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                         {['Detailed Technical', 'Executive Summary', 'Legal Standard'].map(tone => (
+                           <button 
+                            key={tone} 
+                            onClick={() => setReportTone(tone)}
+                            className={`p-5 rounded-2xl border transition-all text-left ${reportTone === tone ? 'bg-white border-[#00E5CC] shadow-lg shadow-[#00E5CC]/10' : 'bg-slate-50 border-slate-100 hover:border-slate-200'}`}
+                           >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${reportTone === tone ? 'bg-[#00E5CC]/10 text-[#00E5CC]' : 'bg-white text-slate-400'}`}>
+                                 <Info size={16} />
+                              </div>
+                              <p className={`text-xs font-bold ${reportTone === tone ? 'text-slate-900' : 'text-slate-500'}`}>{tone}</p>
+                           </button>
+                         ))}
+                      </div>
+                   </section>
                 </div>
-              </div>
-            </section>
+              )}
 
-            {/* 4. Access & Identity */}
-            <section className="p-6 rounded-[2rem] border-[var(--panel-border)] border animate-fade-in-up delay-300" style={{ background: 'var(--panel-bg)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-[rgba(0,229,204,0.1)] rounded-2xl text-[#00E5CC]">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-bold text-[var(--text-heading)]">Access & Identity</h2>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-3xl border border-[var(--panel-border)]">
-                   <div className="flex items-center gap-4">
-                     <div className="p-3 bg-[rgba(0,229,204,0.1)] rounded-2xl text-[#00E5CC]">
-                       <Fingerprint className="w-6 h-6" />
-                     </div>
-                     <div>
-                       <p className="text-sm font-bold text-[var(--text-heading)]">WebAuthn Biometrics</p>
-                       <p className="text-[10px] text-[var(--text-muted)]">Enable TouchID / FaceID for instant forensic access.</p>
-                     </div>
-                   </div>
-                   <button 
-                    onClick={() => setBiometrics(!biometrics)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-bold transition-all ${biometrics ? 'bg-[#00E5CC] text-[#020617]' : 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)]'}`}
-                   >
-                     {biometrics ? 'ENABLED' : 'DISABLED'}
-                   </button>
-                </div>
-
-                <div className="space-y-3">
+              {activeTab === 'Activity Log' && (
+                <div className="space-y-6 animate-in fade-in duration-500">
                    <div className="flex justify-between items-center mb-2">
-                     <p className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">Recent Security Events</p>
-                     <p className="text-[10px] font-bold text-[#00E5CC] cursor-pointer flex items-center gap-1">FULL LOGS <ChevronRight className="w-3 h-3" /></p>
+                      <div>
+                         <h3 className="text-xl font-bold text-slate-900">Login Activity Log</h3>
+                         <p className="text-xs text-slate-500 mt-1">Monitor recent access to your forensic laboratory.</p>
+                      </div>
+                      <button className="text-[10px] font-black text-[#00b8a5] uppercase tracking-widest hover:underline">Download full log</button>
                    </div>
-                   <div className="overflow-hidden rounded-2xl border border-[var(--panel-border)]">
-                     <table className="w-full text-left text-[11px]">
-                        <thead className="bg-[var(--bg-primary)] text-[var(--text-muted)] uppercase tracking-tighter font-black">
-                          <tr>
-                            <th className="px-4 py-3">Event</th>
-                            <th className="px-4 py-3">IP Address</th>
-                            <th className="px-4 py-3">Time</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[var(--panel-border)]">
-                          {auditLogs.map(log => (
-                            <tr key={log.id} className="hover:bg-[var(--btn-secondary-bg)] transition-colors">
-                              <td className="px-4 py-3 font-bold text-[var(--text-primary)]">{log.event}</td>
-                              <td className="px-4 py-3 text-[var(--text-muted)] font-mono">{log.ip}</td>
-                              <td className="px-4 py-3 text-[var(--text-muted)]">{log.time}</td>
+
+                   <div className="overflow-x-auto border border-slate-200 rounded-[2.5rem]">
+                      <table className="w-full text-left min-w-[600px]">
+                         <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Event</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">IP Address</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Device / OS</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Location</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Time</th>
                             </tr>
-                          ))}
-                        </tbody>
-                     </table>
+                         </thead>
+                         <tbody className="divide-y divide-slate-100">
+                            {activityLog.map(log => (
+                              <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                                 <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2">
+                                       <div className={`w-2 h-2 rounded-full ${log.event.includes('Failed') ? 'bg-red-500' : 'bg-[#00E5CC]'}`} />
+                                       <span className="text-xs font-bold text-slate-900">{log.event}</span>
+                                    </div>
+                                 </td>
+                                 <td className="px-6 py-4 text-[11px] font-mono text-slate-500">{log.ip}</td>
+                                 <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2 text-slate-600">
+                                       <Monitor size={12} />
+                                       <span className="text-[11px] font-medium">{log.device}</span>
+                                    </div>
+                                 </td>
+                                 <td className="px-6 py-4 text-[11px] font-medium text-slate-500">{log.location}</td>
+                                 <td className="px-6 py-4 text-right text-[10px] font-bold text-slate-400">{log.time}</td>
+                              </tr>
+                            ))}
+                         </tbody>
+                      </table>
                    </div>
                 </div>
+              )}
 
-                <div className="p-4 bg-gradient-to-br from-[rgba(0,229,204,0.15)] to-[rgba(124,92,252,0.1)] rounded-3xl border border-[var(--accent-blue-border)] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[var(--text-active)] animate-ping" />
-                    <span className="text-[10px] font-black text-white tracking-widest">Multi-Factor Auth Active</span>
-                  </div>
-                  <ShieldCheck className="w-5 h-5 text-[var(--text-active)]" />
+              {activeTab === 'Messages' && (
+                <div className="space-y-6 animate-in fade-in duration-500">{notifications.map(notif => (<div key={notif.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 flex items-start gap-4 hover:bg-white transition-all cursor-pointer"><div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${notif.color}15`, color: notif.color }}><notif.icon size={24} /></div><div className="flex-1"><div className="flex justify-between items-center mb-1"><h4 className="text-sm font-black text-slate-900">{notif.title}</h4><span className="text-[10px] font-bold text-slate-400">{notif.time}</span></div><p className="text-xs text-slate-500">{notif.text}</p></div></div>))}</div>
+              )}
+
+              {activeTab === 'Data export' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
+                   <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-200 text-center"><div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 text-[#FF00FF]"><Download size={32} /></div><h3 className="text-2xl font-black text-slate-900 mb-2">Export Laboratory Data</h3><p className="text-sm text-slate-500 max-w-md mx-auto">Download a complete, accurate record of all your forensic scans.</p></div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6"><button className="p-8 bg-white border border-slate-200 rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-500 mb-6"><FileJson size={24} /></div><h4 className="text-lg font-bold text-slate-900 mb-1">Raw JSON Format</h4></button><button className="p-8 bg-white border border-slate-200 rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-green-500 mb-6"><FileSpreadsheet size={24} /></div><h4 className="text-lg font-bold text-slate-900 mb-1">CSV Spreadsheet</h4></button></div>
                 </div>
-              </div>
-            </section>
-
+              )}
+            </div>
           </div>
         </div>
-      </main>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: var(--panel-border);
-          border-radius: 10px;
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-        .animate-fade-in-up {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </div>
+        <div className="h-24" />
+    </DashboardLayout>
   );
 };
 

@@ -1,86 +1,46 @@
-# V50_final_integrity_test.py — Industrial Truth Benchmark
-#
 import sys
 import os
-import time
 
-# Add backend to path
+# Add parent dir to path
 sys.path.append(os.getcwd())
 
-from app.services.video.video_detector import analyze_video
+from app.models.new_forensic_engine import analyze_forensic, load_models
 
-def run_v50_benchmark(dataset_pairs: list):
-    """
-    FakeShield V50 'Industrial Truth' Benchmark.
-    Verifies the Multi-Pass Robustness Engine and Physics-First Gating.
-    """
-    print("\n" + "🚀 Fakeshield V50 'Industrial Truth' Integrity Benchmark")
-    print("=" * 80)
-    # Header: Filename, Label, Verdict, AI%, Robustness, Success
-    print(f"{'Target Video':25} | {'Label':8} | {'Verdict':12} | {'AI %':6} | {'Robust':7} | {'State'}")
-    print("-" * 80)
+def run_titan_test():
+    print("=== FakeShield Titan Engine v50.0 Integrity Test ===")
     
-    results = []
+    # AI Sample (High Quality)
+    ai_text = """
+    Artificial intelligence has fundamentally transformed how we interact with technology. From automated customer service bots to advanced data analytics, AI is everywhere. One of the most significant impacts of this technology is seen in the workplace, where automation is streamlining tasks and improving efficiency. However, this shift also raises important questions about the future of human labor and the need for upskilling. In conclusion, while AI offers immense benefits, it is crucial to balance technological progress with ethical considerations to ensure a sustainable future for all. Furthermore, developers must prioritize transparency and accountability in AI design to build trust with users. Ultimately, the successful integration of artificial intelligence depends on our ability to navigate its complexities with foresight.
+    """ * 2
     
-    for path, is_ai in dataset_pairs:
-        label = "AI" if is_ai else "REAL"
-        filename = os.path.basename(path)
-        
-        try:
-            # V50 Industrial Analysis
-            # High-fidelity mult-pass takes time, but ensures zero FP
-            res = analyze_video(path, max_frames=8) # Lower frame count for faster benchmark
-            
-            verdict = res['verdict']
-            perc = res['fused_score']
-            robust = res.get('robustness_score', 0.0)
-            
-            # V50 Success Logic:
-            # For REAL: Success if score < 50.0 OR Verdict is UNCERTAIN (forensic honesty)
-            # For AI: Success if score > 50.0
-            if is_ai:
-                 success = (perc > 50.0)
-            else:
-                 success = (perc < 50.0) or (verdict == "UNCERTAIN")
-            
-            results.append({
-                "path": filename,
-                "label": label,
-                "verdict": verdict,
-                "score": perc,
-                "robust": robust,
-                "success": success
-            })
-            
-            state = "✅ CALIBRATED" if success else "❌ DRIFT"
-            print(f"{filename:25} | {label:8} | {verdict:12} | {perc:5.1f}% | {robust:>6.1f}% | {state}")
-            
-        except Exception as e:
-            print(f"{filename:25} | {label:8} | ERROR: {str(e)[:15]}")
+    # Human Sample (Academic/Technical)
+    human_text = """
+    The integration of distributed ledger technology within supply chain management presents a significant opportunity for enhancing transparency and auditability. By leveraging a decentralized consensus mechanism, stakeholders can verify the provenance of goods without relying on a centralized intermediary. This research explores the scalability constraints of current Ethereum-based solutions when applied to high-throughput logistics environments. We propose a sidechain architecture that offloads transaction volume while maintaining security through periodic state checkpoints on the mainnet. Experimental results indicate a 40% reduction in latency compared to traditional layer-1 implementations. Furthermore, the use of zero-knowledge proofs ensures that sensitive business data remains private while still allowing for verifiable compliance.
+    """ * 2
 
-    # Metrics
-    total = len(results)
-    correct = sum(1 for r in results if r['success'])
-    avg_robust = sum(r['robust'] for r in results) / total if total > 0 else 0
-    accuracy = (correct / total) * 100 if total > 0 else 0
+    print("\nWarmup phase...")
+    load_models()
     
-    print("=" * 80)
-    print(f"📊 V50 ARCHITECTURE ACCURACY: {accuracy:.1f}%")
-    print(f"📊 MEAN STABILITY (ROBUSTNESS): {avg_robust:.1f}%")
-    print(f"📊 CALIBRATION STATUS: {'SUCCESS' if accuracy >= 90.0 else 'CALIBRATING'}")
-    print("=" * 80)
+    print(f"\n[TITAN] Analyzing AI Text ({len(ai_text.split())} words)...")
+    res_a = analyze_forensic(ai_text)
+    print(f"Verdict: {res_a['verdict']} (Score: {res_a['score']})")
+    print(f"Signals: {res_a['detailed_scores']}")
+    print(f"Reasoning: {res_a['reasoning']}")
     
-    if accuracy >= 90.0:
-        print("🌍 STATUS: V50 INDUSTRIAL TRUTH DEPLOYABLE.")
-    else:
-        print("⚠️ STATUS: NEURAL WEIGHTS REQUIRE FURTHER SUB-GRID TUNING.")
+    print("\n[SENTENCE HEATMAP - AI]")
+    for h in res_a.get('sentence_highlights', [])[:3]:
+        print(f"  [{h['label']}] ({h['ai_score']}) {h['sentence'][:60]}...")
+
+    print(f"\n[TITAN] Analyzing Human Text ({len(human_text.split())} words)...")
+    res_h = analyze_forensic(human_text)
+    print(f"Verdict: {res_h['verdict']} (Score: {res_h['score']})")
+    print(f"Signals: {res_h['detailed_scores']}")
+    print(f"Reasoning: {res_h['reasoning']}")
+
+    print("\n[SENTENCE HEATMAP - HUMAN]")
+    for h in res_h.get('sentence_highlights', [])[:3]:
+        print(f"  [{h['label']}] ({h['ai_score']}) {h['sentence'][:60]}...")
 
 if __name__ == "__main__":
-    test_set = [
-        ("test_data/dataset/ai_10/ai_1.mp4", True),
-        ("test_data/dataset/ai_10/ai_2.mp4", True),
-        ("test_data/dataset/real_10/real_1.mp4", False),
-        ("test_data/dataset/real_10/real_2.mp4", False),
-    ]
-    
-    run_v50_benchmark(test_set)
+    run_titan_test()

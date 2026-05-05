@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth.tsx';
 
 const HeroSection = () => {
+  const { isAuthenticated } = useAuth();
   const [typedText1, setTypedText1] = useState('');
   const [typedText2, setTypedText2] = useState('');
   const fullText1 = "Defend Truth in the";
@@ -120,7 +122,7 @@ const HeroSection = () => {
               }}
             />
           </span>
-          V3.4 Now Live: Real-time Audio Sync Detection
+          Version 1.0 Now Live: FakeShield Forensic Suite
         </div>
 
         {/* Heading */}
@@ -173,6 +175,7 @@ const HeroSection = () => {
         >
           <Link
             to="/signup"
+            state={{ from: { pathname: "/dashboard" } }}
             className="btn-glow"
             style={{
               background: 'var(--cta-btn-bg, #00E5CC)',
@@ -185,15 +188,14 @@ const HeroSection = () => {
               boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
               transition: 'all 0.3s',
             }}
-            onMouseOver={e => (e.currentTarget.style.background = '#00E5CC')}
-            onMouseOut={e => (e.currentTarget.style.background = '#00E5CC')}
           >
             Start Forensic Scan
           </Link>
+
           <a
             href="#labs"
             style={{
-              background: 'var(--btn-secondary-bg)',
+              background: 'transparent',
               border: `1px solid var(--btn-secondary-border)`,
               color: 'var(--text-heading)',
               fontWeight: 600,
@@ -204,7 +206,7 @@ const HeroSection = () => {
               transition: 'all 0.3s',
             }}
             onMouseOver={e => (e.currentTarget.style.background = 'var(--btn-secondary-hover)')}
-            onMouseOut={e => (e.currentTarget.style.background = 'var(--btn-secondary-bg)')}
+            onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
           >
             View Live Demo
           </a>

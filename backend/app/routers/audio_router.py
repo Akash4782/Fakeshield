@@ -1,10 +1,14 @@
 # audio_router.py
 import uuid
 import logging
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
+import asyncio
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends
+from app.dependencies import verify_paid_tier, get_current_user
+from app.routers.dashboard_router import save_scan_internal
 # Model import moved inside task for lazy loading
 
 logger = logging.getLogger(__name__)
+logger.info("Audio router initialized. Asyncio available: %s", "asyncio" in globals())
 
 router = APIRouter(prefix="/audio", tags=["Audio Detection"])
 
@@ -45,7 +49,9 @@ def _get_extension(filename: str) -> str:
 async def analyze_async(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = BackgroundTasks(),
+    user: dict = Depends(verify_paid_tier)
 ):
+    user_email = user["email"]
     filename = file.filename or "audio.wav"
     content_type = file.content_type or ""
     ext = _get_extension(filename)
@@ -78,16 +84,41 @@ async def analyze_async(
         )
 
     job_id = str(uuid.uuid4())
-    job_store[job_id] = {"status": "processing", "filename": filename}
+    job_store[job_id] = {"status": "processing", "filename": filename, "user_email": user_email}
 
     logger.info(f"Job created: {job_id} for {filename!r} ({len(audio_bytes)} bytes)")
 
-    def run():
+    async def run():
+        import asyncio
         from app.models.audio.audio_detector import analyze_audio
         try:
-            result = analyze_audio(audio_bytes, filename)
+            # analyze_audio is synchronous and heavy, run it in a thread
+            result = await asyncio.to_thread(analyze_audio, audio_bytes, filename)
             job_store[job_id] = {"status": "complete", "result": result}
             logger.info(f"Job complete: {job_id}")
+
+            # Persist to MongoDB
+            try:
+                prob = result.get("ai_probability", 0)
+                verdict = "AI-Generated" if prob > 65 else "Suspicious" if prob > 40 else "Authentic"
+                await save_scan_internal(
+                    email=user_email,
+                    lab="audio",
+                    filename=filename,
+                    verdict=verdict,
+                    confidence=prob / 100,
+                    threat_level=result.get("threat_level", "low").lower(),
+                    scan_id=f"aud-{uuid.uuid4().hex[:8]}",
+                    extra={
+                        "ai_probability": prob,
+                        "confidence": result.get("confidence", "low"),
+                        "agreement": result.get("agreement", "N/A")
+                    },
+                    full_result=result
+                )
+            except Exception as db_err:
+                logger.error(f"Failed to persist audio scan to DB: {db_err}")
+
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
@@ -99,10 +130,14 @@ async def analyze_async(
 
 
 @router.get("/status/{job_id}")
-def get_status(job_id: str):
+def get_status(job_id: str, user: dict = Depends(get_current_user)):
     r = job_store.get(job_id)
     if not r:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    
+    if r.get("user_email") != user["email"]:
+        raise HTTPException(status_code=403, detail="Not authorized to view this job status")
+        
     return r
 
 

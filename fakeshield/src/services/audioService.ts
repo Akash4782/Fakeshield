@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8001/api/v1/audio";
+import { API_BASE_URL } from '../config';
+const API_BASE = `${API_BASE_URL}/audio`;
 
 export interface AudioSignalScores {
   wavlm:    number;
@@ -164,6 +165,7 @@ export function isValidAudioFile(file: File): { valid: boolean; error?: string }
 
 export async function analyzeAudioAsync(
   file: File,
+  token: string | null = null,
   onProgress?: (status: string) => void
 ): Promise<AudioResult> {
   // Validate before upload
@@ -182,6 +184,9 @@ export async function analyzeAudioAsync(
   try {
     submitRes = await fetch(`${API_BASE}/analyze/async`, {
       method: "POST",
+      headers: {
+        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+      },
       body:   formData,
       // Do NOT set Content-Type header — browser sets it with boundary automatically
     });
@@ -233,7 +238,11 @@ export async function analyzeAudioAsync(
         onProgress?.(messages[msgIdx % messages.length]);
         msgIdx++;
 
-        const statusRes = await fetch(`${API_BASE}/status/${job_id}`);
+        const statusRes = await fetch(`${API_BASE}/status/${job_id}`, {
+          headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          }
+        });
 
         if (!statusRes.ok) {
           if (statusRes.status === 404) {

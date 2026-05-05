@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle, MapPin, Camera, Cpu, Aperture } from 'lucide-react';
+import { CheckCircle2, XCircle, MapPin, Camera, Cpu, Aperture, AlertCircle, Info } from 'lucide-react';
 
 interface MetadataInspectorProps {
   metadata?: {
@@ -21,11 +21,11 @@ function getBadgeState(key: string, value: string): BadgeState {
   return 'present';
 }
 
-const BADGE_CONFIG: Record<BadgeState, { color: string; bgColor: string; icon: string }> = {
-  present: { color: '#22c55e', bgColor: 'rgba(34,197,94,0.1)', icon: '✓' },
-  missing: { color: '#71717a', bgColor: 'rgba(113,113,122,0.1)', icon: '—' },
-  ai:      { color: '#ef4444', bgColor: 'rgba(239,68,68,0.12)', icon: '⚠' },
-  info:    { color: '#00E5CC', bgColor: 'rgba(0,229,204,0.1)',  icon: 'i' },
+const BADGE_CONFIG: Record<BadgeState, { color: string; bgColor: string; icon: React.ComponentType<{ className?: string }> }> = {
+  present: { color: '#22c55e', bgColor: 'rgba(34,197,94,0.1)', icon: CheckCircle2 },
+  missing: { color: '#94a3b8', bgColor: 'rgba(148,163,184,0.1)', icon: XCircle },
+  ai:      { color: '#ef4444', bgColor: 'rgba(239,68,68,0.12)', icon: AlertCircle },
+  info:    { color: '#0ea5e9', bgColor: 'rgba(14,165,233,0.1)',  icon: Info },
 };
 
 const FIELD_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -61,11 +61,11 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
         className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: 'var(--panel-border)' }}
       >
-        <span className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">
+        <span className="text-xs font-bold tracking-tight text-slate-800 uppercase">
           EXIF Metadata Guard
         </span>
         {metadata.dimensions && (
-          <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[11px] font-semibold text-slate-400">
             {metadata.dimensions}
           </span>
         )}
@@ -77,6 +77,7 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
           const state = getBadgeState(key, value);
           const cfg = BADGE_CONFIG[state];
           const Icon = FIELD_ICONS[key] || Camera;
+          const StatusIcon = cfg.icon;
 
           return (
             <div
@@ -91,24 +92,24 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
 
               {/* Label + note */}
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
                   {FIELD_LABELS[key]}
                 </div>
                 <div
-                  className="text-[10px] font-mono mt-0.5 truncate font-bold"
-                  style={{ color: state === 'missing' ? 'var(--text-muted)' : cfg.color }}
+                  className="text-xs mt-0.5 truncate font-bold"
+                  style={{ color: state === 'missing' ? '#94a3b8' : cfg.color }}
                   title={value}
                 >
-                  {state === 'missing' ? 'NOT FOUND' : value}
+                  {state === 'missing' ? 'SIGNAL MISSING' : value}
                 </div>
               </div>
 
               {/* Badge */}
               <div
-                className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-                style={{ background: cfg.color, color: '#000' }}
+                className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                style={{ background: cfg.color }}
               >
-                {cfg.icon}
+                <StatusIcon className="w-3.5 h-3.5 text-white" strokeWidth={3} />
               </div>
             </div>
           );
@@ -117,11 +118,11 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
 
       {/* Forensic note */}
       <div
-        className="px-4 py-2.5 border-t text-[9px] font-mono leading-relaxed"
-        style={{ borderColor: 'var(--panel-border)', color: 'var(--text-muted)' }}
+        className="px-4 py-3 border-t text-[10px] font-medium leading-relaxed bg-slate-50"
+        style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
       >
-        <span style={{ color: '#00E5CC' }}>★ </span>
-        Camera make/model is a HARD VETO signal. GPS + shutter speed = strong real-photo indicator.
+        <span className="font-bold text-cyan-500">FORENSIC NOTE:</span>
+        {" "}Camera make/model is a primary indicator. Missing GPS or shutter speed data is common in web-optimized images but remains a diagnostic factor.
       </div>
     </div>
   );

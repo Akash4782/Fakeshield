@@ -28,18 +28,18 @@ const SpectrogramView: React.FC<SpectrogramViewProps> = ({ spectralDetail, aiSco
   return (
     <div className="p-4 rounded-xl border border-[var(--panel-border)] bg-[var(--bg-secondary)]">
       <div className="flex items-center justify-between mb-4">
-        <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)]">
+        <h5 className="text-sm font-semibold text-[var(--text-primary)]">
           Spectral Fingerprint
         </h5>
         <span
-          className="text-[9px] font-mono uppercase px-2 py-0.5 rounded font-bold"
+          className="text-xs px-2 py-1 rounded-md font-semibold"
           style={{
-            background: isAI ? 'var(--accent-red-transparent)' : 'rgba(0, 229, 204, 0.1)',
-            color: isAI ? 'var(--accent-red)' : '#00E5CC',
-            border: `1px solid ${isAI ? 'var(--accent-red-border)' : 'rgba(0, 229, 204, 0.2)'}`,
+            background: isAI ? 'var(--accent-red-transparent)' : 'var(--accent-green-transparent)',
+            color: isAI ? 'var(--accent-red)' : 'var(--accent-green)',
+            border: `1px solid ${isAI ? 'var(--accent-red-border)' : 'var(--accent-green-border)'}`,
           }}
         >
-          {isAI ? 'VOCODER SIGNATURE' : 'NATURAL SPECTRUM'}
+          {isAI ? 'Vocoder Signature' : 'Natural Spectrum'}
         </span>
       </div>
 
@@ -62,7 +62,7 @@ const SpectrogramView: React.FC<SpectrogramViewProps> = ({ spectralDetail, aiSco
 
           return (
             <div key={String(key)}>
-              <div className="flex justify-between text-[9px] font-mono mb-1 opacity-70">
+              <div className="flex justify-between text-xs font-medium mb-1 text-[var(--text-secondary)]">
                 <span>{label}</span>
                 <span style={{ color: isSuspicious ? 'var(--accent-orange)' : 'var(--text-muted)' }}>
                   {typeof rawVal === 'number' ? rawVal.toFixed(4) : '—'} <span className="opacity-50">/ {range}</span>
@@ -78,7 +78,6 @@ const SpectrogramView: React.FC<SpectrogramViewProps> = ({ spectralDetail, aiSco
                   style={{
                     width: `${pct}%`,
                     background: `linear-gradient(90deg, ${barColor}88, ${barColor})`,
-                    boxShadow: isSuspicious ? `0 0 8px ${barColor}60` : 'none',
                   }}
                 />
               </div>
@@ -87,7 +86,7 @@ const SpectrogramView: React.FC<SpectrogramViewProps> = ({ spectralDetail, aiSco
         })}
       </div>
 
-      <p className="text-[9px] font-mono text-[var(--text-muted)] mt-3 leading-relaxed opacity-70">
+      <p className="text-xs text-[var(--text-secondary)] mt-4 leading-relaxed">
         {isAI
           ? 'Frequency distribution shows neural vocoder characteristics — reduced high-frequency content and over-smoothed transitions.'
           : 'Frequency distribution shows natural acoustic properties — normal high-frequency energy and realistic spectral variation.'}

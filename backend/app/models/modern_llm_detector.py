@@ -37,7 +37,7 @@ class ModernLLMDetector:
         """
         sentences = [s.strip() for s in re.split(r'[.!?]+', text) if len(s.strip()) > 5]
         if not sentences:
-            return {"modern_ai_score": 0.5, "structural_dna": 0.0, "semantic_flow": 0.5}
+            return {"modern_ai_score": 0.1, "structural_dna": 0.0, "semantic_flow": 0.1}
 
         # 1. Structural DNA Score
         struct_hits = 0
@@ -64,7 +64,7 @@ class ModernLLMDetector:
         avg_flow = np.mean(similarities) if similarities else 0.0
         # AI typically stays in the 0.15 - 0.35 Jaccard range (smooth). 
         # Human writing is either very low (jumpy) or very high (repetitive).
-        flow_score = 0.8 if 0.15 < avg_flow < 0.40 else 0.4
+        flow_score = 0.90 if 0.18 < avg_flow < 0.38 else 0.15
 
         # 3. Pattern Match Score
         pattern_hits = 0
@@ -92,9 +92,11 @@ class ModernLLMDetector:
             cv = std / mean if mean > 0 else 0
             # AI typically has CV < 0.3. Human writing often has CV > 0.5.
             if cv < 0.25:
-                burstiness_score = 0.8  # Very AI-like smoothness
-            elif cv < 0.40:
-                burstiness_score = 0.5
+                burstiness_score = 0.85
+            elif cv < 0.45:
+                burstiness_score = 0.3
+            else:
+                burstiness_score = 0.1
         
         # Combined Modern LLM Score (v17.3 Optimized)
         # Weights: Struct (25%), Flow (15%), Lexical (20%), Progression (15%), Burstiness (25%)

@@ -129,8 +129,9 @@ async def run_video_pipeline_v10(video_path: str) -> Dict[str, Any]:
     frames_pil_deep = frames_pil[::2]
     frames_np_deep = frames_np[::2]
     
-    # Deep Neural Ensemble (Restricted concurrency to prevent CPU thrashing)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    # Deep Neural Ensemble (Max Concurrency for Industrial Speed)
+    # We use 4 workers because we have 4 independent heavy tasks
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         t1_spatial   = loop.run_in_executor(executor, clip_module.get_signal, frames_pil_deep)
         t2_temporal  = loop.run_in_executor(executor, tempo_raft.get_signal, frames_np_deep)
         # Audio module relies on original FPS timing, so it keeps the original frames

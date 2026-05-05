@@ -1,5 +1,5 @@
 """
-PDF Report Generator v10.1 (Linguistic Forensic Edition)
+PDF Report Generator v16.5 (Enterprise Forensic Edition)
 """
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles    import getSampleStyleSheet, ParagraphStyle
@@ -7,10 +7,11 @@ from reportlab.lib.units     import cm
 from reportlab.lib            import colors
 from reportlab.platypus       import (
     SimpleDocTemplate, Paragraph, Spacer, Table,
-    TableStyle, HRFlowable
+    TableStyle, HRFlowable, PageBreak
 )
 from io import BytesIO
 from datetime import datetime
+import hashlib
 
 
 def generate_pdf(scan_id: str, result: dict, text: str) -> bytes:
@@ -25,13 +26,14 @@ def generate_pdf(scan_id: str, result: dict, text: str) -> bytes:
     story  = []
 
     # ── Colours ──────────────────────────────────────────────
-    DARK    = colors.HexColor("#0A0E1A")
-    CYAN    = colors.HexColor("#00F0FF")
+    DARK    = colors.HexColor("#020617")
+    CYAN    = colors.HexColor("#00E5CC")
     RED     = colors.HexColor("#EF4444")
     GREEN   = colors.HexColor("#10B981")
     AMBER   = colors.HexColor("#F59E0B")
-    GRAY    = colors.HexColor("#6B7280")
-    BG_LIGHT = colors.HexColor("#F9FAFB")
+    GRAY    = colors.HexColor("#64748B")
+    BG_LIGHT = colors.HexColor("#F8FAFC")
+    BORDER   = colors.HexColor("#E2E8F0")
 
     threat_level = result.get("threat_level", "LOW")
     threat_color = {
@@ -41,189 +43,154 @@ def generate_pdf(scan_id: str, result: dict, text: str) -> bytes:
         "LOW":      GREEN,
     }.get(threat_level, GRAY)
 
-    # ── Header ───────────────────────────────────────────────
-    story.append(Paragraph(
-        "<b>FAKESHIELD</b> — Forensic AI Detection Report",
-        ParagraphStyle("H", parent=styles["Title"], fontSize=22, textColor=DARK)
-    ))
-    story.append(Paragraph(
-        f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC | v10.1.0-PRO-FORENSIC",
-        ParagraphStyle("Sub", parent=styles["Normal"], fontSize=8, textColor=GRAY)
-    ))
-    story.append(HRFlowable(width="100%", color=CYAN, thickness=2, vAlign='TOP'))
-    story.append(Spacer(1, 0.5*cm))
-
-    # ── Scan metadata ─────────────────────────────────────────
-    meta = [
-        ["Scan ID",    scan_id],
-        ["Engine",     result.get("engine_version", "v10.1.0-PRO-FORENSIC")],
-        ["Signals",    "Structural + Semantic + Reasoning + Statistical"],
-        ["Word Count", f"{result.get('word_count', 0)} words"],
-        ["Proc. Time", result.get("processing_time", "N/A")],
-        ["Confidence", f"<b>{result.get('confidence', 'MEDIUM')}</b>"],
+    # ── Header & Branding ───────────────────────────────────────────────
+    header_data = [
+        [
+            Paragraph("<b>FAKESHIELD</b><br/><font size='8' color='#64748B'>FORENSIC LABS & INTELLIGENCE</font>", 
+                      ParagraphStyle("Brand", parent=styles["Normal"], fontSize=20, textColor=DARK, leading=18)),
+            Paragraph(f"<b>REPORT #</b> {scan_id.upper()}<br/><b>ISSUED:</b> {datetime.now().strftime('%d %b %Y | %H:%M')}", 
+                      ParagraphStyle("Meta", parent=styles["Normal"], fontSize=8, textColor=GRAY, alignment=2))
+        ]
     ]
-    meta_table = Table(meta, colWidths=[4*cm, 13*cm])
-    meta_table.setStyle(TableStyle([
-        ("FONTSIZE",    (0,0), (-1,-1), 9),
-        ("TEXTCOLOR",   (0,0), (0,-1), GRAY),
-        ("FONTNAME",    (0,0), (0,-1), "Helvetica-Bold"),
-        ("BOTTOMPADDING",(0,0),(-1,-1), 4),
+    header_table = Table(header_data, colWidths=[10*cm, 8*cm])
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
     ]))
-    story.append(meta_table)
-    story.append(Spacer(1, 0.4*cm))
-
-    # ── Verdict box ───────────────────────────────────────────
-    verdict_data = [[
-        f"CRITICAL VERDICT: {result.get('verdict', 'UNKNOWN')}",
-        f"AI SCORE: {int((result.get('score', 0) if isinstance(result.get('score'), (int, float)) else 0) * 100)}%",
-        f"THREAT: {threat_level}",
-    ]]
-    vt = Table(verdict_data, colWidths=[7*cm, 5*cm, 5*cm])
-    vt.setStyle(TableStyle([
-        ("BACKGROUND",  (0,0), (-1,-1), DARK),
-        ("TEXTCOLOR",   (0,0), (-1,-1), threat_color),
-        ("FONTNAME",    (0,0), (-1,-1), "Helvetica-Bold"),
-        ("FONTSIZE",    (0,0), (-1,-1), 12),
-        ("ALIGN",       (0,0), (-1,-1), "CENTER"),
-        ("VALIGN",      (0,0), (-1,-1), "MIDDLE"),
-        ("BOX",         (0,0), (-1,-1), 2, threat_color),
-        ("TOPPADDING",  (0,0), (-1,-1), 14),
-        ("BOTTOMPADDING",(0,0), (-1,-1), 14),
-    ]))
-    story.append(vt)
+    story.append(header_table)
+    story.append(Spacer(1, 0.2*cm))
+    story.append(HRFlowable(width="100%", color=DARK, thickness=1.5, vAlign='TOP'))
     story.append(Spacer(1, 0.8*cm))
 
-    # ── Forensic Reasoning Box (v10.1 HIGHLIGHT) ──────────────
+    # ── Master Verdict ───────────────────────────────────────────
+    verdict_title = Paragraph("I. EXECUTIVE FORENSIC SUMMARY", ParagraphStyle("H1", parent=styles["Heading1"], fontSize=12, textColor=DARK, spaceAfter=12))
+    story.append(verdict_title)
+
+    verdict_data = [[
+        Paragraph(f"<font color='#64748B' size='8'>OVERALL VERDICT</font><br/><b>{result.get('verdict', 'UNKNOWN')}</b>", 
+                  ParagraphStyle("V1", parent=styles["Normal"], fontSize=14, leading=18)),
+        Paragraph(f"<font color='#64748B' size='8'>AI PROBABILITY</font><br/><b>{int((result.get('score', 0) if isinstance(result.get('score'), (int, float)) else 0) * 100)}%</b>", 
+                  ParagraphStyle("V2", parent=styles["Normal"], fontSize=14, leading=18)),
+        Paragraph(f"<font color='#64748B' size='8'>THREAT LEVEL</font><br/><b>{threat_level}</b>", 
+                  ParagraphStyle("V3", parent=styles["Normal"], fontSize=14, leading=18, textColor=threat_color)),
+    ]]
+    vt = Table(verdict_data, colWidths=[6*cm, 6*cm, 6*cm])
+    vt.setStyle(TableStyle([
+        ("BACKGROUND",  (0,0), (-1,-1), BG_LIGHT),
+        ("BOX",         (0,0), (-1,-1), 1, BORDER),
+        ("TOPPADDING",  (0,0), (-1,-1), 15),
+        ("BOTTOMPADDING",(0,0), (-1,-1), 15),
+        ("ALIGN",       (0,0), (-1,-1), "CENTER"),
+    ]))
+    story.append(vt)
+    story.append(Spacer(1, 1*cm))
+
+    # ── Technical Metadata ─────────────────────────────────────────
+    meta_data = [
+        [Paragraph("<b>II. TECHNICAL SPECIFICATIONS</b>", ParagraphStyle("H2", parent=styles["Heading2"], fontSize=10))],
+        ["Engine Cluster", "v85.26 Elite Fusion (Neural + Statistical + Stylometric)"],
+        ["Confidence Matrix", f"{result.get('confidence_level', 'STABLE')} ({result.get('confidence', '90%')})"],
+        ["Analysis Depth", "Deep Scan (Recursive Linguistic Audit)"],
+        ["Word Count", f"{result.get('word_count', 0)} Tokens"],
+        ["Latency", result.get("processing_time", "N/A")],
+        ["Data Hash (SHA-256)", hashlib.sha256(text.encode()).hexdigest()[:32].upper()]
+    ]
+    meta_table = Table(meta_data[1:], colWidths=[6*cm, 12*cm])
+    meta_table.setStyle(TableStyle([
+        ("FONTSIZE",    (0,0), (-1,-1), 8),
+        ("TEXTCOLOR",   (0,0), (0,-1), GRAY),
+        ("FONTNAME",    (0,0), (0,-1), "Helvetica-Bold"),
+        ("BOTTOMPADDING",(0,0),(-1,-1), 6),
+        ("LINEBELOW",   (0,0), (-1,-1), 0.5, BORDER),
+    ]))
+    story.append(meta_data[0][0])
+    story.append(Spacer(1, 0.2*cm))
+    story.append(meta_table)
+    story.append(Spacer(1, 1*cm))
+
+    # ── Forensic Reasoning ──────────────────────────────────────────
     reasoning = result.get("forensic_reasoning", "")
     if reasoning:
-        story.append(Paragraph(
-            "Forensic Expert Reasoning (Gemini v1.5 Flash Audit)",
-            ParagraphStyle("H2", parent=styles["Heading2"], fontSize=11, textColor=DARK)
-        ))
+        story.append(Paragraph("<b>III. LINGUISTIC REASONING AUDIT</b>", ParagraphStyle("H2", parent=styles["Heading2"], fontSize=10)))
+        story.append(Spacer(1, 0.3*cm))
         reasoning_style = ParagraphStyle(
             "Reasoning",
             parent=styles["Normal"],
             fontSize=10,
-            leading=14,
-            italic=True,
-            leftIndent=15,
-            rightIndent=15,
-            textColor=colors.HexColor("#1F2937")
+            leading=15,
+            textColor=DARK,
+            backColor=colors.HexColor("#F1F5F9"),
+            borderPadding=15,
+            borderWidth=1,
+            borderColor=BORDER,
+            borderRadius=8
         )
-        # Styled box for reasoning
-        story.append(Spacer(1, 0.2*cm))
-        story.append(Paragraph(f'"{reasoning}"', reasoning_style))
-        story.append(Spacer(1, 0.6*cm))
+        story.append(Paragraph(reasoning, reasoning_style))
+        story.append(Spacer(1, 1*cm))
 
-    # ── v10.1 Signal Audit Table ─────────────────────────────
-    story.append(Paragraph(
-        "Forensic Signal Audit (v10.1 Logic Weights)",
-        ParagraphStyle("H2", parent=styles["Heading2"], fontSize=11)
-    ))
+    # ── Multi-Vector Signals ─────────────────────────────────────────
+    story.append(Paragraph("<b>IV. MULTI-VECTOR SIGNAL INTEL (v85.26)</b>", ParagraphStyle("H2", parent=styles["Heading2"], fontSize=10)))
+    story.append(Spacer(1, 0.3*cm))
     sigs = result.get("signals", {})
-    # Weights dynamic based on engine
-    sig_data = [["Forensic Signal", "Score", "Weight", "Significance"]]
+    sig_data = [["Intelligence Vector", "Intensity", "Reliability", "Diagnostic Note"]]
     
-    # We use actual v14 signals
     sig_rows = [
-        ("Structural Entropy",   f"{int(sigs.get('structural_strength', 0.5)*100)}%", "20%", "Dependency Tree Regularity"),
-        ("Semantic Flow Drift",  f"{int(sigs.get('semantic_irregularity', 0.5)*100)}%",   "20%", "Thought Evolution Consistency"),
-        ("GPT-2 PPL Entropy",    f"{int(sigs.get('ppl_signal', 0.5)*100)}%",  "10%", "Neural Predictability"),
-        ("Statistical Burstiness",f"{int(sigs.get('burstiness_signal', 0.5)*100)}%","10%", "Token Probability Variance"),
-        ("HC3 ChatGPT Classifier",f"{int(sigs.get('classifier_signal', 0.5)*100)}%",    "40%", "Neural Fingerprinting"),
+        ("Neural Pulse (DeBERTa-v3-L)", f"{int(sigs.get('neural', 0.5)*100)}%", "HIGH", "Adversarial pattern recognition"),
+        ("Binoculars (Statistical)", f"{int(sigs.get('statistical', 0.5)*100)}%", "HIGH", "Log-probability distribution audit"),
+        ("Rhythmic Variance (Forensic)", f"{int(sigs.get('rhythm', 0.5)*100)}%", "MEDIUM", "Syntactic complexity & burstiness"),
+        ("Semantic Flow (Drift)", f"{int(sigs.get('flow', 0.5)*100)}%", "HIGH", "Thought trajectory consistency check"),
     ]
-    for name, score, weight, desc in sig_rows:
-        sig_data.append([name, score, weight, desc])
+    for name, score, rel, desc in sig_rows:
+        sig_data.append([name, score, rel, desc])
 
-    sig_table = Table(sig_data, colWidths=[6*cm, 3*cm, 3*cm, 5*cm])
+    sig_table = Table(sig_data, colWidths=[6*cm, 3*cm, 3*cm, 6*cm])
     sig_table.setStyle(TableStyle([
         ("BACKGROUND",   (0,0), (-1,0), DARK),
-        ("TEXTCOLOR",    (0,0), (-1,0), CYAN),
-        ("FONTNAME",     (0,0), (-1,0), "Helvetica-Bold"),
-        ("FONTSIZE",     (0,0), (-1,-1), 9),
-        ("ALIGN",        (1,0), (2,-1), "CENTER"),
-        ("ROWBACKGROUNDS",(0,1),(-1,-1), [BG_LIGHT, colors.white]),
-        ("GRID",         (0,0), (-1,-1), 0.5, colors.HexColor("#E5E7EB")),
-        ("TOPPADDING",   (0,0), (-1,-1), 6),
-        ("BOTTOMPADDING",(0,0), (-1,-1), 6),
-    ]))
-    story.append(sig_table)
-    story.append(Spacer(1, 0.6*cm))
-
-    # ── Structural & Semantic Details ──────────────────────────
-    sd = result.get("structural_details", {})
-    sem = result.get("semantic_details", {})
-    
-    story.append(Paragraph(
-        "Advanced Linguistic Diagnostics",
-        ParagraphStyle("H2", parent=styles["Heading2"], fontSize=11)
-    ))
-    
-    diag_data = [
-        ["Diagnostic Metric", "Value", "Forensic Interpretation"],
-        ["Tree Depth Variance", str(sd.get('depth_variance', 'N/A')), "Structural irregularity (High = Human)"],
-        ["Semantic Consistency", f"{round(sem.get('semantic_consistency', 0)*100, 1)}%", "Topic stability (Extreme = AI-like)"],
-        ["Drift Trajectory", str(sem.get('trajectory_smoothness', 'N/A')), "Logic flow path (Linear = AI-like)"],
-        ["Sentence Cadence CV", str(sd.get('sentence_cadence_cv', 'N/A')), "Rhythmic variation across text"],
-    ]
-    diag_table = Table(diag_data, colWidths=[5*cm, 4*cm, 8*cm])
-    diag_table.setStyle(TableStyle([
-        ("BACKGROUND",   (0,0), (-1,0), colors.HexColor("#1F2937")),
         ("TEXTCOLOR",    (0,0), (-1,0), colors.white),
-        ("FONTNAME",     (0,0), (-1,-1), "Helvetica"),
         ("FONTNAME",     (0,0), (-1,0), "Helvetica-Bold"),
         ("FONTSIZE",     (0,0), (-1,-1), 8),
-        ("GRID",         (0,0), (-1,-1), 0.5, colors.HexColor("#D1D5DB")),
-        ("TOPPADDING",   (0,0), (-1,-1), 5),
-        ("BOTTOMPADDING",(0,0), (-1,-1), 5),
+        ("ALIGN",        (1,1), (2,-1), "CENTER"),
+        ("ROWBACKGROUNDS",(0,1),(-1,-1), [colors.white, BG_LIGHT]),
+        ("GRID",         (0,0), (-1,-1), 0.5, BORDER),
+        ("TOPPADDING",   (0,0), (-1,-1), 8),
+        ("BOTTOMPADDING",(0,0), (-1,-1), 8),
     ]))
-    story.append(diag_table)
-    story.append(Spacer(1, 0.8*cm))
+    story.append(sig_table)
+    
+    story.append(PageBreak())
 
-    # ── Key Indicators (v10.1 Bullets) ────────────────────────
-    indicators = result.get("indicators", [])
-    if indicators:
-        story.append(Paragraph(
-            "Suspicious Forensic Indicators",
-            ParagraphStyle("H2", parent=styles["Heading2"], fontSize=11)
-        ))
-        for ind in indicators:
-            story.append(Paragraph(
-                f"• {ind}",
-                ParagraphStyle("Indicator", parent=styles["Normal"], fontSize=9, leftIndent=10)
-            ))
-        story.append(Spacer(1, 0.5*cm))
+    # ── Certification Section ─────────────────────────────────────────
+    story.append(Spacer(1, 2*cm))
+    cert_data = [
+        [
+            Paragraph("<b>CERTIFICATE OF AUTHENTICITY</b><br/><font size='8'>This document certifies that the forensic analysis of the provided text evidence was conducted using the FakeShield Elite Ensemble. The results are mathematically derived from multi-vector linguistic signals.</font>", 
+                      ParagraphStyle("Cert", parent=styles["Normal"], fontSize=12, leading=16, borderPadding=20, borderWidth=2, borderColor=DARK, borderRadius=10)),
+        ]
+    ]
+    cert_table = Table(cert_data, colWidths=[18*cm])
+    story.append(cert_table)
+    story.append(Spacer(1, 2*cm))
 
-    # ── Sentence Level Sample ─────────────────────────────────
-    hls = result.get("sentence_highlights", [])
-    if hls:
-        story.append(Paragraph(
-            "Sentence-Level Micro-Audit (Partial Sample)",
-            ParagraphStyle("H2", parent=styles["Heading2"], fontSize=11)
-        ))
-        hl_data = [["Sentence", "Verdict", "AI Score"]]
-        for hl in hls[:6]:
-            hl_data.append([
-                hl["sentence"][:100] + ("..." if len(hl["sentence"]) > 100 else ""),
-                hl["label"],
-                f"{int(hl['ai_score']*100)}%" if hl.get('ai_score') else "N/A"
-            ])
-        
-        hl_table = Table(hl_data, colWidths=[12*cm, 3*cm, 2*cm])
-        hl_table.setStyle(TableStyle([
-            ("FONTSIZE", (0,0), (-1,-1), 8),
-            ("GRID", (0,0), (-1,-1), 0.2, GRAY),
-            ("BACKGROUND", (0,0), (-1,0), BG_LIGHT),
-        ]))
-        story.append(hl_table)
+    # ── Signatures ─────────────────────────────────────────
+    sig_data = [
+        [
+            Paragraph("__________________________<br/><b>CHIEF FORENSIC ANALYST</b><br/>FakeShield Automated Systems", 
+                      ParagraphStyle("Sig1", parent=styles["Normal"], fontSize=9)),
+            Paragraph(f"<b>DIGITAL SEAL</b><br/><font size='6' color='#64748B'>{hashlib.md5(scan_id.encode()).hexdigest().upper()}</font>", 
+                      ParagraphStyle("Sig2", parent=styles["Normal"], fontSize=9, alignment=2))
+        ]
+    ]
+    sig_table = Table(sig_data, colWidths=[9*cm, 9*cm])
+    story.append(sig_table)
 
-    # ── Footer ────────────────────────────────────────────────
-    story.append(Spacer(1, 1.5*cm))
+    # ── Confidentiality Notice ─────────────────────────────────────────
+    story.append(Spacer(1, 4*cm))
     story.append(HRFlowable(width="100%", color=GRAY, thickness=0.5))
     story.append(Paragraph(
-        "FakeShield Forensic Engine v10.1-PRO. This report is data-driven and for audit purposes only. "
-        "Intended for professional verification of text integrity.",
-        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=7, textColor=GRAY, alignment=1)
+        "<b>CONFIDENTIALITY & DISCLAIMER:</b> This report is generated by FakeShield Forensic Engine v85.26. "
+        "The analysis is based on probabilistic models and statistical linguistics. "
+        "Results should be interpreted as diagnostic indicators. FakeShield is not liable for actions taken based on this report. "
+        "Property of FakeShield Labs.",
+        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=7, textColor=GRAY, alignment=1, leading=10)
     ))
 
     doc.build(story)

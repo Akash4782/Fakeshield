@@ -7,6 +7,7 @@ os.environ["PYTHONUTF8"] = "1"
 os.environ["PYTHONWARNINGS"] = "ignore:Multiple distributions found for package optimum"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+os.environ["FAKESHIELD_SKIP_WARMUP"] = "0" # Enable background model pre-loading
 
 # Handle optional arguments
 if "--fast" in sys.argv:
@@ -14,7 +15,8 @@ if "--fast" in sys.argv:
     print(">> Fast Mode enabled: Skipping forensic model pre-loading.")
 
 # Define the command to run (using uvicorn directly for Windows stability)
-cmd = ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
+# Using sys.executable -m uvicorn to ensure it uses the correct venv
+cmd = [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 
 # Change directory to the script's directory (backend)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

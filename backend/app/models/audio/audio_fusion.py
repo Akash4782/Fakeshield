@@ -85,13 +85,21 @@ def fuse_audio_signals_v1(
 
 
 def _result(score: float, rule: str, verdict: str) -> dict:
+    # Standardize verdict labels for dashboard consistency
+    label_map = {
+        "AI_GENERATED": "AI-Generated",
+        "LIKELY_AI":    "AI-Generated",
+        "UNCERTAIN":     "Suspicious",
+        "LIKELY_HUMAN":  "Authentic",
+    }
+    verdict = label_map.get(verdict, verdict)
+
     score = max(0.0, min(1.0, score))
     
     threat = {
-        "AI_GENERATED": "CRITICAL",
-        "LIKELY_AI":    "HIGH",
-        "UNCERTAIN":     "MEDIUM",
-        "LIKELY_HUMAN":  "LOW",
+        "AI-Generated": "CRITICAL",
+        "Suspicious":   "MEDIUM",
+        "Authentic":    "SAFE",
     }.get(verdict, "LOW")
     
     return {

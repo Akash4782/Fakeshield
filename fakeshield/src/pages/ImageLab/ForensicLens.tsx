@@ -49,10 +49,10 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="relative flex-1 py-2.5 text-[10px] font-mono tracking-widest uppercase transition-colors"
+            className="relative flex-1 py-3 text-xs font-bold tracking-tight uppercase transition-colors"
             style={{
-              color: activeTab === tab.id ? tab.color : 'var(--text-muted)',
-              background: activeTab === tab.id ? `${tab.color}10` : 'transparent',
+              color: activeTab === tab.id ? tab.color : '#64748b',
+              background: activeTab === tab.id ? `${tab.color}08` : 'transparent',
             }}
           >
             {tab.label}
@@ -70,10 +70,10 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
 
       {/* Description bar */}
       <div
-        className="px-4 py-1.5 text-[9px] font-mono shrink-0 border-b"
-        style={{ borderColor: 'var(--panel-border)', color: 'var(--text-muted)' }}
+        className="px-5 py-2 text-[11px] font-medium shrink-0 border-b bg-slate-50"
+        style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
       >
-        <span style={{ color: activeTabCfg.color }}>▶ </span>
+        <span className="font-bold mr-1" style={{ color: activeTabCfg.color }}>ANALYSIS:</span>
         {TAB_DESCRIPTIONS[activeTab]}
       </div>
 
@@ -82,7 +82,7 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
         {isLoading ? (
           <div className="flex flex-col items-center gap-3 text-cyan-400">
             <Loader2 className="w-10 h-10 animate-spin" />
-            <p className="font-mono text-xs tracking-widest animate-pulse">EXTRACTING FORENSIC SIGNAL...</p>
+            <p className="font-mono text-xs tracking-widest animate-pulse">PROCESSING IMAGE SIGNAL...</p>
           </div>
         ) : (
           <AnimatePresence mode="wait">

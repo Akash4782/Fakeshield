@@ -11,10 +11,10 @@ const PitchStability: React.FC<PitchStabilityProps> = ({ f0_std }) => {
 
   return (
     <div className="p-4 rounded-xl border border-[var(--panel-border)] bg-[var(--bg-secondary)]">
-      <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3 flex justify-between items-center">
+      <h5 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex justify-between items-center">
         <span>Prosody Stability</span>
-        <span className={isStable ? 'text-[var(--accent-red)]' : 'text-green-500'}>
-          {isStable ? 'UNNATURAL' : 'NATURAL'}
+        <span className={isStable ? 'text-[var(--accent-red)] text-xs font-bold' : 'text-green-500 text-xs font-bold'}>
+          {isStable ? 'Unnatural' : 'Natural'}
         </span>
       </h5>
       
@@ -24,16 +24,15 @@ const PitchStability: React.FC<PitchStabilityProps> = ({ f0_std }) => {
             className="h-full rounded-full transition-all duration-1000"
             style={{ 
               width: `${percentage}%`,
-              background: isStable ? 'var(--accent-red)' : '#00E5CC',
-              boxShadow: `0 0 10px ${isStable ? 'var(--accent-red)' : '#00E5CC'}40`
+              background: isStable ? 'var(--accent-red)' : 'var(--accent-green)'
             }}
           />
           {/* Target range marker 2.5-5.0 */}
           <div className="absolute top-0 left-[31%] w-[31%] h-full border-x border-dashed border-white/20 bg-white/5"></div>
         </div>
-        <span className="text-xs font-mono font-bold w-12 text-right">{f0_std.toFixed(2)} st</span>
+        <span className="text-sm font-semibold w-12 text-right text-[var(--text-primary)]">{f0_std.toFixed(2)} st</span>
       </div>
-      <p className="text-[9px] font-mono text-[var(--text-muted)] mt-2 leading-tight">
+      <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed">
         {isStable 
           ? 'Pitch variance is suspiciously low, indicating robotic synthesizer output.' 
           : 'Natural prosodic variation detected within human speech parameters.'}

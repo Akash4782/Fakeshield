@@ -70,17 +70,18 @@ def _load_dino():
     return _DINO_MODEL, _DINO_PROC
 
 
-def _get_embedding(img_pil: Image.Image):
+def _get_embeddings(imgs: list[Image.Image]):
     model, processor = _load_dino()
-    inputs = processor(images=img_pil.convert("RGB"), return_tensors="pt")
+    # Processor handles resizing to 224x224 (DINOv2 default)
+    inputs = processor(images=[img.convert("RGB") for img in imgs], return_tensors="pt").to(DEVICE)
     with torch.no_grad():
         outputs = model(**inputs)
-    cls_embedding = outputs.last_hidden_state[:, 0, :]
-    return F.normalize(cls_embedding, dim=-1)
+    cls_embeddings = outputs.last_hidden_state[:, 0, :]
+    return F.normalize(cls_embeddings, dim=-1)
 
 
 def sig_rigid(
-    img_pil: Image.Image, n_perturbations: int = 10, noise_strength: float = 0.05
+    img_pil: Image.Image, n_perturbations: int = 8, noise_strength: float = 0.05
 ) -> tuple[float, float]:
     """
     RIGID: Training-free AI detection using DINOv2 perturbation sensitivity.
@@ -89,20 +90,21 @@ def sig_rigid(
     """
     try:
         img_arr = np.array(img_pil.convert("RGB"), dtype=np.float32) / 255.0
-        emb_orig = _get_embedding(img_pil)
-
-        similarities = []
+        
+        # Batch preparation: Original + N perturbations
+        batch_pils = [img_pil]
         for _ in range(n_perturbations):
-            noise = np.random.normal(0, noise_strength, img_arr.shape).astype(
-                np.float32
-            )
+            noise = np.random.normal(0, noise_strength, img_arr.shape).astype(np.float32)
             noisy_arr = np.clip(img_arr + noise, 0, 1)
-            noisy_pil = Image.fromarray((noisy_arr * 255).astype(np.uint8))
+            batch_pils.append(Image.fromarray((noisy_arr * 255).astype(np.uint8)))
 
-            emb_noisy = _get_embedding(noisy_pil)
-            sim = F.cosine_similarity(emb_orig, emb_noisy).item()
-            similarities.append(sim)
+        # Single batch forward pass (Massive speedup on CPU)
+        all_embeddings = _get_embeddings(batch_pils)
+        emb_orig = all_embeddings[0:1]
+        emb_noises = all_embeddings[1:]
 
+        similarities = F.cosine_similarity(emb_orig, emb_noises, dim=-1).cpu().numpy()
+        
         mean_similarity = np.mean(similarities)
         std_similarity = np.std(similarities)
 
@@ -989,7 +991,7 @@ def fuse(signals: dict) -> dict:
 def analyze_image(image_bytes: bytes, include_gradcam: bool = True) -> dict:
     load_image_models()
     t0 = time.time()
-    print(f"\n{'═' * 60}")
+    print(f"\n{'=' * 60}")
     print(f"[v7.0] Analyzing {len(image_bytes) // 1024}KB image...")
 
     try:
@@ -1005,7 +1007,7 @@ def analyze_image(image_bytes: bytes, include_gradcam: bool = True) -> dict:
         elapsed = round(time.time() - t0, 2)
         print("  [GEMINI] 4-Pointed Star Watermark Detected. Short-circuiting analysis!")
         print(f"  VERDICT: AI GENERATED | prob=1.000 | conf=100.0 | t={elapsed}s")
-        print(f"{'═' * 60}\n")
+        print(f"{'=' * 60}\n")
         return {
             "ai_probability": 1.0,
             "confidence": 100.0,
@@ -1115,58 +1117,67 @@ def analyze_image(image_bytes: bytes, include_gradcam: bool = True) -> dict:
             },
         }
 
-    # ── Run all signals in sequence ──
-    # RIGID is the primary training-free signal
-    rigid_sc, rigid_conf = sig_rigid(img_pil)
-    fft_sc, fft_conf, fft_vis = sig_fft(img_pil)
-    noise_sc, noise_conf = sig_noise(img_pil)
-    neural_sc, neural_conf = sig_neural(img_pil)
-    clip_sc, clip_conf = sig_clip(img_pil)
-    exif_sc, exif_conf, exif_data = sig_exif(image_bytes)
-
-    # ── ELA: Error Level Analysis ──
-    ela_sc = 0.5
-    ela_image_b64 = None
-    try:
-        ela_score_val, ela_vis_pil = analyze_ela(img_pil)
-        ela_sc = ela_score_val
-        if ela_vis_pil is not None:
-            buf_ela = io.BytesIO()
-            ela_vis_pil.save(buf_ela, "PNG")
-            ela_image_b64 = base64.b64encode(buf_ela.getvalue()).decode()
-    except Exception as e:
-        print(f"  [ELA] Error: {e}")
-
-    # ── Augmentation Consistency Test ──
-    # Insight: Real images → classifier stable across augmentations.
-    # AI images  → classifier probability drifts under simple transforms.
-    augmentation_consistency = 0.5
-    try:
-        aug_variants = [
-            img_pil.resize((int(w * 0.8), int(h * 0.8)), Image.LANCZOS),
-            img_pil.crop((w // 8, h // 8, w - w // 8, h - h // 8)).resize((w, h), Image.LANCZOS),
-            img_pil.transpose(Image.FLIP_LEFT_RIGHT),
-        ]
-        aug_scores = []
-        if S1_LOADED:
-            for aug_pil in aug_variants:
+    # ── Run all signals in parallel ──
+    # Greatly speeds up processing since they are independent
+    def run_aug():
+        aug_consistency = 0.5
+        try:
+            aug_variants = [
+                img_pil.resize((int(w * 0.8), int(h * 0.8)), Image.LANCZOS),
+                img_pil.crop((w // 8, h // 8, w - w // 8, h - h // 8)).resize((w, h), Image.LANCZOS),
+                img_pil.transpose(Image.FLIP_LEFT_RIGHT),
+            ]
+            aug_scores = []
+            if S1_LOADED:
                 try:
-                    inp = S1_PROC(images=aug_pil.convert("RGB"), return_tensors="pt").to(DEVICE)
+                    # Batch variant processing (Massive speedup)
+                    inp = S1_PROC(images=aug_variants, return_tensors="pt").to(DEVICE)
                     with torch.no_grad():
                         logits = S1_MODEL(**inp).logits
-                        probs = F.softmax(logits, dim=-1).cpu().numpy()[0]
-                    aug_scores.append(float(probs[_S1_AI]))
-                except Exception:
-                    pass
-        if len(aug_scores) >= 2:
-            # High std = unstable = AI signal; Low std = stable = Real signal
-            aug_std = float(np.std(aug_scores))
-            # std > 0.15 is very unstable → strong AI signal
-            # std < 0.05 is very stable   → real signal
-            augmentation_consistency = float(np.clip(aug_std / 0.15, 0.0, 1.0))
-            print(f"  [AUG] scores={[round(s,3) for s in aug_scores]}, std={aug_std:.4f}, aug_consistency_ai={augmentation_consistency:.3f}")
-    except Exception as e:
-        print(f"  [AUG] Error: {e}")
+                        probs = F.softmax(logits, dim=-1).cpu().numpy()
+                    aug_scores = [float(p[_S1_AI]) for p in probs]
+                except Exception as e:
+                    print(f"  [AUG] Batch failed: {e}")
+            if len(aug_scores) >= 2:
+                # High std = unstable = AI signal; Low std = stable = Real signal
+                aug_std = float(np.std(aug_scores))
+                aug_consistency = float(np.clip(aug_std / 0.15, 0.0, 1.0))
+                print(f"  [AUG] scores={[round(s,3) for s in aug_scores]}, std={aug_std:.4f}, aug_consistency_ai={aug_consistency:.3f}")
+        except Exception as e:
+            print(f"  [AUG] Error: {e}")
+        return aug_consistency
+
+    def run_ela():
+        try:
+            return analyze_ela(img_pil)
+        except Exception as e:
+            print(f"  [ELA] Error: {e}")
+            return 0.5, None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        f_rigid = executor.submit(sig_rigid, img_pil)
+        f_fft = executor.submit(sig_fft, img_pil)
+        f_noise = executor.submit(sig_noise, img_pil)
+        f_neural = executor.submit(sig_neural, img_pil)
+        f_clip = executor.submit(sig_clip, img_pil)
+        f_exif = executor.submit(sig_exif, image_bytes)
+        f_ela = executor.submit(run_ela)
+        f_aug = executor.submit(run_aug)
+        
+        rigid_sc, rigid_conf = f_rigid.result()
+        fft_sc, fft_conf, fft_vis = f_fft.result()
+        noise_sc, noise_conf = f_noise.result()
+        neural_sc, neural_conf = f_neural.result()
+        clip_sc, clip_conf = f_clip.result()
+        exif_sc, exif_conf, exif_data = f_exif.result()
+        ela_sc, ela_vis_pil = f_ela.result()
+        augmentation_consistency = f_aug.result()
+
+    ela_image_b64 = None
+    if ela_vis_pil is not None:
+        buf_ela = io.BytesIO()
+        ela_vis_pil.save(buf_ela, "PNG")
+        ela_image_b64 = base64.b64encode(buf_ela.getvalue()).decode()
 
     # ── Optional: Noise heatmap ──
     heatmap = make_heatmap(img_pil) if include_gradcam else None
@@ -1288,10 +1299,8 @@ def analyze_image(image_bytes: bytes, include_gradcam: bool = True) -> dict:
         )
 
     elapsed = round(time.time() - t0, 2)
-    print(
-        f"  VERDICT: {verdict} | prob={final_fused:.3f} | conf={overall_conf:.2f} | t={elapsed}s"
-    )
-    print(f"{'═' * 60}\n")
+    print(f"  VERDICT: {verdict} | prob={final_fused:.3f} | conf={overall_conf:.2f} | t={elapsed}s")
+    print(f"{'=' * 60}\n")
 
     # ── Per-generator accuracy reference (for display) ──
     per_generator_accuracy = {

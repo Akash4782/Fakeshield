@@ -76,7 +76,8 @@ const ThreatRadar = () => {
               </li>
             ))}
           </ul>
-          <button
+          <a
+            href="/dashboard"
             style={{
               background: 'var(--btn-secondary-bg)',
               border: `1px solid var(--btn-secondary-border)`,
@@ -86,12 +87,12 @@ const ThreatRadar = () => {
               borderRadius: '0.5rem',
               cursor: 'pointer',
               transition: 'background 0.3s',
+              textDecoration: 'none',
+              display: 'inline-block',
             }}
-            onMouseOver={e => (e.currentTarget.style.background = 'var(--btn-secondary-hover)')}
-            onMouseOut={e => (e.currentTarget.style.background = 'var(--btn-secondary-bg)')}
           >
             Explore the Radar
-          </button>
+          </a>
         </div>
 
         {/* Radar Visualization */}

@@ -47,13 +47,12 @@ class VideoSampler:
 
     def extract_frames(self, video_path: str, count: int = 8, 특정_indices: list = None):
         """
-        V11.0 CPU Optimized: FFmpeg Batch Extraction.
-        Drastically faster on CPU than OpenCV pos_frames.
+        V11.1 CPU Optimized: Single-Pass FFmpeg Batch Extraction.
+        Extracts all frames in one command, drastically reducing process overhead.
         """
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened(): return [], []
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
         cap.release()
 
         if 특정_indices:
@@ -67,33 +66,47 @@ class VideoSampler:
         frames_np = []
         frames_pil = []
         
-        # CPU OPTIMIZATION: Extract all frames in one FFmpeg pass
-        # This is much faster than OpenCV seeking (which decodes every time)
+        # Create a select filter string for the indices
+        # Example: select='eq(n\,0)+eq(n\,10)+eq(n\,20)'
+        select_filter = "+".join([f"eq(n\,{idx})" for idx in indices])
+        
         with tempfile.TemporaryDirectory() as tmpdir:
-            for i, idx in enumerate(indices):
-                timestamp = idx / max(fps, 1)
-                out_path = os.path.join(tmpdir, f"frame_{i:03d}.jpg")
+            out_pattern = os.path.join(tmpdir, "frame_%03d.jpg")
+            
+            try:
+                # Single pass extraction
+                cmd = [
+                    "ffmpeg", "-i", video_path,
+                    "-vf", f"select='{select_filter}'",
+                    "-vsync", "0", # vsync 0 is more reliable for select filter
+                    "-q:v", "2",
+                    out_pattern, "-y", "-loglevel", "quiet"
+                ]
+                subprocess.run(cmd, check=True)
                 
-                # Single frame extraction via FFmpeg (Accurate Seek)
-                # -ss BEFORE -i is fast but sometimes inaccurate for P-frames
-                # -ss AFTER -i is accurate but slow. 
-                # We use -ss BEFORE -i with a small offset for the best of both worlds.
-                try:
+                # Read back the files
+                # FFmpeg with vsync 0/vfr might name files frame_001, frame_002...
+                # We sort them to ensure chronological order matching our indices
+                saved_files = sorted([f for f in os.listdir(tmpdir) if f.startswith("frame_")])
+                for f_name in saved_files:
+                    out_path = os.path.join(tmpdir, f_name)
+                    img = Image.open(out_path).convert("RGB")
+                    frames_pil.append(img)
+                    frames_np.append(np.array(img))
+            except Exception as e:
+                print(f"[VideoSampler] Batch FFmpeg failed: {e}. Falling back to iterative extraction.")
+                # Fallback: Extract frames one by one if batch fails
+                for idx in indices:
+                    timestamp = idx / 30.0 # Heuristic if FPS unknown, or use cap.get
+                    out_path = os.path.join(tmpdir, f"fb_{idx}.jpg")
                     subprocess.run([
-                        "ffmpeg", "-ss", str(max(0, timestamp - 0.5)), 
-                        "-i", video_path, 
-                        "-ss", "0.5",
-                        "-frames:v", "1", 
-                        "-q:v", "2", 
-                        out_path, "-y", "-loglevel", "quiet"
-                    ], check=True)
-                    
+                        "ffmpeg", "-ss", str(max(0, timestamp - 0.1)), "-i", video_path,
+                        "-frames:v", "1", out_path, "-y", "-loglevel", "quiet"
+                    ])
                     if os.path.exists(out_path):
                         img = Image.open(out_path).convert("RGB")
                         frames_pil.append(img)
                         frames_np.append(np.array(img))
-                except Exception as e:
-                    print(f"[VideoSampler] FFmpeg Frame {idx} failed: {e}")
 
         return frames_np, frames_pil
 

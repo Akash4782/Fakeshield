@@ -93,10 +93,16 @@ const LandingPage = () => {
       <main>
         <HeroSection />
         <SocialProof />
-        <FeaturesShowcase />
+        <div id="features">
+          <FeaturesShowcase />
+        </div>
         <ThreatRadar />
-        <HowItWorks />
-        <CTASection />
+        <div id="how-it-works">
+          <HowItWorks />
+        </div>
+        <div id="enterprise">
+          <CTASection />
+        </div>
       </main>
       <Footer />
     </div>

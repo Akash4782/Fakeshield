@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronRight, TrendingUp, Info } from 'lucide-react';
+import { CheckCircle2, XCircle, TrendingUp, Info } from 'lucide-react';
 
 interface ImageReportPanelProps {
   reasons?: string[];
@@ -34,27 +34,36 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
       {reasons && reasons.length > 0 && (
         <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}>
           <div
-            className="px-4 py-3 border-b text-[10px] font-mono tracking-widest uppercase"
-            style={{ borderColor: 'var(--panel-border)', color: '#00E5CC' }}
+            className="px-5 py-4 border-b text-xs font-bold tracking-tight uppercase bg-slate-50"
+            style={{ borderColor: 'var(--panel-border)', color: '#334155' }}
           >
             Logical Arbiter — Forensic Reasoning
           </div>
           <div className="p-3 space-y-2">
             {reasons.map((reason, i) => {
-              const isPositive = reason.startsWith('✓') || reason.startsWith('○');
-              const isNegative = reason.startsWith('✗');
-              const color = isPositive ? '#22c55e' : isNegative ? '#ef4444' : '#eab308';
+              const isPositive = reason.includes('✓') || reason.includes('○');
+              const isNegative = reason.includes('✗');
+              const Icon = isPositive ? CheckCircle2 : isNegative ? XCircle : Info;
+              const color = isPositive ? '#10b981' : isNegative ? '#ef4444' : '#64748b';
+              
+              // Clean the text by removing the markers
+              const cleanText = reason.replace(/[✓✗○]/g, '').trim();
+
               return (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.08 }}
-                  className="flex items-start gap-2 px-3 py-2 rounded-xl text-[10px] font-mono leading-relaxed"
-                  style={{ background: `${color}08`, border: `1px solid ${color}20`, color: 'var(--text-secondary)' }}
+                  className="flex items-start gap-4 px-5 py-3.5 rounded-xl text-[11px] font-medium leading-relaxed border"
+                  style={{ 
+                    background: isPositive ? 'rgba(16,185,129,0.03)' : isNegative ? 'rgba(239,68,68,0.03)' : '#f8fafc', 
+                    borderColor: isPositive ? 'rgba(16,185,129,0.1)' : isNegative ? 'rgba(239,68,68,0.1)' : 'rgba(0,0,0,0.03)',
+                    color: '#334155' 
+                  }}
                 >
-                  <ChevronRight className="w-3 h-3 mt-0.5 shrink-0" style={{ color }} />
-                  <span>{reason}</span>
+                  <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color }} strokeWidth={2.5} />
+                  <span className="flex-1">{cleanText}</span>
                 </motion.div>
               );
             })}
@@ -66,11 +75,11 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
       {perGeneratorAccuracy && Object.keys(perGeneratorAccuracy).length > 0 && (
         <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}>
           <div
-            className="px-4 py-3 border-b flex items-center gap-2"
+            className="px-5 py-4 border-b flex items-center gap-2 bg-slate-50"
             style={{ borderColor: 'var(--panel-border)' }}
           >
-            <TrendingUp className="w-3 h-3" style={{ color: '#00E5CC' }} />
-            <span className="text-[10px] font-mono tracking-widest uppercase" style={{ color: '#00E5CC' }}>
+            <TrendingUp className="w-4 h-4 text-cyan-500" />
+            <span className="text-xs font-bold tracking-tight uppercase" style={{ color: '#334155' }}>
               Per-Generator Detection Accuracy
             </span>
           </div>
@@ -81,8 +90,8 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
               return (
                 <div key={gen} className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-mono" style={{ color: 'var(--text-secondary)' }}>{gen}</span>
-                    <span className="text-[9px] font-mono font-bold" style={{ color: col }}>{data.accuracy}</span>
+                    <span className="text-[10px] font-bold text-slate-700">{gen}</span>
+                    <span className="text-[10px] font-black" style={{ color: col }}>{data.accuracy}</span>
                   </div>
                   <div className="w-full rounded-full overflow-hidden" style={{ height: 4, background: 'rgba(255,255,255,0.06)' }}>
                     <motion.div
@@ -93,17 +102,17 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
                       transition={{ duration: 0.8, ease: 'easeOut' }}
                     />
                   </div>
-                  <div className="text-[8px] font-mono" style={{ color: 'var(--text-muted)' }}>{data.notes}</div>
+                  <div className="text-[9px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">{data.notes}</div>
                 </div>
               );
             })}
           </div>
           <div
-            className="px-4 py-2 border-t flex items-start gap-1.5 text-[8px] font-mono leading-relaxed"
-            style={{ borderColor: 'var(--panel-border)', color: 'var(--text-muted)' }}
+            className="px-5 py-3 border-t flex items-start gap-2 text-[10px] font-medium leading-relaxed bg-slate-50/50"
+            style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
           >
-            <Info className="w-3 h-3 shrink-0 mt-0.5 text-yellow-500" />
-            Accuracy varies by compression, platform re-encoding, and steganographic post-processing.
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
+            Accuracy varies by compression, platform re-encoding, and steganographic post-processing artifacts.
           </div>
         </div>
       )}

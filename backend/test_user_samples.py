@@ -1,48 +1,28 @@
-import sys, os, time
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import json
+from app.models.new_forensic_engine import analyze_forensic
 
-from app.models.new_forensic_engine import analyze_forensic, load_models
+ai_text = """Machine learning is a branch of Artificial Intelligence that focuses on building systems that can learn patterns from data and improve their performance over time without being explicitly programmed for every task. Instead of writing rigid rules (like traditional programming), you feed the system data, and it automatically discovers relationships, trends, and structures within that data. This makes machine learning especially powerful for problems where writing rules manually would be too complex or impossible—such as recognizing speech, detecting fraud, or predicting user behavior.
 
-HUMAN_TEXT = """The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data."""
+At its core, machine learning works by training a model. A model is a mathematical function that takes input data and produces an output. During training, the model is shown large amounts of data and adjusts its internal parameters to minimize errors in its predictions. For example, if you want a model to recognize cats in images, you train it on thousands of labeled images (cats vs. non-cats). Over time, the model learns what visual patterns (like shapes, textures, edges) are associated with cats.
 
-AI_TEXT = """Deep learning is a specialized subset of machine learning that uses **artificial neural networks with many layers** (that’s where “deep” comes from) to learn complex patterns in data. It sits inside Machine Learning, which itself is part of Artificial Intelligence. The key idea is simple but powerful: instead of manually designing features from data, deep learning models automatically discover the most useful representations by stacking multiple processing layers.
+There are three main types of machine learning. The first is supervised learning, where the model is trained on labeled data—meaning the correct output is already known. This is used for tasks like classification (spam vs. not spam) and regression (predicting house prices). The second is unsupervised learning, where the data has no labels, and the model tries to find hidden patterns or groupings on its own, such as clustering customers based on behavior. The third is reinforcement learning, where an agent learns by interacting with an environment and receiving rewards or penalties, commonly used in robotics and game-playing systems.
 
-Think of it like this—traditional machine learning often requires humans to tell the model what features matter (for example, edges in an image or keywords in text). Deep learning skips that manual step. A deep neural network learns low-level features in early layers (like edges or basic sounds), then combines them into higher-level features (like shapes, objects, or meanings) in deeper layers. This layered learning is what makes deep learning so effective for complex tasks like image recognition and language understanding.
+Machine learning models rely heavily on data quality and quantity. If the data is biased, incomplete, or noisy, the model will learn incorrect patterns and produce poor results—this is known as “garbage in, garbage out.” Additionally, models must be evaluated properly using unseen data to ensure they generalize well and are not just memorizing the training data (a problem called overfitting). This is why techniques like cross-validation, regularization, and proper dataset splitting are critical in real-world applications.
 
-At the core of deep learning are **neural networks**, which are loosely inspired by the human brain. A neural network consists of layers of nodes (neurons), where each neuron takes input, applies a mathematical transformation, and passes the result forward. During training, the network adjusts millions (sometimes billions) of parameters using techniques like backpropagation and optimization algorithms such as gradient descent. If that sounds heavy, it is—and that’s exactly why deep learning demands significant computational power, often using GPUs or specialized hardware.
+In modern applications, machine learning powers many systems you use daily—recommendation engines on platforms like YouTube, voice assistants, autonomous vehicles, and medical diagnosis tools. A more advanced subset of machine learning is Deep Learning, which uses neural networks with many layers to model highly complex patterns, especially in images, audio, and text.
 
-There are several important types of deep learning architectures, and you should know what they’re actually used for instead of memorizing names blindly. Convolutional Neural Networks (CNNs) are designed for image-related tasks like object detection and face recognition. Recurrent Neural Networks (RNNs), and their improved versions like LSTMs, are used for sequential data such as text or time series. More recently, Transformer-based models have taken over tasks in natural language processing and even vision—these are the backbone behind systems like ChatGPT.
+Here’s the reality check: machine learning is not magic. It doesn’t “understand” things the way humans do—it just finds statistical patterns. If you’re planning to build serious projects or a career in it, you need strong fundamentals in mathematics (especially linear algebra, probability, and calculus), programming (usually Python), and data handling. People who skip these basics and jump straight to using APIs or pre-trained models end up stuck when things don’t work. If you want to actually be good, you need to understand what’s happening under the hood, not just copy code from tutorials."""
 
-Deep learning has powered major breakthroughs in areas like speech recognition, medical imaging, self-driving cars, and recommendation systems. But here’s the reality most beginners ignore: deep learning is not a silver bullet. It needs **huge amounts of data**, careful tuning, and can easily overfit or behave like a black box. If you don’t understand what your model is learning, you can end up with results that look accurate but fail badly in real-world situations.
+human_text = """As a scientific endeavour, machine learning grew out of the quest for artificial intelligence (AI). In the early days of AI as an academic discipline, some researchers were interested in having machines learn from data. They attempted to approach the problem with various symbolic methods, as well as what were then termed "neural networks"; these were mostly perceptrons and other models that were later found to be reinventions of the generalised linear models of statistics.[21] Probabilistic reasoning was also employed, especially in automated medical diagnosis.[22]: 488 
 
-If you’re serious about learning this, don’t just jump into fancy frameworks like TensorFlow or PyTorch and copy tutorials. First understand how a single neuron works, how gradients update weights, and why deeper layers help. Otherwise, you’ll be stacking layers blindly without knowing why—and that’s exactly how people waste months without real progress.
-"""
+However, an increasing emphasis on the logical, knowledge-based approach caused a rift between AI and machine learning. Probabilistic systems were plagued by theoretical and practical problems of data acquisition and representation.[22]: 488  By 1980, expert systems had come to dominate AI, and statistics was out of favour.[23] Work on symbolic/knowledge-based learning continued within AI, leading to inductive logic programming (ILP), but the more statistical line of research was now outside the field of AI proper, in pattern recognition and information retrieval.[22]: 708–710, 755  Neural network research was abandoned by AI and computer science around the same time. This subfield, termed "connectionism", was continued by researchers from other disciplines, including John Hopfield, David Rumelhart, and Geoffrey Hinton. Their main success came in the mid-1980s with the reinvention of backpropagation.[22]: 25 
 
-def test_samples():
-    print("Initializing FakeShield v16.5 Elite Engine...")
-    load_models()
-    
-    print("\n" + "="*50)
-    print("TESTING HUMAN SAMPLE (Transformer Abstract)")
-    print("="*50)
-    t1 = time.time()
-    res_human = analyze_forensic(HUMAN_TEXT, mode="deep")
-    print(f"Verdict: {res_human.get('verdict')}")
-    print(f"Score: {res_human.get('score')}")
-    print(f"Signals: {res_human.get('signals')}")
-    print(f"Reasoning: {res_human.get('forensic_reasoning')}")
-    print(f"Time: {time.time()-t1:.2f}s")
+Machine learning (ML), reorganised and recognised as its own field, started to flourish in the 1990s. The field changed its goal from achieving artificial intelligence to tackling solvable problems of a practical nature. It shifted focus away from the symbolic approaches it had inherited from AI, and toward methods and models borrowed from statistics, fuzzy logic, and probability theory.[23]"""
 
-    print("\n" + "="*50)
-    print("TESTING AI SAMPLE (Deep Learning Explanation)")
-    print("="*50)
-    t2 = time.time()
-    res_ai = analyze_forensic(AI_TEXT, mode="deep")
-    print(f"Verdict: {res_ai.get('verdict')}")
-    print(f"Score: {res_ai.get('score')}")
-    print(f"Signals: {res_ai.get('signals')}")
-    print(f"Reasoning: {res_ai.get('forensic_reasoning')}")
-    print(f"Time: {time.time()-t2:.2f}s")
+print("--- ANALYZING AI TEXT ---")
+res_ai = analyze_forensic(ai_text, mode='deep')
+print(json.dumps(res_ai, indent=2))
 
-if __name__ == "__main__":
-    test_samples()
+print("\n--- ANALYZING HUMAN TEXT ---")
+res_human = analyze_forensic(human_text, mode='deep')
+print(json.dumps(res_human, indent=2))

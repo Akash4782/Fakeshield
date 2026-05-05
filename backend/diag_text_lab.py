@@ -37,7 +37,7 @@ print("="*65 + "\n")
 # ── 1. Neural Detector ─────────────────────────────────────────────
 print(f"{INFO} [1/6] Testing Neural Transformer (DeBERTa/RoBERTa)...")
 try:
-    from app.models.text_classifier_ensemble import load_neural_detector, _neural_document_score
+    from app.models.text_classifier_ensemble import load_neural_detector, _multi_model_neural_vote as _neural_document_score
     load_neural_detector()
     import app.models.text_classifier_ensemble as tce
     if tce._neural_tok is None:

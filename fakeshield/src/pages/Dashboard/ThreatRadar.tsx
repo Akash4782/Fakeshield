@@ -15,81 +15,134 @@ const ThreatRadar: React.FC = () => {
     const parent = canvas.parentElement;
     if (!parent) return;
 
-    // Set canvas dimensions based on parent
-    const width = parent.clientWidth * 2;
-    const height = (parent.clientHeight || 220) * 2;
-    canvas.width = width;
-    canvas.height = height;
-    ctx.scale(2, 2);
+    const scale = window.devicePixelRatio || 1;
+    const width = parent.clientWidth;
+    const height = (parent.clientHeight || 220);
+    
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    ctx.scale(scale, scale);
 
-    const centerX = width / 4;
-    const centerY = height / 4;
-    const radius = 60;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) * 0.38;
 
     const drawRadar = () => {
-      // Clear
       ctx.clearRect(0, 0, width, height);
       
-      // Get CSS variables
       const style = getComputedStyle(document.body);
-      const accentRed = style.getPropertyValue('--accent-red').trim() || '#FF2D55';
-      const accentRedTrans = style.getPropertyValue('--accent-red-transparent').trim() || 'rgba(255, 45, 85, 0.2)';
-      const panelBorder = style.getPropertyValue('--panel-border').trim() || 'rgba(255, 255, 255, 0.05)';
+      const accentCyan = '#00E5CC';
+      const accentRed = '#ef4444';
+      const borderSubtle = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+      const textMuted = theme === 'dark' ? '#64748b' : '#94a3b8';
 
-      // Background circles
-      ctx.strokeStyle = panelBorder;
-      ctx.lineWidth = 1;
-      for (let i = 1; i <= 3; i++) {
+      // 1. Technical Grid (Human-engineered look)
+      ctx.strokeStyle = borderSubtle;
+      ctx.lineWidth = 0.5;
+      ctx.setLineDash([2, 2]); // Dashed lines for a technical look
+
+      // Circles with labels
+      ctx.font = '7px "JetBrains Mono", monospace';
+      ctx.fillStyle = textMuted;
+      ctx.textAlign = 'center';
+
+      for (let i = 1; i <= 4; i++) {
+        const r = (radius / 4) * i;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, (radius / 3) * i, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
         ctx.stroke();
+        
+        // Scale labels
+        ctx.fillText(`${i * 25}%`, centerX, centerY - r + 8);
       }
+      ctx.setLineDash([]); // Reset
 
-      // Axes (6 for Text Forensics)
-      const axes = 6;
-      ctx.beginPath();
-      for (let i = 0; i < axes; i++) {
-        const angle = (Math.PI * 2 / axes) * i - Math.PI / 2;
+      // Axes with crosshairs
+      const axesCount = 6;
+      for (let i = 0; i < axesCount; i++) {
+        const angle = (Math.PI * 2 / axesCount) * i - Math.PI / 2;
+        ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.lineTo(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius);
+        ctx.stroke();
+
+        // Axis ticks
+        for (let j = 1; j <= 4; j++) {
+            const tr = (radius / 4) * j;
+            const tx = centerX + Math.cos(angle) * tr;
+            const ty = centerY + Math.sin(angle) * tr;
+            ctx.beginPath();
+            ctx.moveTo(tx - 2, ty);
+            ctx.lineTo(tx + 2, ty);
+            ctx.stroke();
+        }
       }
-      ctx.stroke();
 
-      // Data Shape (Simulating real text forensics output)
-      // Indexes: 0=DeBERTa, 1=RoBERTa, 2=Perplexity, 3=Stylometric, 4=Consistency, 5=Repetition
-      const values = [0.85, 0.72, 0.94, 0.35, 0.88, 0.40]; 
+      // 2. Data Mapping (Precise Polygon)
+      const dataPoints = [0.85, 0.62, 0.45, 0.78, 0.34, 0.92]; // Specific forensic signals
       
+      // Shadow/Glow area
       ctx.beginPath();
-      ctx.fillStyle = accentRedTrans;
-      ctx.strokeStyle = accentRed;
-      ctx.lineWidth = 2;
-
-      for (let i = 0; i <= axes; i++) {
-        const val = values[i % axes];
-        const angle = (Math.PI * 2 / axes) * i - Math.PI / 2;
+      ctx.fillStyle = 'rgba(0, 229, 204, 0.1)';
+      for (let i = 0; i <= axesCount; i++) {
+        const val = dataPoints[i % axesCount];
+        const angle = (Math.PI * 2 / axesCount) * i - Math.PI / 2;
         const x = centerX + Math.cos(angle) * (radius * val);
         const y = centerY + Math.sin(angle) * (radius * val);
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.fill();
+
+      // Main line
+      ctx.beginPath();
+      ctx.strokeStyle = accentCyan;
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i <= axesCount; i++) {
+        const val = dataPoints[i % axesCount];
+        const angle = (Math.PI * 2 / axesCount) * i - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * (radius * val);
+        const y = centerY + Math.sin(angle) * (radius * val);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
       ctx.stroke();
 
-      // Glow effect
-      ctx.shadowBlur = theme === 'dark' ? 10 : 0;
-      ctx.shadowColor = accentRed;
+      // 3. Data Vertices (The "Programmer" touch)
+      dataPoints.forEach((val, i) => {
+        const angle = (Math.PI * 2 / axesCount) * i - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * (radius * val);
+        const y = centerY + Math.sin(angle) * (radius * val);
+
+        // Dot
+        ctx.beginPath();
+        ctx.fillStyle = val > 0.7 ? accentRed : accentCyan;
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Coordinate Label
+        ctx.font = 'bold 8px monospace';
+        ctx.fillStyle = val > 0.7 ? accentRed : textMuted;
+        ctx.fillText(val.toFixed(2), x + 10, y - 5);
+      });
+
+      // 4. Center Crosshair
+      ctx.strokeStyle = accentCyan;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 5, centerY); ctx.lineTo(centerX + 5, centerY);
+      ctx.moveTo(centerX, centerY - 5); ctx.lineTo(centerX, centerY + 5);
       ctx.stroke();
     };
 
     drawRadar();
 
-    // Handle resizing
     const handleResize = () => {
-      const newWidth = parent.clientWidth * 2;
-      const newHeight = (parent.clientHeight || 220) * 2;
-      canvas.width = newWidth;
-      canvas.height = newHeight;
-      ctx.scale(2, 2);
+      const newWidth = parent.clientWidth;
+      const newHeight = (parent.clientHeight || 220);
+      canvas.width = newWidth * scale;
+      canvas.height = newHeight * scale;
+      ctx.scale(scale, scale);
       drawRadar();
     };
 
@@ -97,17 +150,42 @@ const ThreatRadar: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [theme]);
 
+  const labels = [
+    { text: 'IMG-GRID', top: '2%', left: '50%', color: 'var(--text-heading)' },
+    { text: 'AUD-SPEC', top: '25%', left: '85%', color: 'var(--text-secondary)' },
+    { text: 'VID-MESH', top: '75%', left: '85%', color: 'var(--text-secondary)' },
+    { text: 'TXT-LLM', top: '95%', left: '50%', color: 'var(--text-heading)' },
+    { text: 'META-V04', top: '75%', left: '15%', color: 'var(--text-secondary)' },
+    { text: 'RPPG-SIG', top: '25%', left: '15%', color: 'var(--accent-red)' },
+  ];
+
   return (
     <div className="flex-1 relative flex items-center justify-center w-full h-full min-h-[220px]">
       <canvas ref={canvasRef} className="w-full h-full" />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span className="absolute top-2 text-[10px] text-[var(--accent-red)] font-bold">DEBERTA-V3</span>
-        <span className="absolute bottom-2 text-[10px] font-bold" style={{ color: 'var(--text-secondary)' }}>STYLOMETRICS</span>
-        <span className="absolute top-8 right-8 text-[10px] font-bold" style={{ color: 'var(--text-secondary)' }}>ROBERTA</span>
-        <span className="absolute top-8 left-8 text-[10px] text-[var(--accent-red)] font-bold">REPETITION</span>
-        <span className="absolute bottom-8 right-8 text-[10px] text-[var(--accent-red)] font-bold">PERPLEXITY</span>
-        <span className="absolute bottom-8 left-8 text-[10px] font-bold" style={{ color: 'var(--text-secondary)' }}>CONSISTENCY</span>
-      </div>
+      
+      {/* Technical Labels */}
+      {labels.map((label, idx) => (
+        <div 
+          key={idx}
+          className="absolute flex flex-col items-center pointer-events-none"
+          style={{ 
+            top: label.top, 
+            left: label.left, 
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <span className="text-[10px] font-mono font-bold tracking-widest whitespace-nowrap" style={{ color: label.color }}>
+            {label.text}
+          </span>
+          <div className="w-1 h-1 bg-[var(--panel-border)] rounded-full mt-1"></div>
+        </div>
+      ))}
+
+      {/* Decorative corner indicators */}
+      <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-[var(--panel-border)]"></div>
+      <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-[var(--panel-border)]"></div>
+      <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-[var(--panel-border)]"></div>
+      <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-[var(--panel-border)]"></div>
     </div>
   );
 };

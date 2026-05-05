@@ -64,10 +64,22 @@ class VideoTempoRaft:
         """Analyzes motion consistency across a sequence of frames"""
         if len(frames_bgr) < 2: return {"score": 0.5, "conf": 0.0}
         
+        # CPU OPTIMIZATION: Pre-process all frames in one batch
+        # This avoids redundant color conversion and resizing for shared frames in pairs
+        preprocessed_tensors = [self.preprocess(f) for f in frames_bgr]
+        
         flows = []
         magnitudes = []
-        for i in range(len(frames_bgr) - 1):
-            flow = self.compute_flow(frames_bgr[i], frames_bgr[i+1])
+        
+        # Batch inference loop
+        for i in range(len(preprocessed_tensors) - 1):
+            t1 = preprocessed_tensors[i]
+            t2 = preprocessed_tensors[i+1]
+            
+            with torch.no_grad():
+                predictions = self.model(t1, t2)
+                flow = predictions[-1].squeeze(0).permute(1, 2, 0).cpu().numpy()
+            
             flows.append(flow)
             mag = np.sqrt(flow[..., 0]**2 + flow[..., 1]**2)
             magnitudes.append(mag)
@@ -101,12 +113,12 @@ class VideoTempoRaft:
         _, buffer = cv2.imencode('.jpg', evidence_bgr)
         evidence_b64 = base64.b64encode(buffer).decode('utf-8')
         
-        # Score Logic (Consistency Auditor v10.0)
-        ai_prob = 0.3 # Lower baseline for more conservative audit
-        if pavr > 6.0: ai_prob += 0.2
-        if flow_entropy > 4.8: ai_prob += 0.2
-        if avg_residual > 5.0: ai_prob += 0.2
-        if np.std(mag_vars) > 4.0: ai_prob += 0.1
+        # Score Logic (Consistency Auditor v11.0 - Refined)
+        ai_prob = 0.25 
+        if pavr > 5.0: ai_prob += 0.25
+        if flow_entropy > 4.5: ai_prob += 0.2
+        if avg_residual > 4.0: ai_prob += 0.2
+        if np.std(mag_vars) > 3.0: ai_prob += 0.1
         
         ai_prob = min(max(ai_prob, 0.01), 0.99)
         

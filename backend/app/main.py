@@ -2,7 +2,6 @@ import os
 import sys
 import io
 import warnings
-import logging
 
 # 1. Environment & Protobuf Fixes (Must be at the absolute top)
 try:
@@ -16,7 +15,6 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["PYTHONUTF8"] = "1"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
-import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*The name tf.losses.*")
 warnings.filterwarnings("ignore", message=".*use_fast is unset.*")
@@ -54,11 +52,10 @@ def _block_torchaudio():
         _m.__package__ = _sub.rsplit(".", 1)[0]
         sys.modules[_sub] = _m
 
+# DLL Bypass: Attempt to import torchaudio. If it fails with a DLL error, apply the block.
 try:
     import torchaudio
-    # If torchaudio imports fine, no fix needed
 except OSError:
-    # Broken DLL — apply the nuclear block
     _block_torchaudio()
 
 # Patch transformers availability checks so AST uses numpy mel-filterbank path
@@ -74,8 +71,20 @@ except Exception:
 
 # 2. Force UTF-8 encoding for Windows terminals
 if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except Exception:
+        pass
+
+def robust_print(msg, **kwargs):
+    """Prints message while handling potential UnicodeEncodeErrors on legacy terminals."""
+    try:
+        print(msg, **kwargs)
+    except UnicodeEncodeError:
+        # Fallback: strip non-ascii
+        clean_msg = msg.encode('ascii', 'ignore').decode('ascii')
+        print(clean_msg, **kwargs)
 
 # 3. Suppress Heavy Logging from AI Libraries
 import transformers
@@ -85,10 +94,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+import importlib
 import importlib.metadata
-
-# Monkeypatch for corrupted torch metadata in anaconda environment
-import importlib.metadata
+# importlib.metadata (already handled)
 import sys
 
 def _patch_metadata(mod):
@@ -126,6 +134,8 @@ from app.routers.text_router import router as text_router
 from app.routers.image_router import router as image_router
 from app.routers.video_router import router as video_router
 from app.routers.audio_router import router as audio_router
+from app.routers.auth_router import router as auth_router
+from app.routers.dashboard_router import router as dashboard_router
 # Forensic warm-up functions moved to background task to prevent startup hangs
 # (Imports moved inside the task below)
 
@@ -139,12 +149,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",   # Vite default
-        "http://127.0.0.1:5173",   # Alternative local IP
-        "http://localhost:5174",   # Alternative Vite
-    ],
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -153,58 +159,63 @@ app.include_router(text_router)
 app.include_router(image_router)
 app.include_router(video_router, prefix="/api/v1")
 app.include_router(audio_router, prefix="/api/v1")
+app.include_router(auth_router)
+app.include_router(dashboard_router)
 
 import asyncio
 
 @app.on_event("startup")
 async def startup_event():
-    print("[START] Initializing FakeShield Engine (Background Warmup Enabled)...", flush=True)
+    from app.database import init_db
+    try:
+        await init_db()
+    except Exception as e:
+        robust_print(f"[DB] Database initialization failed: {e}")
+        robust_print("[DB] Proceeding in OFFLINE mode (history and users will be unavailable).")
+    
+    robust_print("[START] Initializing FakeShield Engine (Background Warmup Enabled)...", flush=True)
     async def run_universal_warmup():
         """Pre-loads all forensic labs in background to ensure zero-latency navigation."""
         if os.environ.get("FAKESHIELD_SKIP_WARMUP") == "1":
+            robust_print("[WARMUP] Skipped by environment flag.")
             return
             
         # 1. Text Lab (v16 Elite)
         try:
             from app.models.new_forensic_engine import load_models as load_text_models
-            print("[WARMUP] [1/4] Pre-loading Text Forensic Suite (v16 Elite)...", flush=True)
+            robust_print("[WARMUP] [1/3] Pre-loading Text Forensic Suite...", flush=True)
             await asyncio.to_thread(load_text_models)
-            print("[WARMUP] Text Lab ready.", flush=True)
+            robust_print("[WARMUP] Text Lab ready.", flush=True)
         except Exception as e:
-            print(f"[WARMUP] Text load warning: {e}")
-
-        # 2. Image Lab (v8.0 Multi-Signal)
+            robust_print(f"[WARMUP] Text load error: {e}")
+            
+        # 2. Image Lab (DINOv2 + ViT Ensemble)
         try:
             from app.models.image_detector import load_image_models
-            print("[WARMUP] [2/4] Pre-loading Image Forensic Suite (v8.0 Multi-Signal)...", flush=True)
+            robust_print("[WARMUP] [2/3] Pre-loading Image Forensic Suite...", flush=True)
             await asyncio.to_thread(load_image_models)
-            print("[WARMUP] Image Lab ready.", flush=True)
+            robust_print("[WARMUP] Image Lab ready.", flush=True)
         except Exception as e:
-            print(f"[WARMUP] Image load warning: {e}")
-
-        # 3. Audio Lab (v3.2 PRO)
+            robust_print(f"[WARMUP] Image load error: {e}")
+ 
+        # 3. Audio Lab (WavLM ITW)
         try:
-            from app.models.audio.audio_warmup import warm_up_audio_models
-            print("[WARMUP] [3/4] Pre-loading Audio Forensic Suite (v3.2 PRO)...", flush=True)
-            await asyncio.to_thread(warm_up_audio_models)
-            print("[WARMUP] Audio Lab ready.", flush=True)
+            from app.models.audio.signal_wavlm import _load_model as load_wavlm
+            robust_print("[WARMUP] [3/3] Pre-loading Audio Forensic Suite...", flush=True)
+            await asyncio.to_thread(load_wavlm)
+            robust_print("[WARMUP] Audio Lab ready.", flush=True)
         except Exception as e:
-            print(f"[WARMUP] Audio load warning: {e}")
+            robust_print(f"[WARMUP] Audio load error: {e}")
 
-        # 4. Video Lab (v11.0 Consistency Engine)
-        # DEFERRED: Video models are extremely memory intensive (>8GB RAM). 
-        # We allow them to load on-demand (Lazy) to prevent startup OOM crashes.
-        # try:
-        #     from app.services.video_pipeline import get_video_module
-        #     print("[WARMUP] [4/4] Video Forensic Suite deferred (Lazy Loading Enabled)...", flush=True)
-        # except Exception as e:
-        #     print(f"[WARMUP] Video deferral notice: {e}")
+        robust_print("="*50)
+        robust_print("--- [ALL ENGINES WARMED UP] ---")
+        robust_print("="*50)
 
     # Launch universal warmup in background
     asyncio.create_task(run_universal_warmup())
-    print("-" * 50, flush=True)
-    print("FakeShield API is now ONLINE and listening on port 8001.", flush=True)
-    print("-" * 50, flush=True)
+    robust_print("-" * 50, flush=True)
+    robust_print("FakeShield API is now ONLINE and listening on port 8001.", flush=True)
+    robust_print("-" * 50, flush=True)
 
 @app.get("/")
 def root():

@@ -42,7 +42,7 @@ const WaveformHeatmap: React.FC<WaveformHeatmapProps> = ({ timeline, duration, o
   return (
     <div className="w-full mt-4">
       {/* Time ruler */}
-      <div className="flex justify-between text-[10px] font-mono text-[var(--text-muted)] mb-2 px-1">
+      <div className="flex justify-between text-xs font-medium text-[var(--text-muted)] mb-2 px-1">
         <span>0.0s</span>
         {duration > 0 && <span className="absolute left-1/2 -translate-x-1/2">{(duration / 2).toFixed(1)}s</span>}
         <span>{duration.toFixed(1)}s</span>
@@ -92,7 +92,7 @@ const WaveformHeatmap: React.FC<WaveformHeatmapProps> = ({ timeline, duration, o
               {/* Hover tooltip */}
               {isHovered && (
                 <div
-                  className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[var(--bg-primary)] border border-[var(--panel-border)] rounded-lg px-2 py-1.5 text-[9px] font-mono whitespace-nowrap z-50 pointer-events-none"
+                  className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[var(--bg-primary)] border border-[var(--panel-border)] rounded-lg px-2 py-1.5 text-xs font-medium whitespace-nowrap z-50 pointer-events-none"
                   style={{ color }}
                 >
                   <div className="font-bold">{seg.ai_score}% AI</div>
@@ -116,8 +116,8 @@ const WaveformHeatmap: React.FC<WaveformHeatmapProps> = ({ timeline, duration, o
           { label: 'Synthetic', color: 'var(--accent-red)' },
         ].map(({ label, color }) => (
           <div key={label} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm" style={{ background: color }} />
-            <span className="text-[10px] font-mono uppercase tracking-wider opacity-70">{label}</span>
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">{label}</span>
           </div>
         ))}
       </div>

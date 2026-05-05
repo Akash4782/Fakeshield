@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useTheme } from '../hooks/useTheme';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../hooks/useTheme';
+import { useAuth } from '../hooks/useAuth.tsx';
 import logo from '../assets/logo.png';
 
 const SunIcon = () => (
@@ -26,6 +27,7 @@ const MoonIcon = () => (
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav
@@ -62,39 +64,24 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            color: 'var(--text-secondary)',
-          }}
+          className="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--text-secondary)]"
         >
-          <a href="#labs" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseOver={e => (e.currentTarget.style.color = 'var(--text-heading)')}
-            onMouseOut={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+          <a href="/#features" className="hover:text-[var(--text-heading)] transition-colors">
             Forensic Labs
           </a>
-          <a href="#threat-radar" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseOver={e => (e.currentTarget.style.color = 'var(--text-heading)')}
-            onMouseOut={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+          <a href="/#threat-radar" className="hover:text-[var(--text-heading)] transition-colors">
             Threat Radar
           </a>
-          <a href="#features" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseOver={e => (e.currentTarget.style.color = 'var(--text-heading)')}
-            onMouseOut={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+          <a href="/#how-it-works" className="hover:text-[var(--text-heading)] transition-colors">
             Features
           </a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseOver={e => (e.currentTarget.style.color = 'var(--text-heading)')}
-            onMouseOut={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+          <a href="/#enterprise" className="hover:text-[var(--text-heading)] transition-colors">
             Enterprise
           </a>
         </div>
 
         {/* Right side: Theme toggle + CTA Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="flex items-center gap-4 md:gap-6">
           {/* Theme Toggle */}
           <button
             className="theme-toggle"
@@ -106,32 +93,13 @@ const Navbar = () => {
 
           <Link
             to="/login"
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: 'var(--text-secondary)',
-              textDecoration: 'none',
-              padding: '0 1rem',
-              transition: 'color 0.2s',
-            }}
-            onMouseOver={e => (e.currentTarget.style.color = 'var(--text-heading)')}
-            onMouseOut={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
+            className="hidden sm:block text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors px-2"
           >
             Log in
           </Link>
           <Link
             to="/signup"
-            className="btn-glow"
-            style={{
-              background: 'var(--cta-btn-bg)',
-              color: 'var(--cta-btn-color)',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              padding: '0.625rem 1.5rem',
-              borderRadius: '9999px',
-              textDecoration: 'none',
-              transition: 'all 0.3s',
-            }}
+            className="btn-glow bg-[var(--cta-btn-bg)] text-[var(--cta-btn-color)] text-xs md:text-sm font-bold py-2 md:py-2.5 px-4 md:px-6 rounded-full transition-all"
           >
             Get Started
           </Link>
@@ -139,18 +107,10 @@ const Navbar = () => {
           {/* Mobile Hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            style={{
-              display: 'none',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '0.25rem',
-            }}
-            className="mobile-menu-btn"
+            className="md:hidden p-2 text-[var(--text-secondary)]"
           >
             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              <path d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
             </svg>
           </button>
         </div>
@@ -158,29 +118,21 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div
-          style={{
-            background: 'var(--glass-bg)',
-            borderTop: `1px solid var(--glass-border)`,
-            padding: '1rem 1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-          }}
-        >
-          {['Forensic Labs', 'Threat Radar', 'Features', 'Enterprise'].map(item => (
+        <div className="md:hidden bg-[var(--glass-bg)] border-t border-[var(--glass-border)] px-6 py-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+          {[
+            { label: 'Forensic Labs', href: '/#features' },
+            { label: 'Threat Radar', href: '/#threat-radar' },
+            { label: 'Features', href: '/#how-it-works' },
+            { label: 'Enterprise', href: '/#enterprise' },
+            { label: 'Log in', href: '/login' }
+          ].map(item => (
             <a
-              key={item}
-              href="#"
-              style={{
-                color: 'var(--text-secondary)',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                padding: '0.5rem 0',
-              }}
+              key={item.label}
+              href={item.href}
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] transition-colors py-2"
             >
-              {item}
+              {item.label}
             </a>
           ))}
         </div>

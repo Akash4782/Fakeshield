@@ -34,28 +34,29 @@ class VideoClipModule:
 
     @torch.no_grad()
     def analyze_frames(self, pil_frames: list) -> list:
-        """Returns per-frame AI probability scores using ensemble of CLIP+SigLIP"""
+        """Returns per-frame AI probability scores using ensemble of CLIP+SigLIP (Batch Optimized)"""
         if not pil_frames: return []
         
         all_prompts = REAL_PROMPTS + AI_PROMPTS
-        results = []
         
-        for frame in pil_frames:
-            # 1. CLIP Inference
-            clip_inputs = self.clip_processor(text=all_prompts, images=frame, return_tensors="pt", padding=True).to(DEVICE)
-            clip_outputs = self.clip_model(**clip_inputs)
-            clip_probs = clip_outputs.logits_per_image.softmax(dim=1)[0].cpu().numpy()
-            
-            # 2. SigLIP Inference
-            siglip_inputs = self.siglip_processor(text=all_prompts, images=frame, return_tensors="pt", padding=True).to(DEVICE)
-            siglip_outputs = self.siglip_model(**siglip_inputs)
-            siglip_probs = siglip_outputs.logits_per_image.softmax(dim=1)[0].cpu().numpy()
-            
+        # 1. CLIP Batch Inference
+        clip_inputs = self.clip_processor(text=all_prompts, images=pil_frames, return_tensors="pt", padding=True).to(DEVICE)
+        clip_outputs = self.clip_model(**clip_inputs)
+        # logits_per_image is [num_frames, num_prompts]
+        clip_probs = clip_outputs.logits_per_image.softmax(dim=1).cpu().numpy()
+        
+        # 2. SigLIP Batch Inference
+        siglip_inputs = self.siglip_processor(text=all_prompts, images=pil_frames, return_tensors="pt", padding=True).to(DEVICE)
+        siglip_outputs = self.siglip_model(**siglip_inputs)
+        siglip_probs = siglip_outputs.logits_per_image.softmax(dim=1).cpu().numpy()
+        
+        results = []
+        for i in range(len(pil_frames)):
             # Aggregate AI probability (sum of AI prompts / total)
-            clip_ai = clip_probs[len(REAL_PROMPTS):].sum()
-            siglip_ai = siglip_probs[len(REAL_PROMPTS):].sum()
+            clip_ai = clip_probs[i][len(REAL_PROMPTS):].sum()
+            siglip_ai = siglip_probs[i][len(REAL_PROMPTS):].sum()
             
-            # Ensemble (Mean)
+            # Ensemble (Mean - SigLIP weighted higher for better accuracy)
             ensemble_ai = (clip_ai * 0.4 + siglip_ai * 0.6)
             results.append(float(ensemble_ai))
             

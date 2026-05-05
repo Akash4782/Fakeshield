@@ -10,10 +10,11 @@ class SemanticDriftEngine:
     AI writing follows a geodesic (smooth) path; human reasoning has associative jumps.
     """
     def __init__(self, device: str = "cpu"):
-        self.device = device if torch.cuda.is_available() or device == "cpu" else "cuda"
+        self.device = "cpu"
         try:
             # Upgrade to mpnet-base-v2 as per v10 requirement
-            self.model = SentenceTransformer("all-mpnet-base-v2", device=self.device)
+            # Explicitly force CPU to avoid meta-tensor issues
+            self.model = SentenceTransformer("all-mpnet-base-v2", device="cpu")
             self.enabled = True
         except Exception as e:
             print(f"[SemanticDrift] Error loading mpnet: {e}")

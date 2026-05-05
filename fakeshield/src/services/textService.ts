@@ -1,14 +1,11 @@
-const API_BASE = "http://localhost:8001/api/v1/text";
+import { API_BASE_URL } from '../config';
+const API_BASE = `${API_BASE_URL}/text`;
 
 export interface SignalScores {
-  binoculars:     number;
-  classifier:     number;
-  stylometry:     number;
-  retrieval:      number;
-  statistical:    number;
-  lexical:        number;
-  human_shield:   number;
-  reasoning:      string;
+  neural:       number;
+  statistical:  number;
+  rhythm:       number;
+  flow:         number;
 }
 
 export interface StructuralDetails {
@@ -62,13 +59,17 @@ export interface TextResult {
 // ── Async scan with polling ───────────────────────────────────
 export async function scanTextAsync(
   text: string,
+  token: string | null = null,
   onProgress?: (msg: string) => void
 ): Promise<TextResult> {
 
   onProgress?.("Initializing Forensic Engines...");
   const submitRes = await fetch(`${API_BASE}/analyze/async`, {
     method:  "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    },
     body:    JSON.stringify({
       text,
       include_highlights: true,
@@ -101,8 +102,25 @@ export async function scanTextAsync(
         onProgress?.(messages[msgIdx % messages.length]);
         msgIdx++;
 
-        const statusRes = await fetch(`${API_BASE}/status/${job_id}`);
-        const status    = await statusRes.json();
+        let statusRes;
+        let retries = 3;
+        while (retries > 0) {
+          try {
+            statusRes = await fetch(`${API_BASE}/status/${job_id}`, {
+              headers: {
+                ...(token ? { "Authorization": `Bearer ${token}` } : {})
+              }
+            });
+            if (statusRes.ok) break;
+            throw new Error(`HTTP ${statusRes.status}`);
+          } catch (e) {
+            retries--;
+            if (retries === 0) throw e;
+            await new Promise(r => setTimeout(r, 1000));
+          }
+        }
+
+        const status = await statusRes.json();
 
         if (status.status === "complete") {
           clearInterval(interval);
@@ -119,16 +137,19 @@ export async function scanTextAsync(
 
     setTimeout(() => {
       clearInterval(interval);
-      reject(new Error("Analysis timed out after 90 seconds (Deep Scan requires more time)"));
-    }, 95000);
+      reject(new Error("Analysis timed out after 5 minutes. Initializing heavy AI models locally can take some time. Please try again."));
+    }, 300000);
   });
 }
 
 // ── Direct sync scan (for backward compatibility) ─────────────
-export async function scanTextSync(text: string): Promise<TextResult> {
+export async function scanTextSync(text: string, token: string | null = null): Promise<TextResult> {
   const res = await fetch(`${API_BASE}/analyze`, {
     method:  "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    },
     body:    JSON.stringify({
       text,
       include_highlights: true,
@@ -141,17 +162,29 @@ export async function scanTextSync(text: string): Promise<TextResult> {
 }
 
 // ── PDF Forensic Report Export ────────────────────────────────
-export async function downloadForensicReport(scanId: string): Promise<void> {
-  const url = `${API_BASE}/report/${scanId}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Could not generate report");
+export async function downloadForensicReport(scanId: string, token: string | null = null): Promise<void> {
+  const url = `${API_BASE}/report/${scanId}.pdf`;
   
-  const blob = await response.blob();
-  const downloadUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = downloadUrl;
-  link.setAttribute('download', `fakeshield_${scanId}.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  try {
+    const res = await fetch(url, {
+      headers: {
+        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!res.ok) throw new Error("Failed to download report");
+
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', `FakeShield_Report_${scanId.substring(0, 8)}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    console.error("Download error:", err);
+    throw err;
+  }
 }

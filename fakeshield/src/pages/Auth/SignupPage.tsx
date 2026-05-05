@@ -1,10 +1,98 @@
-import React from 'react';
-import { User, Mail, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { User, Mail, Lock, ShieldCheck, ArrowRight, Loader } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useTheme } from '../../hooks/useTheme';
+import { useAuth } from '../../hooks/useAuth.tsx';
+import { API_BASE_URL } from '../../config';
 
 const SignupPage: React.FC = () => {
   const { theme } = useTheme();
+  const { login } = useAuth();
+   const navigate = useNavigate();
+   const location = useLocation();
+   const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '', confirmPassword: '' });
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+
+    if (formData.password !== formData.confirmPassword) {
+      return setError('Passwords do not match');
+    }
+
+    setIsLoading(true);
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Signup failed');
+
+      setSuccessMessage('Account created successfully! Redirecting to login...');
+      
+      // Delay redirection to allow user to see the message
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+        });
+        const googleUser = await res.json();
+        
+        const response = await fetch(`${API_BASE_URL}/auth/oauth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: 'Google',
+            email: googleUser.email,
+            name: googleUser.name,
+            profile_pic: googleUser.picture
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error('OAuth login failed');
+        
+        login(data.access_token, data.user);
+        navigate(from);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => setError('Google Login Failed')
+  });
+
+  const handleGitHubLogin = () => {
+    const GITHUB_CLIENT_ID = "Ov23li64VlPrSj1cR3kY"; 
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`;
+  };
 
   return (
     <div className="min-h-screen flex items-start justify-center font-sans overflow-y-auto pt-[0vh] pb-20 p-4" style={{ background: 'var(--page-bg)', color: 'var(--text-primary)' }}>
@@ -32,7 +120,9 @@ const SignupPage: React.FC = () => {
           <div className="h-1 w-12 bg-gradient-to-r from-[#00E5CC] to-[var(--accent-purple)] mt-3 md:mt-4 rounded-full"></div>
         </div>
 
-        <form className="space-y-2.5 md:space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-2.5 md:space-y-4" onSubmit={handleSignup}>
+          {error && <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">{error}</div>}
+          {successMessage && <div className="text-emerald-500 text-sm text-center bg-emerald-500/10 py-2 rounded-lg border border-emerald-500/20">{successMessage}</div>}
           {/* Full Name Input */}
           <div className="relative group overflow-hidden">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--text-muted)] group-focus-within:text-[#00E5CC] transition-colors">
@@ -40,7 +130,10 @@ const SignupPage: React.FC = () => {
             </div>
             <input
               type="text"
+              required
               placeholder="Full Name"
+              value={formData.fullName}
+              onChange={(e) => setFormData({...formData, fullName: e.target.value})}
               className="w-full bg-opacity-50 border-none rounded-2xl py-3 md:py-3.5 pl-11 pr-4 outline-none transition-all shadow-sm hover:shadow-md"
               style={{
                 background: 'var(--bg-secondary)',
@@ -57,7 +150,10 @@ const SignupPage: React.FC = () => {
             </div>
             <input
               type="email"
+              required
               placeholder="Email Address"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
               className="w-full bg-opacity-50 border-none rounded-2xl py-3.5 pl-11 pr-4 outline-none transition-all shadow-sm hover:shadow-md"
               style={{
                 background: 'var(--bg-secondary)',
@@ -74,7 +170,10 @@ const SignupPage: React.FC = () => {
             </div>
             <input
               type="password"
+              required
               placeholder="Create Password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
               className="w-full bg-opacity-50 border-none rounded-2xl py-3.5 pl-11 pr-4 outline-none transition-all shadow-sm hover:shadow-md"
               style={{
                 background: 'var(--bg-secondary)',
@@ -91,7 +190,10 @@ const SignupPage: React.FC = () => {
             </div>
             <input
               type="password"
+              required
               placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
               className="w-full bg-opacity-50 border-none rounded-2xl py-3.5 pl-11 pr-4 outline-none transition-all shadow-sm hover:shadow-md"
               style={{
                 background: 'var(--bg-secondary)',
@@ -104,10 +206,11 @@ const SignupPage: React.FC = () => {
           {/* Signup Button */}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#00E5CC] to-[var(--accent-purple)] text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group mt-2 border-none"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-[#00E5CC] to-[var(--accent-purple)] text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group mt-2 border-none disabled:opacity-70 disabled:hover:translate-y-0"
           >
-            Create Account
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            {isLoading ? <Loader size={18} className="animate-spin" /> : 'Create Account'}
+            {!isLoading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
           </button>
 
           {/* Divider */}
@@ -122,7 +225,7 @@ const SignupPage: React.FC = () => {
 
           {/* Social Logins */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border transition-all group" style={{ borderColor: 'var(--panel-border)', background: 'var(--btn-secondary-bg)' }}>
+            <button type="button" onClick={() => handleGoogleLogin()} className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border transition-all group hover:bg-slate-800" style={{ borderColor: 'var(--panel-border)', background: 'var(--btn-secondary-bg)' }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -131,7 +234,7 @@ const SignupPage: React.FC = () => {
               </svg>
               <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>Google</span>
             </button>
-            <button className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border transition-all group" style={{ borderColor: 'var(--panel-border)', background: 'var(--btn-secondary-bg)' }}>
+            <button type="button" onClick={handleGitHubLogin} className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border transition-all group hover:bg-slate-800" style={{ borderColor: 'var(--panel-border)', background: 'var(--btn-secondary-bg)' }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-primary)' }}>
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
               </svg>

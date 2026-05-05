@@ -1,9 +1,12 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel
+from app.dependencies import verify_paid_tier
+from app.routers.dashboard_router import save_scan_internal
 # Model import moved inside endpoint for lazy loading
 import base64
 import io
 import asyncio
+import uuid
 from typing import Dict, Any
 
 class ImageAnalyzeRequest(BaseModel):
@@ -14,7 +17,7 @@ router = APIRouter(prefix="/api/v1/image", tags=["Image Lab"])
 
 
 @router.post("/analyze")
-async def analyze_image_endpoint(request: ImageAnalyzeRequest):
+async def analyze_image_endpoint(request: ImageAnalyzeRequest, user: dict = Depends(verify_paid_tier)):
     """
     Analyzes an image using the v2026 Forensic Truth Pipeline.
     Integrates RIGID (DINOv2), C2PA provenance, FFT, ELA, EXIF, and Multi-Neural Ensembles.
@@ -71,10 +74,33 @@ async def analyze_image_endpoint(request: ImageAnalyzeRequest):
 
         # Run frontend-ready Image Forensics pipeline
         try:
-            # analyze_image is synchronous, we can run it directly or via asyncio
-            result = analyze_image(image_bytes, include_gradcam=request.include_gradcam)
+            # analyze_image is synchronous and heavy, run it in a thread to keep the event loop alive
+            result = await asyncio.to_thread(analyze_image, image_bytes, include_gradcam=request.include_gradcam)
             if "error" in result:
                 raise ValueError(result["error"])
+            
+            # Persist to MongoDB
+            try:
+                verdict = "AI-Generated" if result.get("verdict") == 'AI GENERATED' else "Authentic" if result.get("verdict") == 'LIKELY HUMAN' else "Suspicious"
+                prob = result.get("ai_probability", 0)
+                await save_scan_internal(
+                    email=user["email"],
+                    lab="image",
+                    filename="uploaded_image.png",
+                    verdict=verdict,
+                    confidence=prob,
+                    threat_level="critical" if prob >= 0.72 else "high" if prob >= 0.5 else "low",
+                    scan_id=f"img-{uuid.uuid4().hex[:8]}",
+                    extra={
+                        "verdict_raw": result.get("verdict"),
+                        "ai_probability": prob,
+                        "confidence": result.get("confidence")
+                    },
+                    full_result=result
+                )
+            except Exception as db_err:
+                print(f"Failed to persist image scan to DB: {db_err}")
+
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
         except Exception as e:

@@ -63,7 +63,7 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-display font-bold text-[var(--text-heading)]">Forensic Report</h2>
-          <p className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-widest mt-1">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mt-1">
             Case ID: {caseId}
           </p>
         </div>
@@ -121,18 +121,18 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
         {/* Fusion rule badge */}
         {result.fusion_rule && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-primary)]">
-            <span className="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+            <span className="text-xs font-medium text-[var(--text-secondary)]">
               Decision Rule:
             </span>
-            <span className="text-[9px] font-mono font-bold text-[var(--accent-blue)]">
-              {result.fusion_rule.replace(/_/g, ' ')}
+            <span className="text-xs font-semibold text-[var(--accent-blue)] capitalize">
+              {result.fusion_rule.replace(/_/g, ' ').toLowerCase()}
             </span>
           </div>
         )}
 
         {/* Action Recommendation */}
-        <div className="p-4 rounded-xl border border-[rgba(0,229,204,0.3)] bg-[rgba(0,229,204,0.05)]">
-          <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#00E5CC] mb-2 flex items-center">
+        <div className="p-4 rounded-xl border border-[var(--accent-green-border)] bg-[var(--accent-green-transparent)]">
+          <h5 className="text-xs font-semibold text-[var(--accent-green)] mb-2 flex items-center">
             <Shield className="w-3 h-3 mr-2" />
             Counter-Measures
           </h5>
@@ -153,8 +153,8 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
               key={label}
               className="p-3 rounded-lg border border-[var(--panel-border)] bg-[var(--bg-primary)] flex flex-col"
             >
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)] mb-1">{label}</span>
-              <span className="text-sm font-bold font-mono text-[var(--accent-blue)]">{value}</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)] mb-1">{label}</span>
+              <span className="text-sm font-semibold text-[var(--accent-blue)]">{value}</span>
             </div>
           ))}
         </div>
@@ -162,8 +162,8 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
         {/* Primary Reasons */}
         {result.primary_reasons.length > 0 && (
           <div>
-            <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)] mb-4 flex items-center">
-              <Shield className="w-3 h-3 mr-2 text-[var(--accent-blue)]" />
+            <h5 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center">
+              <Shield className="w-4 h-4 mr-2 text-[var(--accent-blue)]" />
               Primary Evidence Indicators
             </h5>
             <div className="space-y-3">
@@ -179,12 +179,12 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
                     >
                       {reason.signal} Analysis
                     </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--panel-border)] text-[var(--text-muted)]">
+                    <span className="text-xs font-medium px-2 py-1 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--panel-border)]">
                       {Math.round(reason.score * 100)}% match
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">{reason.message}</p>
-                  <p className="text-xs text-[var(--text-muted)] font-mono leading-relaxed">{reason.evidence}</p>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{reason.evidence}</p>
                 </div>
               ))}
             </div>
@@ -192,7 +192,7 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
         )}
 
         {result.primary_reasons.length === 0 && (
-          <p className="text-xs text-[var(--text-muted)] italic font-mono px-2">
+          <p className="text-xs text-[var(--text-muted)] italic px-2">
             No primary synthesis indicators detected.
           </p>
         )}
@@ -200,8 +200,8 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
         {/* Supporting Reasons */}
         {result.supporting_reasons.length > 0 && (
           <div>
-            <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)] mb-4 flex items-center">
-              <Info className="w-3 h-3 mr-2" style={{ color: '#00E5CC' }} />
+            <h5 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center">
+              <Info className="w-4 h-4 mr-2 text-[var(--accent-green)]" />
               Supporting Forensic Signals
             </h5>
             <div className="space-y-2">
@@ -211,7 +211,7 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
                   className="p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--panel-border)]/50 opacity-80 hover:opacity-100 transition-all"
                 >
                   <p className="text-xs font-semibold text-[var(--text-secondary)]">{reason.message}</p>
-                  <p className="text-[10px] text-[var(--text-muted)] font-mono mt-1 italic">{reason.evidence}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1 italic">{reason.evidence}</p>
                 </div>
               ))}
             </div>
@@ -221,8 +221,8 @@ const AudioReportPanel: React.FC<AudioReportPanelProps> = ({ result, onReset }) 
         {/* Exonerating Factors */}
         {result.exonerating_factors.length > 0 && (
           <div className="pb-6">
-            <h5 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-muted)] mb-4 flex items-center">
-              <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
+            <h5 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
               Human Authenticity Markers
             </h5>
             <ul className="space-y-1">

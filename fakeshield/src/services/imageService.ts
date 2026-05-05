@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8001/api/v1/image";
+import { API_BASE_URL } from '../config';
+const API_BASE = `${API_BASE_URL}/image`;
 
 export interface ImageAnalysisResponse {
   // Core verdict
@@ -45,11 +46,15 @@ export interface ImageAnalysisResponse {
 
 export async function analyzeImage(
   imageBase64: string,
+  token: string | null = null,
   includeGradcam: boolean = true
 ): Promise<{ status: string; data: ImageAnalysisResponse }> {
   const response = await fetch(`${API_BASE}/analyze`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    },
     body: JSON.stringify({
       image: imageBase64,
       include_gradcam: includeGradcam,
