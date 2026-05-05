@@ -1,9 +1,13 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+import os
 import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 
 async def check_db_health():
-    MONGO_URL = "mongodb+srv://fakeshield_admin:fakeshield123@cluster0.uxrdypt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    print(f"Connecting to: {MONGO_URL}")
+    MONGO_URL = os.getenv("MONGO_URL")
+    if not MONGO_URL:
+        print("Error: MONGO_URL environment variable not set.")
+        return
+    print("Connecting to MongoDB...")
     client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=10000, tlsAllowInvalidCertificates=True)
     try:
         # Check if we can reach the server

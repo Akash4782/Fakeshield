@@ -1,10 +1,14 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+import os
 import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timezone
 
 async def test_db_persistence():
-    MONGO_URL = "mongodb+srv://fakeshield_admin:fakeshield123@cluster0.uxrdypt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    print(f"Testing DB persistence at: {MONGO_URL}")
+    MONGO_URL = os.getenv("MONGO_URL")
+    if not MONGO_URL:
+        print("Error: MONGO_URL environment variable not set.")
+        return
+    print("Testing DB persistence...")
     
     # Use short timeout to fail fast if unreachable
     client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=10000)

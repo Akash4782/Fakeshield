@@ -3,7 +3,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 
 # Load from environment variable for production readiness
-MONGO_URL = os.getenv("MONGO_URL", "mongodb+srv://fakeshield_admin:fakeshield123@cluster0.uxrdypt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+# Load from environment variable for security
+MONGO_URL = os.getenv("MONGO_URL")
 
 class DummyCollection:
     """Mock collection to prevent crashes when MongoDB is unreachable."""
