@@ -380,4 +380,3 @@ const TextLabPage: React.FC = () => {
 
 export default TextLabPage;
 
-export default TextLabPage;

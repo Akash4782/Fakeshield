@@ -4,8 +4,16 @@ __pycache__/
 .vscode/
 *.pyc
 .env
+*.env
 *.onnx
 *.lib
 *.dll
 storage/
 onnx_models/
+hr_errors.json
+**/hr_errors.json
+hf_error*.json
+**/hf_error*.json
+node_modules/
+dist/
+build/

@@ -1,26 +1,41 @@
+# ── Core Web Framework ─────────────────────────────────────────────
 fastapi
 uvicorn[standard]
-transformers
-torch
-numpy
-scipy
-optimum[onnxruntime]
-onnxruntime
 python-multipart
-pydantic
 python-dotenv
+pydantic
+pydantic-settings
+email-validator
+
+# ── Database & Auth ─────────────────────────────────────────────────
+motor
+passlib[bcrypt]
+PyJWT
+
+# ── AI / ML Core ────────────────────────────────────────────────────
+spacy
+transformers
 accelerate
 sentence-transformers
 scikit-learn
+numpy
+scipy
+
+# ── Image Processing ────────────────────────────────────────────────
 Pillow
 piexif
 opencv-python-headless
-diffusers
-retina-face
+c2pa-python
+
+# ── Audio Processing ────────────────────────────────────────────────
 librosa>=0.10.0
 soundfile>=0.12.0
-scipy>=1.12.0
 resampy>=0.4.2
 pyannote.audio>=3.1.0
-mediapipe
+
+# ── Gemini AI ───────────────────────────────────────────────────────
+google-generativeai
+
+# ── Misc ────────────────────────────────────────────────────────────
 protobuf~=4.25.3
+python-magic

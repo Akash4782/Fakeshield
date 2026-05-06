@@ -1,18 +1,17 @@
-# Name
-### {{module_name}}
+---
+title: FakeShield API
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
 
-# Synopsis
-{{synopsis}}
+# FakeShield Forensic API
+Industry-level multimodal deepfake detection (Text, Image, Audio, Video).
 
-# Description
-
-# Example
-
-# Install:
-`npm install {{module_name}}`
-
-# Test:
-`npm test`
-
-#License:
-{{license}}
+## Deployment Info
+- **SDK**: Docker
+- **Port**: 7860 (Hugging Face Default)
+- **Engine**: Vanguard Forensic Suite v2.0

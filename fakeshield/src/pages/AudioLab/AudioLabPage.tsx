@@ -742,5 +742,3 @@ const AudioLabPage = () => {
 };
 
 export default AudioLabPage;
-
-export default AudioLabPage;
