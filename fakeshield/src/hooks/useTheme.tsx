@@ -26,7 +26,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [theme]);
 
   const toggleTheme = (event?: React.MouseEvent | MouseEvent) => {
-    const isAppearanceTransition = document.startViewTransition && 
+    const isAppearanceTransition = (document as any).startViewTransition && 
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!isAppearanceTransition) {
@@ -46,7 +46,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.style.setProperty('--y', y + 'px');
     document.documentElement.style.setProperty('--r', endRadius + 'px');
 
-    const transition = document.startViewTransition(async () => {
+    const transition = (document as any).startViewTransition(async () => {
       setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
     });
 
