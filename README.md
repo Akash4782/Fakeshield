@@ -164,4 +164,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-Created with ❤️ by **Akash4782** as a Final Year Project.
+Created with ❤️ by **Akash Virdi** as a Final Year Project.
