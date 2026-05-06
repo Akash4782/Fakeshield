@@ -1,8 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../components/layout/Sidebar";
 import { 
-  ChevronRight, 
   Activity, 
   Video, 
   Cpu, 

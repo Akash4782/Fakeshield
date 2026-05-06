@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Shield, Zap, Crown, ArrowRight, Loader, QrCode, CreditCard, ArrowLeft } from 'lucide-react';
+import { Check, Shield, Zap, Crown, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../hooks/useTheme';
 
 const SubscriptionPage: React.FC = () => {
-  const { theme } = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plans' | 'payment' | 'success'>('plans');
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
-  const [transactionId, setTransactionId] = useState('');
+  const [transactionId] = useState('');
   const [orderId] = useState(() => `FS-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`);
   const user = JSON.parse(localStorage.getItem('fakeshield_user') || '{}');
   
@@ -350,7 +348,7 @@ Secure your digital perimeter with FakeShield.
                       disabled={isLoading || timeLeft === 0}
                       className="w-full bg-[#00E5CC] text-black font-black py-4 rounded-2xl shadow-xl shadow-[#00E5CC]/20 hover:bg-[#00d1ba] hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? <Loader size={20} className="animate-spin mx-auto" /> : (timeLeft === 0 ? 'QR EXPIRED' : 'CONFIRM TRANSACTION')}
+                      {isLoading ? <Loader2 size={20} className="animate-spin mx-auto" /> : (timeLeft === 0 ? 'QR EXPIRED' : 'CONFIRM TRANSACTION')}
                     </button>
                     
                     <p className="text-[9px] text-slate-400 text-center leading-relaxed">

@@ -49,9 +49,6 @@ const SettingsPage: React.FC = () => {
 
   // Form State - Password
   const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
 
   // Privacy State
   const [ephemeralMode, setEphemeralMode] = useState(false);
@@ -67,10 +64,6 @@ const SettingsPage: React.FC = () => {
   ];
 
   // Mock Data
-  const invoices = [
-    { id: 'INV-001', date: 'May 01, 2026', amount: '$29.00', status: 'Paid' },
-    { id: 'INV-002', date: 'Apr 01, 2026', amount: '$29.00', status: 'Paid' },
-  ];
 
   const activityLog = [
     { id: 1, event: 'Success Login', ip: '192.168.1.1', device: 'Chrome on Windows 11', location: 'Mumbai, IN', time: '2 mins ago' },

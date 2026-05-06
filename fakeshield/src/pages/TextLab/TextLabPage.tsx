@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Sidebar from '../../components/layout/Sidebar';
 import { scanTextAsync, downloadForensicReport, type TextResult } from '../../services/textService';
 import { useAuth } from '../../hooks/useAuth.tsx';
 
@@ -205,7 +204,6 @@ const TextLabPage: React.FC = () => {
                         <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 pr-4">
                            <div className="prose prose-invert max-w-none leading-[1.8] text-xl font-medium">
                               {result.sentence_highlights.map((h, i) => {
-                                const s = (h.ai_score ?? 0) / 100;
                                 const bgColor = h.label === "AI" ? `rgba(239, 68, 68, 0.2)` 
                                   : h.label === "UNCERTAIN" ? `rgba(234, 179, 8, 0.2)`
                                   : h.label === "HUMAN" ? `rgba(34, 197, 94, 0.2)` : "transparent";

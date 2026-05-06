@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle, MapPin, Camera, Cpu, Aperture, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, XCircle, MapPin, Camera, Cpu, Scan, AlertCircle, Info } from 'lucide-react';
 
 interface MetadataInspectorProps {
   metadata?: {
@@ -28,10 +28,10 @@ const BADGE_CONFIG: Record<BadgeState, { color: string; bgColor: string; icon: R
   info:    { color: '#0ea5e9', bgColor: 'rgba(14,165,233,0.1)',  icon: Info },
 };
 
-const FIELD_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const FIELD_ICONS: Record<string, React.ComponentType<any>> = {
   camera: Camera,
   gps: MapPin,
-  lens: Aperture as any,
+  lens: Scan,
   software: Cpu,
 };
 

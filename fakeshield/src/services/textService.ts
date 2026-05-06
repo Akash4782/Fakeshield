@@ -102,23 +102,23 @@ export async function scanTextAsync(
         onProgress?.(messages[msgIdx % messages.length]);
         msgIdx++;
 
-        let statusRes;
-        let retries = 3;
-        while (retries > 0) {
+        const fetchWithRetry = async (url: string, options: RequestInit, retries = 3): Promise<Response> => {
           try {
-            statusRes = await fetch(`${API_BASE}/status/${job_id}`, {
-              headers: {
-                ...(token ? { "Authorization": `Bearer ${token}` } : {})
-              }
-            });
-            if (statusRes.ok) break;
-            throw new Error(`HTTP ${statusRes.status}`);
+            const res = await fetch(url, options);
+            if (!res.ok && retries > 0) throw new Error();
+            return res;
           } catch (e) {
-            retries--;
             if (retries === 0) throw e;
             await new Promise(r => setTimeout(r, 1000));
+            return fetchWithRetry(url, options, retries - 1);
           }
-        }
+        };
+
+        const statusRes = await fetchWithRetry(`${API_BASE}/status/${job_id}`, {
+          headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          }
+        });
 
         const status = await statusRes.json();
 
