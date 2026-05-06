@@ -26,7 +26,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [theme]);
 
   const toggleTheme = (event?: React.MouseEvent | MouseEvent) => {
-    // @ts-expect-error - startViewTransition is a new API
     const isAppearanceTransition = document.startViewTransition && 
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -47,7 +46,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.style.setProperty('--y', y + 'px');
     document.documentElement.style.setProperty('--r', endRadius + 'px');
 
-    // @ts-expect-error - startViewTransition is a new API
     const transition = document.startViewTransition(async () => {
       setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
     });

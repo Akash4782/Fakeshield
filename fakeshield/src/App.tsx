@@ -4,7 +4,6 @@ import { ThemeProvider } from './hooks/useTheme';
 import { AuthProvider, useAuth } from './hooks/useAuth.tsx';
 import LandingPage from './pages/Landing/LandingPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
-import ForensicLab from './pages/ForensicLab/ForensicLab';
 import TextLabPage from './pages/TextLab/TextLabPage';
 import AudioLabPage from './pages/AudioLab/AudioLabPage';
 import ImageLabPage from './pages/ImageLab/ImageLabPage';

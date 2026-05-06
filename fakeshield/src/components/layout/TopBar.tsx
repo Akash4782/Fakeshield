@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings, User, Menu } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth.tsx';
+import { useAuth } from '../../hooks/useAuth';
 
 interface TopBarProps {
   searchValue?: string;
@@ -71,7 +71,7 @@ const TopBar: React.FC<TopBarProps> = ({ searchValue, onSearchChange, onMenuClic
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#00E5CC] to-[#00bfa5] flex items-center justify-center text-white shadow-inner">
-                <User size={16} md:size={18} strokeWidth={2.5} />
+                <User size={18} strokeWidth={2.5} />
               </div>
             )}
           </div>

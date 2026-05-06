@@ -21,7 +21,7 @@ function getBadgeState(key: string, value: string): BadgeState {
   return 'present';
 }
 
-const BADGE_CONFIG: Record<BadgeState, { color: string; bgColor: string; icon: React.ComponentType<{ className?: string }> }> = {
+const BADGE_CONFIG: Record<BadgeState, { color: string; bgColor: string; icon: React.ComponentType<any> }> = {
   present: { color: '#22c55e', bgColor: 'rgba(34,197,94,0.1)', icon: CheckCircle2 },
   missing: { color: '#94a3b8', bgColor: 'rgba(148,163,184,0.1)', icon: XCircle },
   ai:      { color: '#ef4444', bgColor: 'rgba(239,68,68,0.12)', icon: AlertCircle },
