@@ -17,3 +17,7 @@ hf_error*.json
 node_modules/
 dist/
 build/
+backend/eval_samples/
+*.mp4
+*.wav
+*.mp3
