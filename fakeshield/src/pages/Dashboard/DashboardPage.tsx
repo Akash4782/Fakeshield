@@ -122,6 +122,15 @@ const DashboardPage: React.FC = () => {
         )}
 
         <div className="px-4 md:px-8 space-y-6 pb-16">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-8 mb-8">
+            <div className="space-y-1">
+              <h1 className="text-4xl md:text-5xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Dashboard</h1>
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Security Operations Center</p>
+              </div>
+            </div>
+          </header>
 
           {/* ── 4-stat row ──────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -17,7 +17,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, activeTab, 
 
       <main className="flex-1 overflow-y-auto flex flex-col" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.08) transparent' }}>
         {(showTopBar && window.location.pathname === '/dashboard') && (
-          <div className="px-4 md:px-8 pt-6 pb-4 shrink-0">
+          <div className="px-4 md:px-8 pt-10 pb-4 shrink-0">
             <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
           </div>
         )}
