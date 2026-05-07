@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
 const Footer = () => {
@@ -10,7 +11,9 @@ const Footer = () => {
 
           {/* logo + tagline */}
           <div>
-            <img src={logo} alt="FakeShield" style={{ height: '5.5rem', width: 'auto', marginBottom: '1.25rem' }} />
+            <Link to="/">
+              <img src={logo} alt="FakeShield" style={{ height: '5.5rem', width: 'auto', marginBottom: '1.25rem' }} />
+            </Link>
             <p style={{ color: '#6b7280', fontSize: '0.8125rem', lineHeight: 1.7, maxWidth: '16rem' }}>
               AI-powered deepfake detection across text, image, audio, and video.
             </p>
@@ -21,16 +24,23 @@ const Footer = () => {
             <h4 style={{ color: '#374151', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>Product</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               {[
-                { label: 'Features', href: '#labs' },
+                { label: 'Features', href: '/#labs' },
                 { label: 'Pricing', href: '/subscription' },
                 { label: 'Dashboard', href: '/dashboard' },
                 { label: 'Analytics', href: '/dashboard' },
               ].map(l => (
                 <li key={l.label}>
-                  <a href={l.href} style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
-                    onMouseOver={e => e.currentTarget.style.color = '#111827'}
-                    onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
-                  >{l.label}</a>
+                  {l.href.startsWith('#') || l.href.startsWith('/#') ? (
+                    <a href={l.href} style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#111827'}
+                      onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
+                    >{l.label}</a>
+                  ) : (
+                    <Link to={l.href} style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#111827'}
+                      onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
+                    >{l.label}</Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -46,11 +56,19 @@ const Footer = () => {
                 { label: 'GitHub', href: 'https://github.com/Akash4782' },
               ].map(l => (
                 <li key={l.label}>
-                  <a href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined} rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
-                    onMouseOver={e => e.currentTarget.style.color = '#111827'}
-                    onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
-                  >{l.label}</a>
+                  {l.href.startsWith('http') ? (
+                    <a href={l.href} target="_blank" rel="noopener noreferrer"
+                      style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#111827'}
+                      onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
+                    >{l.label}</a>
+                  ) : (
+                    <Link to={l.href}
+                      style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
+                      onMouseOver={e => e.currentTarget.style.color = '#111827'}
+                      onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
+                    >{l.label}</Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -66,10 +84,10 @@ const Footer = () => {
                 { label: 'FAQs', href: '/faq' },
               ].map(l => (
                 <li key={l.label}>
-                  <a href={l.href} style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
+                  <Link to={l.href} style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.8125rem', transition: 'color 0.2s' }}
                     onMouseOver={e => e.currentTarget.style.color = '#111827'}
                     onMouseOut={e => e.currentTarget.style.color = '#6b7280'}
-                  >{l.label}</a>
+                  >{l.label}</Link>
                 </li>
               ))}
             </ul>
