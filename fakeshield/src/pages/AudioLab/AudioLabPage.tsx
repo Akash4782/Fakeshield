@@ -210,7 +210,7 @@ const AudioLabPage = () => {
           )}
         </header>
 
-        <main className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden relative">
+        <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
           {/* ═══ Left: Input / Results ═══════════════════════════════════ */}
           <section className="flex-1 p-4 md:p-8 pt-7 flex flex-col items-center justify-start overflow-y-auto custom-scrollbar">
@@ -463,8 +463,8 @@ const AudioLabPage = () => {
                         const color = s.value > 65 ? 'var(--accent-red)' : s.value > 40 ? 'var(--accent-orange)' : '#00E5CC';
                         return (
                           <div key={s.name}>
-                    <div className="flex justify-between gap-3 text-[10px] md:text-xs font-medium mb-1.5 text-[var(--text-secondary)]">
-                              <span className="min-w-0 truncate">{s.name}</span>
+                            <div className="flex justify-between text-[10px] md:text-xs font-medium mb-1.5 text-[var(--text-secondary)]">
+                              <span>{s.name}</span>
                               <span style={{ color }}>{s.value.toFixed(1)}%</span>
                             </div>
                             <div
@@ -567,7 +567,7 @@ const AudioLabPage = () => {
 
           {/* ═══ Right: Forensic Dashboard Sidebar ═══════════════════════ */}
           <aside
-            className="w-full lg:w-[420px] flex flex-col lg:h-full z-40 shrink-0 lg:border-l"
+            className="w-full lg:w-[420px] flex flex-col h-full z-40 shrink-0 lg:border-l"
             style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)' }}
           >
             {!result ? (
@@ -712,10 +712,10 @@ const AudioLabPage = () => {
 
         {/* ── Footer Telemetry Bar ── */}
         <footer
-          className="min-h-9 flex flex-col sm:flex-row items-center px-4 sm:px-6 py-3 sm:py-2 justify-between text-[10px] z-50 shrink-0 gap-2"
+          className="min-h-9 flex flex-col sm:flex-row items-center px-6 py-2 sm:py-0 justify-between text-[10px] z-50 shrink-0 gap-2"
           style={{ borderTop: '1px solid var(--panel-border)', background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}
         >
-          <div className="flex flex-wrap justify-center sm:justify-start gap-x-4 sm:gap-x-6 gap-y-1">
+          <div className="flex flex-wrap justify-center sm:justify-start space-x-4 sm:space-x-6">
             <span>
               Format: <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {selectedFile ? selectedFile.name.split('.').pop()?.toUpperCase() : '—'}

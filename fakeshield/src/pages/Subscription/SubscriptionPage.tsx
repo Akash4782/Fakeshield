@@ -144,9 +144,9 @@ Secure your digital perimeter with FakeShield.
   ];
 
   return (
-    <div className="min-h-screen pt-16 md:pt-24 pb-16 md:pb-20 px-4" style={{ background: '#F8FAFC', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen pt-24 pb-20 px-4" style={{ background: '#F8FAFC', color: 'var(--text-primary)' }}>
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10 md:mb-16 animate-fade-in">
+        <div className="text-center mb-16 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00E5CC]/10 border border-[#00E5CC]/20 mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-[#00E5CC] animate-pulse"></div>
             <span className="text-[10px] font-bold text-[#00E5CC] uppercase tracking-widest">Enterprise Forensics</span>
@@ -165,14 +165,14 @@ Secure your digital perimeter with FakeShield.
             {plans.map((plan, idx) => (
               <div 
                 key={idx}
-                className={`relative rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-10 transition-all duration-500 transform hover:-translate-y-2 ${plan.highlight ? 'shadow-2xl z-10' : 'shadow-sm'}`}
+                className={`relative rounded-[2.5rem] p-10 transition-all duration-500 transform hover:-translate-y-2 ${plan.highlight ? 'shadow-2xl z-10' : 'shadow-sm'}`}
                 style={{ 
                   background: 'white', 
                   border: plan.highlight ? '1px solid #00E5CC' : '1px solid #E2E8F0',
                 }}
               >
                 {plan.highlight && (
-                  <div className="absolute top-6 right-6 md:top-8 md:right-10 flex items-center gap-2">
+                  <div className="absolute top-8 right-10 flex items-center gap-2">
                     <Crown size={16} className="text-[#00E5CC]" />
                     <span className="text-[10px] font-bold text-[#00E5CC] uppercase tracking-[0.2em]">Priority</span>
                   </div>
@@ -232,10 +232,10 @@ Secure your digital perimeter with FakeShield.
             ))}
           </div>
         ) : paymentStep === 'payment' ? (
-          <div className="max-w-4xl mx-auto rounded-[2rem] md:rounded-[3rem] bg-white shadow-2xl border border-slate-100 overflow-hidden animate-fade-in-up">
+          <div className="max-w-4xl mx-auto rounded-[3rem] bg-white shadow-2xl border border-slate-100 overflow-hidden animate-fade-in-up">
             <div className="flex flex-col md:flex-row">
               {/* Left Side: Order Summary */}
-              <div className="flex-1 p-6 sm:p-8 md:p-12 bg-slate-50 md:border-r border-slate-100">
+              <div className="flex-1 p-10 md:p-12 bg-slate-50 border-r border-slate-100">
                 <button 
                   onClick={() => setPaymentStep('plans')}
                   className="mb-10 text-[10px] font-bold text-slate-400 hover:text-slate-900 flex items-center gap-2 transition-all uppercase tracking-widest"
@@ -275,7 +275,7 @@ Secure your digital perimeter with FakeShield.
               </div>
 
               {/* Right Side: QR Payment */}
-              <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col min-w-0">
+              <div className="flex-1 p-8 md:p-10 flex flex-col">
                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100">
                   <div>
                     <button 
@@ -298,7 +298,7 @@ Secure your digital perimeter with FakeShield.
                       Scan QR code using BHIM or your preferred UPI app
                     </p>
                     
-                    <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-4 sm:gap-6 mb-8 md:mb-10 min-h-7 px-4">
+                    <div className="flex items-center justify-center gap-6 mb-10 h-7 px-4">
                       <div className="flex items-center justify-center min-w-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="GPay" className="h-[20px] object-contain" />
                       </div>
@@ -315,7 +315,7 @@ Secure your digital perimeter with FakeShield.
 
                     <div className="relative group mx-auto w-fit">
                       <div className="absolute -inset-4 bg-[#00E5CC]/10 rounded-[2.5rem] blur-2xl group-hover:bg-[#00E5CC]/20 transition-all duration-500"></div>
-                      <div className="relative w-44 h-44 sm:w-52 sm:h-52 bg-white p-4 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center overflow-hidden shadow-inner">
+                      <div className="relative w-52 h-52 bg-white p-4 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center overflow-hidden shadow-inner">
                         <img 
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=H&data=${encodeURIComponent(`upi://pay?pa=${MERCHANT_CONFIG.upiId}&am=${MERCHANT_CONFIG.amount}&cu=INR&tn=${MERCHANT_CONFIG.note}`)}`}
                           alt="Payment QR Code"
@@ -362,7 +362,7 @@ Secure your digital perimeter with FakeShield.
                   </div>
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-slate-100 flex flex-wrap items-center justify-center gap-4 sm:justify-between opacity-40 grayscale hover:grayscale-0 transition-all duration-500 min-h-5 px-2">
+                <div className="mt-auto pt-6 border-t border-slate-100 flex items-center justify-between opacity-40 grayscale hover:grayscale-0 transition-all duration-500 h-5 px-2">
                   <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-full object-contain" />
                   <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-full object-contain" />
                   <img src="https://cdn.worldvectorlogo.com/logos/rupay-logo.svg" alt="RuPay" className="h-full object-contain" />
@@ -372,7 +372,7 @@ Secure your digital perimeter with FakeShield.
             </div>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto text-center py-12 md:py-20 px-6 md:px-10 rounded-[2rem] md:rounded-[3rem] bg-white shadow-2xl border border-slate-100 animate-fade-in-up">
+          <div className="max-w-2xl mx-auto text-center py-20 px-10 rounded-[3rem] bg-white shadow-2xl border border-slate-100 animate-fade-in-up">
             <div className="w-24 h-24 bg-[#00E5CC]/10 rounded-full flex items-center justify-center mx-auto mb-8">
               <Shield size={48} className="text-[#00E5CC] animate-pulse" />
             </div>

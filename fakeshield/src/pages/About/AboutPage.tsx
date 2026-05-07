@@ -15,25 +15,25 @@ const AboutPage: React.FC = () => {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" }}>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--panel-border)' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 md:h-28 flex items-center justify-between">
-          <div className="flex items-center gap-3 sm:gap-6 md:gap-12 min-w-0">
+        <div className="max-w-6xl mx-auto px-6 h-28 flex items-center justify-between">
+          <div className="flex items-center gap-12">
             <button 
               onClick={() => navigate(-1)}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm hover:shadow-lg shrink-0"
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm hover:shadow-lg"
               style={{ background: 'var(--btn-secondary-bg)', color: 'var(--text-muted)', border: '1px solid var(--panel-border)' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#00E5CC'; e.currentTarget.style.color = '#000000'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--btn-secondary-bg)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               <ArrowLeft size={20} />
             </button>
-            <div className="flex items-center gap-3 sm:gap-5 md:gap-8 cursor-pointer min-w-0" onClick={() => navigate('/')}>
-              <img src={logo} alt="FakeShield" className="h-14 md:h-24 shrink-0" />
-              <span className="hidden sm:block text-2xl md:text-4xl font-black tracking-tighter truncate" style={{ color: 'var(--text-heading)' }}>FAKESHIELD</span>
+            <div className="flex items-center gap-8 cursor-pointer" onClick={() => navigate('/')}>
+              <img src={logo} alt="FakeShield" className="h-24" />
+              <span className="text-4xl font-black tracking-tighter" style={{ color: 'var(--text-heading)' }}>FAKESHIELD</span>
             </div>
           </div>
           <button 
             onClick={() => navigate('/login')}
-            className="hidden sm:flex text-sm font-bold transition-colors items-center gap-2 shrink-0"
+            className="text-sm font-bold transition-colors flex items-center gap-2"
             style={{ color: 'var(--text-secondary)' }}
             onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
@@ -45,7 +45,7 @@ const AboutPage: React.FC = () => {
 
       <main className="flex-grow">
         {/* Section 1: Hero - Narrative driven */}
-        <section className="pt-32 md:pt-40 pb-20 md:pb-24 px-4 sm:px-6" style={{ borderBottom: '1px solid var(--panel-border)' }}>
+        <section className="pt-40 pb-24 px-6" style={{ borderBottom: '1px solid var(--panel-border)' }}>
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-8xl font-black mb-12 tracking-tight leading-[0.9]">
               Authentication <br />
@@ -197,7 +197,7 @@ const AboutPage: React.FC = () => {
                    As an engineer, I'm focused on creating tools that empower investigators to peel back 
                    the layers of AI-generated media and see the math underneath.
                  </p>
-                <div className="flex flex-wrap gap-3">
+                 <div className="flex gap-3">
                     <a href="https://github.com/Akash4782" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" style={{ background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', color: 'var(--text-primary)' }}>
                       <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" className="w-4 h-4" alt="GitHub" />
                       GitHub
@@ -220,7 +220,7 @@ const AboutPage: React.FC = () => {
 
         {/* Section 5: Stats / Progress Bar - Dev aesthetic */}
         <section className="pb-32 px-6">
-          <div className="max-w-4xl mx-auto p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border bg-slate-50/50" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+          <div className="max-w-4xl mx-auto p-12 rounded-[3rem] border bg-slate-50/50" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {[
                   { label: 'Latency', value: '<2.4s' },
