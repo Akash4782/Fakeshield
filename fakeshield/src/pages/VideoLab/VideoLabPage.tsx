@@ -21,8 +21,8 @@ import TimelineChart from "./TimelineChart";
 import AudioVisualSync from "./AudioVisualSync";
 import VLMReasoningPanel from "./VLMReasoningPanel";
 import { useAuth } from '../../hooks/useAuth.tsx';
-
-const API = "http://127.0.0.1:8001/api/v1"; 
+import { API_BASE_URL } from '../../config';
+const API = `${API_BASE_URL}`; 
 
 const SIGNAL_META: Record<string, { label: string; icon: any; desc: string; color: string }> = {
   spatial:   { label: 'Spatial Neural', icon: Cpu, desc: 'Detects facial textures & diffusion artifacts', color: '#a78bfa' },
