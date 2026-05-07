@@ -242,10 +242,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
               <span className="font-medium text-[15px]">{item.name}</span>
             </Link>
           );
-        })}
-      </nav>
-
-
+      })}
+    </nav>
 
       {/* Footer / Settings at bottom */}
       <div className="p-4 flex flex-col gap-1 border-t" style={{ borderColor: 'var(--panel-border)' }}>
