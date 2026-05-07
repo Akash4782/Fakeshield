@@ -30,28 +30,28 @@ const ContactPage: React.FC = () => {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--panel-border)' }}>
-        <div className="max-w-7xl mx-auto px-6 h-28 flex items-center justify-between">
-          <div className="flex items-center gap-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-28 flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-6 md:gap-12 min-w-0">
             <button 
               onClick={() => navigate(-1)}
-              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm hover:shadow-lg"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm hover:shadow-lg shrink-0"
               style={{ background: 'var(--btn-secondary-bg)', color: 'var(--text-muted)', border: '1px solid var(--panel-border)' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = '#00E5CC'; e.currentTarget.style.color = '#000000'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--btn-secondary-bg)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               <ArrowLeft size={20} />
             </button>
-            <div className="flex items-center gap-10 cursor-pointer" onClick={() => navigate('/')}>
-              <img src={logo} alt="FakeShield" className="h-24" />
-              <span className="text-4xl font-black tracking-tighter" style={{ color: 'var(--text-heading)' }}>FAKESHIELD</span>
+            <div className="flex items-center gap-3 sm:gap-5 md:gap-10 cursor-pointer min-w-0" onClick={() => navigate('/')}>
+              <img src={logo} alt="FakeShield" className="h-14 md:h-24 shrink-0" />
+              <span className="hidden sm:block text-2xl md:text-4xl font-black tracking-tighter truncate" style={{ color: 'var(--text-heading)' }}>FAKESHIELD</span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-grow pt-40 pb-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+      <main className="flex-grow pt-32 md:pt-40 pb-20 md:pb-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             
             {/* Left Side: Info */}
             <div className="space-y-12">
@@ -111,7 +111,7 @@ const ContactPage: React.FC = () => {
             {/* Right Side: Form */}
             <div className="relative">
               {sent ? (
-                <div className="h-full min-h-[600px] flex flex-col items-center justify-center text-center p-12 rounded-[3rem] border animate-in fade-in zoom-in duration-500" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
+                <div className="h-full min-h-[420px] md:min-h-[600px] flex flex-col items-center justify-center text-center p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border animate-in fade-in zoom-in duration-500" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}>
                   <div className="w-20 h-20 rounded-full flex items-center justify-center text-[#00E5CC] mb-8" style={{ background: 'rgba(0, 229, 204, 0.1)' }}>
                     <CheckCircle size={40} />
                   </div>
@@ -124,7 +124,7 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="p-10 md:p-12 rounded-[3rem] border shadow-2xl" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+                <div className="p-6 sm:p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] border shadow-2xl" style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
                   <h3 className="text-2xl font-black mb-8" style={{ color: 'var(--text-heading)' }}>Send a Message</h3>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

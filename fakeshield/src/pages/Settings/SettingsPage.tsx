@@ -122,7 +122,7 @@ const SettingsPage: React.FC = () => {
           {/* MAIN CONTENT AREA */}
           <div className="flex-1">
             <div className="max-w-3xl">
-              <h2 className="text-3xl font-black text-slate-900 mb-10">{activeTab}</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-[var(--text-heading)] mb-8 md:mb-10">{activeTab}</h2>
               
               {activeTab === 'Personal information' && (
                 <div className="space-y-12 animate-in fade-in duration-500">
@@ -139,7 +139,7 @@ const SettingsPage: React.FC = () => {
 
               {activeTab === 'Change password' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-200">
+                  <div className="p-5 md:p-8 bg-slate-50 rounded-[2rem] border border-slate-200">
                     <form className="space-y-6">
                       <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Current Password</label><input type="password" placeholder="••••••••" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">New Password</label><input type="password" placeholder="New password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Confirm New Password</label><input type="password" placeholder="Repeat new password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div></div>
@@ -151,8 +151,8 @@ const SettingsPage: React.FC = () => {
 
               {activeTab === 'Billing information' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
-                   <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#00E5CC] to-[#00b8a5] text-[#000000] overflow-hidden shadow-2xl shadow-[#00E5CC]/20">
-                      <div className="relative z-10 flex justify-between items-center"><div><span className="px-3 py-1 bg-[#000000]/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#000000]/10">Current Plan</span><h3 className="text-4xl font-black mt-3">Pro Forensic</h3></div><div className="text-right"><p className="text-3xl font-black">$29.00</p><p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">per month</p></div></div>
+                   <div className="p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-gradient-to-br from-[#00E5CC] to-[#00b8a5] text-[#000000] overflow-hidden shadow-2xl shadow-[#00E5CC]/20">
+                      <div className="relative z-10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6"><div><span className="px-3 py-1 bg-[#000000]/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#000000]/10">Current Plan</span><h3 className="text-3xl md:text-4xl font-black mt-3">Pro Forensic</h3></div><div className="sm:text-right"><p className="text-2xl md:text-3xl font-black">$29.00</p><p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">per month</p></div></div>
                    </div>
                 </div>
               )}
@@ -160,9 +160,9 @@ const SettingsPage: React.FC = () => {
               {activeTab === 'Privacy & Logic' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
                    {/* Ephemeral Mode */}
-                   <section className="p-8 rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)] group hover:border-[#00E5CC]/30 transition-all">
-                      <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-5">
+                   <section className="p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)] group hover:border-[#00E5CC]/30 transition-all">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+                         <div className="flex items-center gap-5 min-w-0">
                             <div className={`p-4 rounded-2xl transition-colors ${ephemeralMode ? 'bg-[#00E5CC] text-[#000000]' : 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)]'}`}>
                                <Zap size={24} />
                             </div>
@@ -183,7 +183,7 @@ const SettingsPage: React.FC = () => {
                    </section>
 
                    {/* AI Report Tone */}
-                   <section className="p-8 rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)]">
+                   <section className="p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)]">
                       <div className="mb-8">
                          <h3 className="text-lg font-bold text-[var(--text-primary)]">AI Report Tone</h3>
                          <p className="text-xs text-[var(--text-secondary)] mt-1">Calibrate how the AI Reasoner explains forensic findings in your reports.</p>
@@ -208,7 +208,7 @@ const SettingsPage: React.FC = () => {
 
               {activeTab === 'Activity Log' && (
                 <div className="space-y-6 animate-in fade-in duration-500">
-                   <div className="flex justify-between items-center mb-2">
+                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2">
                       <div>
                          <h3 className="text-xl font-bold text-[var(--text-primary)]">Login Activity Log</h3>
                          <p className="text-xs text-[var(--text-secondary)] mt-1">Monitor recent access to your forensic laboratory.</p>
@@ -216,7 +216,7 @@ const SettingsPage: React.FC = () => {
                       <button className="text-[10px] font-black text-[#00b8a5] uppercase tracking-widest hover:underline">Download full log</button>
                    </div>
 
-                   <div className="overflow-x-auto border border-[var(--panel-border)] rounded-[2.5rem]">
+                   <div className="overflow-x-auto border border-[var(--panel-border)] rounded-[2rem] md:rounded-[2.5rem]">
                       <table className="w-full text-left min-w-[600px]">
                          <thead className="bg-[var(--btn-secondary-bg)] border-b border-[var(--panel-border)]">
                             <tr>
@@ -254,13 +254,13 @@ const SettingsPage: React.FC = () => {
               )}
 
               {activeTab === 'Messages' && (
-                <div className="space-y-6 animate-in fade-in duration-500">{notifications.map(notif => (<div key={notif.id} className="p-6 bg-[var(--btn-secondary-bg)] rounded-3xl border border-[var(--panel-border)] flex items-start gap-4 hover:bg-[var(--border-hover)] transition-all cursor-pointer"><div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${notif.color}15`, color: notif.color }}><notif.icon size={24} /></div><div className="flex-1"><div className="flex justify-between items-center mb-1"><h4 className="text-sm font-black text-[var(--text-primary)]">{notif.title}</h4><span className="text-[10px] font-bold text-[var(--text-muted)]">{notif.time}</span></div><p className="text-xs text-[var(--text-secondary)]">{notif.text}</p></div></div>))}</div>
+                <div className="space-y-6 animate-in fade-in duration-500">{notifications.map(notif => (<div key={notif.id} className="p-5 md:p-6 bg-[var(--btn-secondary-bg)] rounded-3xl border border-[var(--panel-border)] flex items-start gap-4 hover:bg-[var(--border-hover)] transition-all cursor-pointer"><div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${notif.color}15`, color: notif.color }}><notif.icon size={24} /></div><div className="flex-1 min-w-0"><div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-1"><h4 className="text-sm font-black text-[var(--text-primary)]">{notif.title}</h4><span className="text-[10px] font-bold text-[var(--text-muted)]">{notif.time}</span></div><p className="text-xs text-[var(--text-secondary)]">{notif.text}</p></div></div>))}</div>
               )}
 
               {activeTab === 'Data export' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
-                   <div className="p-10 bg-[var(--btn-secondary-bg)] rounded-[2.5rem] border border-[var(--panel-border)] text-center"><div className="w-20 h-20 bg-[var(--bg-secondary)] rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 text-[#FF00FF]"><Download size={32} /></div><h3 className="text-2xl font-black text-[var(--text-primary)] mb-2">Export Laboratory Data</h3><p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">Download a complete, accurate record of all your forensic scans.</p></div>
-                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6"><button className="p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-blue-500 mb-6"><FileJson size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">Raw JSON Format</h4></button><button className="p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-green-500 mb-6"><FileSpreadsheet size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">CSV Spreadsheet</h4></button></div>
+                   <div className="p-6 md:p-10 bg-[var(--btn-secondary-bg)] rounded-[2rem] md:rounded-[2.5rem] border border-[var(--panel-border)] text-center"><div className="w-20 h-20 bg-[var(--bg-secondary)] rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 text-[#FF00FF]"><Download size={32} /></div><h3 className="text-xl md:text-2xl font-black text-[var(--text-primary)] mb-2">Export Laboratory Data</h3><p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">Download a complete, accurate record of all your forensic scans.</p></div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6"><button className="p-6 md:p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-blue-500 mb-6"><FileJson size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">Raw JSON Format</h4></button><button className="p-6 md:p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-green-500 mb-6"><FileSpreadsheet size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">CSV Spreadsheet</h4></button></div>
                 </div>
               )}
             </div>

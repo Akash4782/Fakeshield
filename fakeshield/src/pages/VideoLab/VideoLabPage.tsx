@@ -131,12 +131,12 @@ const VideoLabPage = () => {
           </div>
         </header>
 
-        <main className="flex-1 max-w-6xl w-full mx-auto p-8 pt-12">
+        <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8 pt-8 md:pt-12">
           <AnimatePresence mode="wait">
             {phase === "idle" && (
-              <motion.div key="idle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
+              <motion.div key="idle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8 md:space-y-12">
                 <div className="text-center space-y-4">
-                  <h1 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-[#00E5CC] to-[#2DD4BF] bg-clip-text text-transparent">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter bg-gradient-to-r from-[#00E5CC] to-[#2DD4BF] bg-clip-text text-transparent">
                     Video analysis lab
                   </h1>
                   <p className="text-sm max-w-lg mx-auto opacity-60 leading-relaxed">
@@ -150,7 +150,7 @@ const VideoLabPage = () => {
                   className="relative group cursor-pointer max-w-2xl mx-auto"
                 >
                   <div className="absolute -inset-1 bg-gradient-to-r from-[#00E5CC] to-[#2DD4BF] rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                  <div className="relative p-12 py-20 rounded-2xl border-2 border-dashed border-[var(--panel-border)] bg-[var(--bg-secondary)] hover:border-[#00E5CC]/50 transition-all text-center space-y-6">
+                  <div className="relative p-6 sm:p-10 md:p-12 py-14 md:py-20 rounded-2xl border-2 border-dashed border-[var(--panel-border)] bg-[var(--bg-secondary)] hover:border-[#00E5CC]/50 transition-all text-center space-y-6">
                     <div className="w-20 h-20 bg-[#00E5CC]/10 rounded-3xl flex items-center justify-center mx-auto ring-1 ring-[#00E5CC]/20 group-hover:scale-110 transition-transform duration-500">
                       <Video className="w-10 h-10 text-[#00E5CC]" />
                     </div>
@@ -192,7 +192,7 @@ const VideoLabPage = () => {
                 {/* Result Hero */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Verdict Card */}
-                  <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-sm">
+                  <div className="lg:col-span-2 p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm">
 
                     
                     <div className="relative shrink-0">
@@ -216,7 +216,7 @@ const VideoLabPage = () => {
 
                     <div className="flex-1 space-y-5 text-center md:text-left">
                       <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <h2 className="text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
                           {vCfg?.label}
                         </h2>
                         <span className="px-3 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider self-center md:self-start" style={{ background: vCfg?.bg, borderColor: vCfg?.border, color: vCfg?.color }}>
@@ -253,7 +253,7 @@ const VideoLabPage = () => {
                   </div>
 
                   {/* Signals Panel */}
-                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-8 flex flex-col justify-center shadow-sm">
+                  <div className="p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-8 flex flex-col justify-center shadow-sm">
                     <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Forensic Signals</h3>
                     <div className="space-y-6">
                       {Object.entries(result.data.signals).map(([key, val]: any) => {
@@ -288,7 +288,7 @@ const VideoLabPage = () => {
                 {/* Evidence Spotlight & RAFT Heatmap */}
                 {result.data.evidence_heatmap && (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-sm">
+                    <div className="lg:col-span-2 p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm">
                       <div className="shrink-0 w-full md:w-1/2 relative">
                          <img src={result.data.evidence_heatmap} alt="Optical Flow Heatmap" className="relative rounded-xl border border-[var(--panel-border)] shadow-sm w-full aspect-video object-cover" />
                          <div className="absolute bottom-2 right-2 px-2 py-1 bg-[var(--bg-primary)]/80 backdrop-blur-sm rounded text-[8px] font-bold text-[var(--text-primary)] uppercase tracking-widest border border-[var(--panel-border)]">
@@ -315,7 +315,7 @@ const VideoLabPage = () => {
                       </div>
                     </div>
 
-                    <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] flex flex-col justify-center space-y-6 shadow-sm">
+                    <div className="p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] flex flex-col justify-center space-y-6 shadow-sm">
                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1 flex items-center gap-2">
                          <Thermometer className="w-4 h-4" /> CONSISTENCY SCORE
                        </h3>
@@ -345,7 +345,7 @@ const VideoLabPage = () => {
                 {/* New Analysis Visualizations */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Timeline Chart */}
-                  <div className="p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] space-y-6">
+                  <div className="p-5 md:p-8 rounded-3xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] space-y-6">
                     <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2">
                         <BarChart2 className="w-4 h-4 text-[#00E5CC]" />
@@ -381,7 +381,7 @@ const VideoLabPage = () => {
                 {/* Sub Panels */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Evidence List */}
-                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-6 shadow-sm">
+                  <div className="p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-6 shadow-sm">
                     <div className="flex items-center gap-2">
                       <Eye className="w-4 h-4 text-[var(--text-muted)]" />
                       <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Forensic Brief</h3>
@@ -402,7 +402,7 @@ const VideoLabPage = () => {
                   </div>
 
                   {/* Physics Info */}
-                  <div className="p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-6 shadow-sm">
+                  <div className="p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] space-y-6 shadow-sm">
                     <div className="flex items-center gap-2">
                       <BarChart2 className="w-4 h-4 text-[var(--text-muted)]" />
                       <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">Temporal Evidence</h3>

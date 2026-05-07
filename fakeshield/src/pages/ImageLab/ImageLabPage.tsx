@@ -288,7 +288,7 @@ const ImageLabPage = () => {
 
         {/* ── Upload Zone ── */}
         {!showWorkspace ? (
-          <div className="flex-1 flex items-center justify-center p-8">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -296,7 +296,7 @@ const ImageLabPage = () => {
             >
               {/* Drop zone */}
               <div
-                className="relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all p-12 gap-5"
+                className="relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all p-6 sm:p-12 gap-5"
                 style={{
                   borderColor: isDragging ? '#00E5CC' : 'var(--panel-border)',
                   background: isDragging ? 'rgba(0,229,204,0.05)' : 'var(--panel-bg)',
@@ -332,7 +332,7 @@ const ImageLabPage = () => {
             </div>
           ) : (
           /* ── Analysis Workspace ── */
-          <div className="flex-1 p-5 flex flex-col gap-8 min-h-0 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 p-4 md:p-5 flex flex-col gap-6 md:gap-8 min-h-0 overflow-y-auto custom-scrollbar">
 
             {/* TOP ROW: FORENSIC LENS + MASTER GAUGE */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -351,7 +351,7 @@ const ImageLabPage = () => {
               {/* RIGHT: Master Verdict Gauge (4/12) */}
               <div className="lg:col-span-4 h-full">
                 <div
-                  className="rounded-2xl p-8 border flex flex-col items-center justify-center gap-6 h-full min-h-[420px]"
+                  className="rounded-2xl p-5 sm:p-8 border flex flex-col items-center justify-center gap-6 h-full min-h-[360px] sm:min-h-[420px]"
                   style={{
                     borderColor: data ? vCfg.border : 'var(--panel-border)',
                     background: data ? vCfg.bg : 'var(--panel-bg)',
@@ -370,7 +370,7 @@ const ImageLabPage = () => {
                   ) : data ? (
                     <>
                       {/* Circular gauge */}
-                      <div className="relative w-56 h-56">
+                      <div className="relative w-44 h-44 sm:w-56 sm:h-56">
                         <svg width="100%" height="100%" viewBox="0 0 100 100">
                           <path d="M 15 85 A 42 42 0 1 1 85 85" fill="none" stroke="rgba(0,0,0,0.05)" strokeWidth="6" strokeLinecap="round" />
                           <motion.path
@@ -387,7 +387,7 @@ const ImageLabPage = () => {
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center mt-2">
                           <motion.span
-                            className="font-black tracking-tighter text-5xl"
+                            className="font-black tracking-tighter text-4xl sm:text-5xl"
                             style={{ color: vCfg.color }}
                             initial={{ opacity: 0, scale: 0.7 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -395,7 +395,7 @@ const ImageLabPage = () => {
                           >
                             {Math.round(data.ai_probability * 100)}%
                           </motion.span>
-                          <span className="text-xs font-bold mt-2 tracking-widest text-[var(--text-muted)] uppercase">AI PROBABILITY SCORE</span>
+                          <span className="text-[10px] sm:text-xs font-bold mt-2 tracking-widest text-[var(--text-muted)] uppercase text-center px-3">AI PROBABILITY SCORE</span>
                         </div>
                       </div>
 
@@ -403,7 +403,7 @@ const ImageLabPage = () => {
                       <div className="text-center mt-4">
                         <div className="flex items-center gap-3 justify-center mb-2">
                           {(() => { const Icon = vCfg.icon; return <Icon className="w-6 h-6" style={{ color: vCfg.color }} />; })()}
-                          <span className="text-2xl font-black tracking-wider" style={{ color: vCfg.color }}>
+                          <span className="text-xl sm:text-2xl font-black tracking-wider" style={{ color: vCfg.color }}>
                             {vCfg.label}
                           </span>
                         </div>
@@ -462,17 +462,17 @@ const ImageLabPage = () => {
                             transition={{ duration: 0.3 }}
                             className="px-4 py-3 rounded-xl border border-[var(--panel-border)] bg-[var(--btn-secondary-bg)]"
                           >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                              <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] shadow-sm border border-[var(--panel-border)]">
                                   <Icon className="w-5 h-5" style={{ color: mod.color }} />
                                 </div>
-                                <div>
-                                  <div className="text-sm font-bold text-[var(--text-primary)]">{mod.label}</div>
+                                <div className="min-w-0">
+                                  <div className="text-sm font-bold text-[var(--text-primary)] truncate">{mod.label}</div>
                                   <div className="text-[11px] text-[var(--text-secondary)] font-medium">{mod.desc}</div>
                                 </div>
                               </div>
-                              <div className="text-right">
+                              <div className="text-left sm:text-right">
                                 <div className="text-sm font-black tracking-tight" style={{ color: col }}>{rawScore !== undefined ? `${pct}%` : '—'}</div>
                                 <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color: `${col}cc` }}>{scoreLabel(score)}</div>
                               </div>
@@ -543,13 +543,12 @@ const ImageLabPage = () => {
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(4px)' }}
-            className="fixed bottom-8 right-8 z-50 flex items-start gap-4 p-5 rounded-2xl border"
+            className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:bottom-8 z-50 flex items-start gap-4 p-4 sm:p-5 rounded-2xl border sm:w-[420px]"
             style={{
               background: 'rgba(15, 15, 20, 0.95)',
               backdropFilter: 'blur(24px)',
               borderColor: 'rgba(239, 68, 68, 0.3)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(239,68,68,0.1) inset, 0 0 60px rgba(239,68,68,0.15)',
-              width: '420px',
               fontFamily: "'Inter', sans-serif"
             }}
           >

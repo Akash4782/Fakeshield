@@ -162,27 +162,27 @@ const TextLabPage: React.FC = () => {
             {/* EVIDENCE AREA (Col 1-8) */}
             <div className="col-span-1 lg:col-span-8 space-y-6">
                <div className="card-border p-1.5 rounded-2xl bg-[var(--panel-border)]">
-                 <div className="p-8 rounded-[0.9rem] border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden min-h-[520px] flex flex-col">
+                 <div className="p-5 md:p-8 rounded-[0.9rem] border border-[var(--panel-border)] bg-[var(--panel-bg)] relative overflow-hidden min-h-[430px] md:min-h-[520px] flex flex-col">
                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--text-secondary) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
                    
                    {!result ? (
                      <>
-                        <div className="flex justify-between items-center mb-6 relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6 relative z-10">
                           <span className="text-sm font-bold text-[var(--text-secondary)]">Input content</span>
                           <span className="text-[10px] font-mono text-[var(--accent-blue)]">CHARACTER COUNT: {text.length}</span>
                         </div>
                         <textarea
-                          className="flex-1 bg-transparent text-xl leading-relaxed resize-none outline-none placeholder-[var(--text-muted)] relative z-10 font-medium custom-scrollbar"
+                          className="flex-1 bg-transparent text-base md:text-xl leading-relaxed resize-none outline-none placeholder-[var(--text-muted)] relative z-10 font-medium custom-scrollbar"
                           placeholder="Paste or type text for professional forensic analysis..."
                           value={text}
                           onChange={(e) => setText(e.target.value)}
                           disabled={loading}
                         />
-                        <div className="flex justify-between items-center mt-6 pt-6 border-t border-[var(--panel-border)] relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-6 pt-6 border-t border-[var(--panel-border)] relative z-10">
                            <button
                              onClick={handleAnalyze}
                              disabled={loading || text.trim().length < 20}
-                             className={`px-12 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm transition-all relative overflow-hidden ${
+                             className={`w-full sm:w-auto px-6 sm:px-12 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs sm:text-sm transition-all relative overflow-hidden ${
                                loading || text.trim().length < 20
                                ? 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)] cursor-not-allowed opacity-50' 
                                : 'bg-gradient-to-r from-[#00E5CC] to-[#0092ff] text-[#000000] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,229,204,0.3)] active:scale-95'
@@ -194,7 +194,7 @@ const TextLabPage: React.FC = () => {
                      </>
                    ) : (
                      <div className="flex flex-col h-full">
-                         <div className="flex justify-between items-center mb-6 relative z-10">
+                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 relative z-10">
                           <span className="text-sm font-bold text-[#00E5CC]">AI probability heatmap</span>
                           <div className="flex gap-4">
                             <span className="text-[8px] text-red-500 font-bold uppercase tracking-widest flex items-center gap-1">
@@ -206,7 +206,7 @@ const TextLabPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 pr-4">
-                           <div className="prose prose-invert max-w-none leading-[1.8] text-xl font-medium">
+                           <div className="prose prose-invert max-w-none leading-[1.8] text-base md:text-xl font-medium">
                               {result.sentence_highlights.map((h, i) => {
                                 const bgColor = h.label === "AI" ? `rgba(239, 68, 68, 0.2)` 
                                   : h.label === "UNCERTAIN" ? `rgba(234, 179, 8, 0.2)`
@@ -248,13 +248,13 @@ const TextLabPage: React.FC = () => {
 
             {/* MASTER VERDICT (Col 9-12) */}
             <div className="col-span-1 lg:col-span-4">
-               <div className={`min-h-[520px] sticky top-8 p-8 pb-12 rounded-2xl border border-[var(--panel-border)] flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-700 ${
+                <div className={`min-h-[430px] md:min-h-[520px] lg:sticky lg:top-8 p-5 md:p-8 pb-8 md:pb-12 rounded-2xl border border-[var(--panel-border)] flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-700 ${
                   !result ? 'bg-[var(--panel-bg)] opacity-60' :
                   result.threat_level === 'CRITICAL' || result.threat_level === 'HIGH' ? 'bg-[rgba(239,68,68,0.02)]' :
                   'bg-[rgba(16,185,129,0.02)]'
                 }`}>
                   
-                  <span className="text-sm font-bold mb-10 text-[var(--text-secondary)]">Consolidated verdict</span>
+                  <span className="text-sm font-bold mb-6 md:mb-10 text-[var(--text-secondary)]">Consolidated verdict</span>
                   
                   <ForensicGauge 
                     size="xl"
@@ -269,7 +269,7 @@ const TextLabPage: React.FC = () => {
                   />
 
                   {result && (
-                    <div className="mt-8 w-full grid grid-cols-2 gap-4">
+                    <div className="mt-8 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="p-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--panel-border)] flex flex-col items-center justify-center text-center">
                           <span className="block text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-bold mb-2">Stability</span>
                           <div className="flex flex-col items-center">
@@ -290,7 +290,7 @@ const TextLabPage: React.FC = () => {
           </div>
 
           {/* BELOW ROW: MULTI-VECTOR AUDIT STRIP */}
-          <div className={`mt-8 p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] transition-all duration-700 ${!result && 'opacity-30'}`}>
+          <div className={`mt-8 p-5 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] transition-all duration-700 ${!result && 'opacity-30'}`}>
              <h3 className="text-sm font-bold mb-10 text-[var(--text-secondary)] text-center">Diagnostic signal analytics</h3>
              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
                 <ForensicGauge size="sm" score={result ? (result.signals.neural || 0) * 100 : 0} label="Neural Pulse" color="#8b5cf6" sublabel="" />
@@ -331,7 +331,7 @@ const TextLabPage: React.FC = () => {
 
                {/* EXPERT AUDIT persona */}
                <div className="col-span-1 md:col-span-12 lg:col-span-7 space-y-6">
-                  <div className="p-10 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] h-full flex flex-col justify-center">
+                  <div className="p-6 md:p-10 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)] h-full flex flex-col justify-center">
                     <div className="flex items-center gap-4 mb-8">
                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-muted)] border border-[var(--panel-border)]">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
