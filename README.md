@@ -1,3 +1,13 @@
+---
+title: FakeShield API
+emoji: 🛡️
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 8001
+pinned: false
+---
+
 # 🛡️ FakeShield: AI Forensic Laboratory
 
 FakeShield is a state-of-the-art, multi-modal deepfake detection platform designed for researchers, journalists, and security professionals. It leverages advanced machine learning ensembles to detect AI-generated content across **Text, Image, Audio, and Video** with surgical precision.
