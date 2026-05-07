@@ -9,6 +9,8 @@ email-validator
 
 # ── Database & Auth ─────────────────────────────────────────────────
 motor
+dnspython
+certifi
 passlib[bcrypt]
 PyJWT
 

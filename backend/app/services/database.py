@@ -1,66 +1,9 @@
 """
-PostgreSQL integration using asyncpg.
+MongoDB integration wrapper for text forensics.
+Redirects old PostgreSQL calls to the new unified MongoDB dashboard.
 """
-import asyncpg
-import json
-from app.config import settings
-
-_pool = None
-
-async def get_pool():
-    global _pool
-    if _pool is None:
-        try:
-            _pool = await asyncpg.create_pool(
-                dsn=settings.DATABASE_URL,
-                min_size=2,
-                max_size=5,
-                command_timeout=5,
-                timeout=5,
-            )
-            await _create_table()
-            print("[DB] PostgreSQL connected.")
-        except Exception as e:
-            print(f"[DB] Connection failed: {e}")
-            print("[DB] Running without database (results not saved).")
-            _pool = None
-    return _pool
-
-
-async def _create_table():
-    pool = await get_pool()
-    if not pool:
-        return
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS text_scans (
-                id               SERIAL PRIMARY KEY,
-                user_email       TEXT NOT NULL,
-                scan_id          TEXT UNIQUE NOT NULL,
-                verdict          TEXT,
-                threat_level     TEXT,
-                confidence       FLOAT,
-                confidence_level TEXT,
-                agreement_score  INTEGER,
-                stability_score  FLOAT,
-                signals          JSONB,
-                linguistic_profile JSONB,
-                word_count       INTEGER,
-                processing_time  TEXT,
-                text_preview     TEXT,
-                created_at       TIMESTAMPTZ DEFAULT NOW()
-            );
-            
-            -- Ensure existing tables have new columns
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS user_email TEXT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS confidence_level TEXT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS agreement_score  INTEGER;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stability_score  FLOAT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stylometric_details JSONB;
-            
-            CREATE INDEX IF NOT EXISTS idx_text_scans_user_email ON text_scans(user_email);
-        """)
-
+import asyncio
+from app.routers.dashboard_router import save_scan_internal
 
 async def save_scan(
     user_email: str,
@@ -78,52 +21,38 @@ async def save_scan(
     processing_time: str,
     text_preview: str,
 ):
-    pool = await get_pool()
-    if not pool:
-        print("[DB] No database — skipping save.")
-        return
-
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            INSERT INTO text_scans
-                (user_email, scan_id, verdict, threat_level, confidence,
-                 confidence_level, agreement_score, stability_score,
-                 signals, linguistic_profile, stylometric_details,
-                 word_count, processing_time, text_preview)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-            ON CONFLICT (scan_id) DO NOTHING;
-        """,
-            user_email, scan_id, verdict, threat_level, confidence,
-            confidence_level, agreement_score, stability_score,
-            json.dumps(signals),
-            json.dumps(linguistic_profile),
-            json.dumps(stylometric_details),
-            word_count, processing_time, text_preview
-        )
-
+    """
+    Adapter that maps the old PostgreSQL-style call to the new MongoDB unified dashboard.
+    """
+    extra = {
+        "confidence_level": confidence_level,
+        "agreement_score": agreement_score,
+        "stability_score": stability_score,
+        "signals": signals,
+        "linguistic_profile": linguistic_profile,
+        "stylometric_details": stylometric_details,
+        "word_count": word_count,
+        "processing_time": processing_time,
+        "text_preview": text_preview
+    }
+    
+    # Save using the unified MongoDB logic
+    await save_scan_internal(
+        email=user_email,
+        lab="text",
+        filename="Text Analysis",
+        verdict=verdict,
+        confidence=confidence,
+        threat_level=threat_level,
+        scan_id=scan_id,
+        extra=extra,
+        full_result=extra # Save the same data as full result for now
+    )
 
 async def get_scan_history(user_email: str, limit: int = 50) -> list:
-    pool = await get_pool()
-    if not pool:
-        return []
-    async with pool.acquire() as conn:
-        rows = await conn.fetch("""
-            SELECT scan_id, verdict, threat_level, confidence,
-                   word_count, text_preview, created_at
-            FROM text_scans
-            WHERE user_email = $1
-            ORDER BY created_at DESC
-            LIMIT $2;
-        """, user_email, limit)
-        return [dict(r) for r in rows]
-
+    """Mock for old history calls — frontend now uses dashboard_router.get_history directly."""
+    return []
 
 async def get_scan_by_id(scan_id: str) -> dict:
-    pool = await get_pool()
-    if not pool:
-        return {}
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT * FROM text_scans WHERE scan_id = $1", scan_id
-        )
-        return dict(row) if row else {}
+    """Mock for old scan details calls — frontend now uses dashboard_router.get_scan_details directly."""
+    return {}

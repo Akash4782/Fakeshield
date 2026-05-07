@@ -1,5 +1,6 @@
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+import certifi
 import asyncio
 
 # Load from environment variable for production readiness
@@ -32,8 +33,12 @@ image_results_collection = DummyCollection("image_forensics")
 text_results_collection = DummyCollection("text_forensics")
 
 try:
-    # Create the Async MongoDB Client with a short timeout
-    client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=2000)
+    # Create the Async MongoDB Client with a short timeout and certifi SSL bundle
+    client = AsyncIOMotorClient(
+        MONGO_URL, 
+        serverSelectionTimeoutMS=5000, 
+        tlsCAFile=certifi.where()
+    )
     db = client.fakeshield_db
     
     # Real collections (proxies for Atlas)
