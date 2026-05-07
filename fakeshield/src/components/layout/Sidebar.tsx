@@ -245,35 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
         })}
       </nav>
 
-      {/* User Profile Section */}
-      <div className="px-4 py-4 mt-auto border-t" style={{ borderColor: 'var(--panel-border)' }}>
-        <Link 
-          to="/settings"
-          className="flex items-center gap-3 p-3 rounded-2xl hover:bg-[var(--sidebar-hover-bg)] transition-all duration-300 group"
-        >
-          <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#00E5CC] shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
-            {user?.profile_pic ? (
-              <img 
-                src={user.profile_pic} 
-                alt="Profile" 
-                className="w-full h-full object-cover" 
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#00E5CC] to-[#00bfa5] flex items-center justify-center text-white shadow-inner">
-                <User size={18} strokeWidth={2.5} />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate" style={{ color: 'var(--text-heading)' }}>
-              {user?.name || user?.fullName || 'User Account'}
-            </p>
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#00E5CC' }}>
-              Forensic Analyst
-            </p>
-          </div>
-        </Link>
-      </div>
+
 
       {/* Footer / Settings at bottom */}
       <div className="p-4 flex flex-col gap-1 border-t" style={{ borderColor: 'var(--panel-border)' }}>
@@ -309,13 +281,44 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
           )}
         </button>
         
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer group text-red-400 hover:text-red-500 hover:bg-red-500/10"
-        >
-          <LogOut className="w-5 h-5 group-hover:text-red-500 transition-colors" />
-          <span className="font-medium text-[15px]">Logout</span>
-        </button>
+        {/* Combined Profile & Logout Section */}
+        <div className="flex items-center gap-2 p-1 mt-2 rounded-2xl border border-transparent hover:border-[var(--panel-border)] transition-all group/container">
+          <Link 
+            to="/settings"
+            className="flex-1 flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--sidebar-hover-bg)] transition-all duration-300 group/profile"
+          >
+            <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-[#00E5CC] shadow-sm group-hover/profile:scale-105 transition-transform flex-shrink-0">
+              {user?.profile_pic ? (
+                <img 
+                  src={user.profile_pic} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#00E5CC] to-[#00bfa5] flex items-center justify-center text-white shadow-inner">
+                  <User size={16} strokeWidth={2.5} />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-bold truncate" style={{ color: 'var(--text-heading)' }}>
+                {user?.name || user?.fullName || 'User Account'}
+              </p>
+              <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#00E5CC' }}>
+                Forensic Analyst
+              </p>
+            </div>
+          </Link>
+          
+          <button
+            onClick={() => setShowConfirm(true)}
+            title="Logout"
+            className="p-2.5 rounded-xl text-red-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90 flex-shrink-0"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
+
       </div>
     </aside>
     </>
