@@ -157,6 +157,20 @@
     @apply antialiased text-[var(--text-primary)] bg-[var(--bg-primary)];
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
+  html,
+  body,
+  #root {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
 }
 
 @layer components {
@@ -248,6 +262,14 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* View Transition API Animations */

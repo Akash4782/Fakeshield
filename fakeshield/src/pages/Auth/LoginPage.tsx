@@ -119,7 +119,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center font-sans overflow-y-auto pt-[0vh] pb-20 p-4" style={{ background: 'var(--page-bg)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen flex items-center justify-center font-sans overflow-y-auto py-8 sm:py-12 p-4" style={{ background: 'var(--page-bg)', color: 'var(--text-primary)' }}>
       {/* Decorative Floating Spheres */}
       <div className="absolute top-[20%] left-[30%] w-12 h-12 bg-[#00E5CC] rounded-full blur-sm opacity-20 animate-bounce transition-all duration-1000 hidden md:block"></div>
       <div className="absolute bottom-[30%] right-[32%] w-16 h-16 bg-[var(--accent-purple)] rounded-full blur-md opacity-20 animate-pulse transition-all duration-700 hidden md:block"></div>
@@ -127,10 +127,10 @@ const LoginPage: React.FC = () => {
 
       {/* Main Login Card */}
       <div
-        className="relative z-10 w-full max-w-[420px] rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.15)] p-6 md:p-10 transform hover:rotate-2 transition-all duration-700 ease-out"
+        className="relative z-10 w-full max-w-[420px] rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.15)] p-6 md:p-10 md:transform md:hover:rotate-2 transition-all duration-700 ease-out"
         style={{
           perspective: '1000px',
-          transform: window.innerHeight < 750 ? 'perspective(1000px) rotateX(10deg) rotateY(-5deg) scale(0.85)' : 'perspective(1000px) rotateX(10deg) rotateY(-5deg)',
+          transform: 'none',
           background: 'var(--panel-bg)',
           backdropFilter: 'blur(20px)',
           border: '1px solid var(--panel-border)',
@@ -245,7 +245,7 @@ const LoginPage: React.FC = () => {
         </form>
 
         {/* Decorative Floating Icon */}
-        <div className="absolute -top-6 -right-6 w-12 h-12 bg-[#00E5CC] rounded-full flex items-center justify-center text-white shadow-lg animate-bounce duration-3000 border-none">
+        <div className="hidden sm:flex absolute -top-6 -right-6 w-12 h-12 bg-[#00E5CC] rounded-full items-center justify-center text-white shadow-lg animate-bounce duration-3000 border-none">
           <div className="w-6 h-6 border-4 border-white rounded-full"></div>
         </div>
       </div>
