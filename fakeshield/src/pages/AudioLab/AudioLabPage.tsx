@@ -192,21 +192,22 @@ const AudioLabPage = () => {
       <div className="flex-1 flex flex-col min-w-0" style={{ background: 'var(--bg-primary)' }}>
         <style>{PAGE_STYLES}</style>
 
-        <header className="px-4 md:px-8 py-2 md:py-4 flex justify-between items-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-black">Audio lab</h1>
-            {result && (
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 font-semibold text-sm rounded-lg transition-all hover:opacity-90"
-                style={{
-                  background: 'var(--btn-secondary-bg)',
-                  border: '1px solid var(--panel-border)',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                New Scan
-              </button>
-            )}
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-4 md:px-8 mt-12 mb-8">
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Audio lab</h1>
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+              <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Synthetic voice forensic laboratory</p>
+            </div>
+          </div>
+          {result && (
+            <button
+              onClick={handleReset}
+              className="px-4 md:px-6 py-2 md:py-2.5 rounded-xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] hover:bg-[var(--btn-secondary-bg)] font-bold uppercase text-[9px] md:text-[10px] tracking-widest transition-all"
+            >
+              New Scan
+            </button>
+          )}
         </header>
 
         <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">

@@ -128,9 +128,13 @@ const TextLabPage: React.FC = () => {
     <DashboardLayout activeTab="Text lab">
         <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-6 md:space-y-8 pb-16">
           
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-display font-black text-[var(--text-heading)] tracking-tight">Text lab</h1>
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-12 mb-8">
+            <div className="space-y-1">
+              <h1 className="text-4xl md:text-5xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Text lab</h1>
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Forensic linguistic audit engine</p>
+              </div>
             </div>
             
             <div className="flex flex-wrap gap-3">

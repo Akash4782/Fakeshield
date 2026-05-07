@@ -121,10 +121,13 @@ const VideoLabPage = () => {
   return (
     <DashboardLayout activeTab="Video lab">
       <div className="flex-1 flex flex-col min-w-0" style={{ scrollBehavior: 'smooth' }}>
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 md:py-6 z-50 sticky top-0 backdrop-blur-md border-b transition-colors" style={{ background: 'var(--glass-bg)', borderColor: 'var(--panel-border)' }}>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-800">Video lab</h1>
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-6 md:px-8 mt-12 mb-8">
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Video lab</h1>
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+              <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Deepfake motion temporal audit</p>
+            </div>
           </div>
         </header>
 

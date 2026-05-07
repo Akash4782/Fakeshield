@@ -267,19 +267,18 @@ const ImageLabPage = () => {
     <DashboardLayout activeTab="Image lab">
       <div className="flex flex-col flex-1 min-w-0">
 
-        {/* ── Header ── */}
-        <header
-          className="flex items-center justify-between px-6 py-3.5 shrink-0 border-b shadow-sm"
-          style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}
-        >
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Image lab</h1>
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 px-4 md:px-8 mt-12 mb-8">
+          <div className="space-y-1">
+            <h1 className="text-4xl md:text-5xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Image lab</h1>
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+              <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Neural visual authentication suite</p>
+            </div>
           </div>
           {showWorkspace && (
             <button
               onClick={reset}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider border transition-all hover:bg-white/5"
-              style={{ borderColor: 'var(--panel-border)', color: 'var(--text-muted)' }}
+              className="px-4 md:px-6 py-2 md:py-2.5 rounded-xl border border-[var(--panel-border)] bg-[var(--bg-secondary)] hover:bg-[var(--btn-secondary-bg)] font-bold uppercase text-[9px] md:text-[10px] tracking-widest transition-all flex items-center gap-2"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               New Analysis
