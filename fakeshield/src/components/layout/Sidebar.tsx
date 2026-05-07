@@ -12,7 +12,8 @@ import {
   LogOut,
   Crown,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  User
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth.tsx';
@@ -244,8 +245,38 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
         })}
       </nav>
 
+      {/* User Profile Section */}
+      <div className="px-4 py-4 mt-auto border-t" style={{ borderColor: 'var(--panel-border)' }}>
+        <Link 
+          to="/settings"
+          className="flex items-center gap-3 p-3 rounded-2xl hover:bg-[var(--sidebar-hover-bg)] transition-all duration-300 group"
+        >
+          <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#00E5CC] shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
+            {user?.profile_pic ? (
+              <img 
+                src={user.profile_pic} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#00E5CC] to-[#00bfa5] flex items-center justify-center text-white shadow-inner">
+                <User size={18} strokeWidth={2.5} />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold truncate" style={{ color: 'var(--text-heading)' }}>
+              {user?.name || user?.fullName || 'User Account'}
+            </p>
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#00E5CC' }}>
+              Forensic Analyst
+            </p>
+          </div>
+        </Link>
+      </div>
+
       {/* Footer / Settings at bottom */}
-      <div className="p-6 border-t flex flex-col gap-2" style={{ borderColor: 'var(--panel-border)' }}>
+      <div className="p-4 flex flex-col gap-1 border-t" style={{ borderColor: 'var(--panel-border)' }}>
         <Link 
           to="/settings"
           onClick={onClose}
@@ -291,4 +322,4 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
   );
 };
 
-export default Sidebar;Sidebar;
+export default Sidebar;

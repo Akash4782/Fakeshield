@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, User, Menu } from 'lucide-react';
+import { Settings, Menu } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 interface TopBarProps {
@@ -10,12 +10,6 @@ interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = ({ searchValue, onSearchChange, onMenuClick }) => {
   const { user } = useAuth();
-
-  const [imgError, setImgError] = React.useState(false);
-
-  React.useEffect(() => {
-    setImgError(false);
-  }, [user?.profile_pic]);
 
   return (
     <div className="flex justify-between items-center mb-8 w-full gap-4">
@@ -59,31 +53,6 @@ const TopBar: React.FC<TopBarProps> = ({ searchValue, onSearchChange, onMenuClic
           </div>
         </div>
 
-        {/* User Profile */}
-        <div className="flex items-center gap-2 md:gap-3 bg-[var(--panel-bg)] p-1 md:pr-4 rounded-full border border-[var(--panel-border)] shadow-sm hover:shadow-md transition-all cursor-pointer group">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-[#00E5CC] transition-transform group-hover:scale-105 flex-shrink-0">
-            {user?.profile_pic && !imgError ? (
-              <img 
-                src={user.profile_pic} 
-                alt="Profile" 
-                className="w-full h-full object-cover" 
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#00E5CC] to-[#00bfa5] flex items-center justify-center text-white shadow-inner">
-                <User size={18} strokeWidth={2.5} />
-              </div>
-            )}
-          </div>
-          <div className="hidden sm:flex flex-col">
-            <span className="text-xs md:text-sm font-bold leading-tight truncate max-w-[80px] md:max-w-none" style={{ color: 'var(--text-heading)' }}>
-              {user?.name || user?.fullName || 'User Account'}
-            </span>
-            <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#00E5CC' }}>
-              Forensic Analyst
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
