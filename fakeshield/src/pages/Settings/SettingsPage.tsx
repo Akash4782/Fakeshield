@@ -87,8 +87,14 @@ const SettingsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 md:px-8 space-y-8 md:space-y-0 md:flex gap-12 pb-16">
           
           {/* LEFT SIDEBAR TABS */}
-          <div className="w-full md:w-64 flex-shrink-0">
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-6 md:mb-8">Settings</h1>
+          <div className="w-full md:w-64 flex-shrink-0 mt-12 mb-8">
+            <div className="space-y-1 mb-8">
+              <h1 className="text-4xl font-display font-black text-[#00E5CC] tracking-tighter uppercase">Settings</h1>
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-[1px] bg-[var(--panel-border)]"></span>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.4em] uppercase">Control Panel</p>
+              </div>
+            </div>
             <nav className="flex md:flex-col overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 gap-1 md:gap-1 no-scrollbar">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
