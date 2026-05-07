@@ -1,1 +1,0 @@
-Convolutional neural networks (CNNs) are a type of neural network that is particularly well-suited for image processing tasks. They use convolutional layers to extract features from images, such as edges and textures, which are then used to classify the images.

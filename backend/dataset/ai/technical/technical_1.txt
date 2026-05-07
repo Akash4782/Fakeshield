@@ -1,1 +1,0 @@
-A neural network is a type of machine learning model that is inspired by the structure and function of the human brain. It consists of layers of interconnected nodes, called neurons, that process information and learn patterns from data.

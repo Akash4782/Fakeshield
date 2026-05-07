@@ -18,6 +18,11 @@ node_modules/
 dist/
 build/
 backend/eval_samples/
+backend/test_data/
+**/test_data/
 *.mp4
 *.wav
 *.mp3
+*.zip
+*.tar
+*.gz

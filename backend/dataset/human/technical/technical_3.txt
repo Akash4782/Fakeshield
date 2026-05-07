@@ -1,1 +1,0 @@
-Deep learning involves training neural networks with many hidden layers. The adjustment of weights and biases happens through backpropagation to minimize error. This capability allows networks to make generalizations from unstructured data like images or text.
