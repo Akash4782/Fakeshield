@@ -122,10 +122,7 @@ const DashboardPage: React.FC = () => {
         )}
 
         <div className="px-4 md:px-8 space-y-6 pb-16">
-          <header className="mt-8 mb-10">
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-2">Dashboard</h1>
-            <p className="text-sm text-slate-500 font-medium">Real-time deepfake & synthetic media intelligence</p>
-          </header>
+
 
           {/* ── 4-stat row ──────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

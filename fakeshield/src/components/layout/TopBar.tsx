@@ -23,11 +23,11 @@ const TopBar: React.FC<TopBarProps> = ({ searchValue, onSearchChange, onMenuClic
           </button>
         )}
         <div className="min-w-0">
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight truncate" style={{ color: 'var(--text-heading)' }}>
+          <h1 className="font-display text-3xl md:text-4xl font-black tracking-tighter truncate uppercase" style={{ color: '#00E5CC' }}>
             {window.location.pathname === '/dashboard' ? 'Dashboard' : 
              window.location.pathname.split('/').pop()?.replace('Lab', ' Lab')}
           </h1>
-          <p className="text-[10px] md:text-sm mt-0.5 md:mt-1 truncate" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mt-1" style={{ color: 'var(--text-secondary)' }}>
             Real-time deepfake & synthetic media intelligence
           </p>
         </div>
