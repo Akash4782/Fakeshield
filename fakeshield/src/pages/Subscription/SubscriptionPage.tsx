@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Shield, Zap, Crown, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '../../hooks/useAuth.tsx';
 
 const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plans' | 'payment' | 'success'>('plans');
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
@@ -209,6 +211,8 @@ Secure your digital perimeter with FakeShield.
                   onClick={() => {
                     if (plan.isCurrent) {
                       navigate('/dashboard');
+                    } else if (!isAuthenticated) {
+                      navigate('/login', { state: { from: '/subscription' } });
                     } else if (plan.highlight) {
                       setPaymentStep('payment');
                     }

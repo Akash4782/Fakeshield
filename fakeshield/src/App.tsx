@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PaidRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   if (isLoading) return null;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.subscription_tier !== 'paid') return <Navigate to="/subscription" replace />;
   return <>{children}</>;
 };
@@ -56,7 +56,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/text-lab" element={<ProtectedRoute><TextLabPage /></ProtectedRoute>} />
             <Route path="/image-lab" element={<PaidRoute><ImageLabPage /></PaidRoute>} />
             <Route path="/audio-lab" element={<PaidRoute><AudioLabPage /></PaidRoute>} />
