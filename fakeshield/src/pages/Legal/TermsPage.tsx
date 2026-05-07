@@ -12,20 +12,23 @@ const TermsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" }}>
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
+      <nav className="fixed top-0 left-0 right-0 z-50" style={{ background: 'var(--panel-bg)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--panel-border)' }}>
         <div className="max-w-6xl mx-auto px-6 h-28 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <button 
               onClick={() => navigate(-1)}
-              className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-white hover:bg-[#00E5CC] transition-all duration-500 shadow-sm hover:shadow-lg hover:shadow-[#00E5CC]/20"
+              className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm hover:shadow-lg"
+              style={{ background: 'var(--btn-secondary-bg)', color: 'var(--text-muted)', border: '1px solid var(--panel-border)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#00E5CC'; e.currentTarget.style.color = '#000000'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--btn-secondary-bg)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               <ArrowLeft size={20} />
             </button>
             <div className="flex items-center gap-8 cursor-pointer" onClick={() => navigate('/')}>
               <img src={logo} alt="FakeShield" className="h-24" />
-              <span className="text-4xl font-black tracking-tighter text-slate-900">FAKESHIELD</span>
+              <span className="text-4xl font-black tracking-tighter" style={{ color: 'var(--text-heading)' }}>FAKESHIELD</span>
             </div>
           </div>
         </div>
@@ -34,21 +37,21 @@ const TermsPage: React.FC = () => {
       <main className="flex-grow pt-40 pb-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-16">
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-slate-900">
+            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight" style={{ color: 'var(--text-heading)' }}>
               Terms of <span className="text-[#00E5CC]">Service.</span>
             </h1>
-            <p className="text-slate-500 font-medium">Agreement for Forensic Verification Services | v2.1.0</p>
+            <p style={{ color: 'var(--text-secondary)' }} className="font-medium">Agreement for Forensic Verification Services | v2.1.0</p>
           </div>
 
           <div className="space-y-16">
             <section>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#00E5CC]">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[#00E5CC]" style={{ background: 'var(--btn-secondary-bg)' }}>
                   <Gavel size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">1. Forensic Integrity</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-heading)' }}>1. Forensic Integrity</h2>
               </div>
-              <div className="space-y-6 text-slate-600 leading-relaxed font-medium">
+              <div className="space-y-6 leading-relaxed font-medium" style={{ color: 'var(--text-secondary)' }}>
                 <p>
                   By using FakeShield, you agree to use our forensic tools for legitimate verification and investigative purposes. 
                   Any attempt to reverse-engineer our detection algorithms or use the platform to "test" how to bypass 
@@ -59,10 +62,10 @@ const TermsPage: React.FC = () => {
 
             <section>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#00E5CC]">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[#00E5CC]" style={{ background: 'var(--btn-secondary-bg)' }}>
                   <AlertCircle size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">2. Acceptable Use</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-heading)' }}>2. Acceptable Use</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
@@ -71,9 +74,9 @@ const TermsPage: React.FC = () => {
                   { title: 'No Automated Scraping', desc: 'Accessing the engine via unauthorized bots or scrapers is a breach of service.' },
                   { title: 'Reporting Accuracy', desc: 'Recognize that scores are forensic probabilities, not absolute legal facts.' }
                 ].map((item, i) => (
-                  <div key={i} className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100">
-                    <h4 className="font-bold text-slate-900 mb-2">{item.title}</h4>
-                    <p className="text-sm text-slate-500">{item.desc}</p>
+                  <div key={i} className="p-6 rounded-[2rem]" style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--panel-border)' }}>
+                    <h4 className="font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -81,12 +84,12 @@ const TermsPage: React.FC = () => {
 
             <section>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#00E5CC]">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[#00E5CC]" style={{ background: 'var(--btn-secondary-bg)' }}>
                   <Scale size={20} />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">3. Results & Accountability</h2>
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-heading)' }}>3. Results & Accountability</h2>
               </div>
-              <div className="space-y-6 text-slate-600 leading-relaxed font-medium">
+              <div className="space-y-6 leading-relaxed font-medium" style={{ color: 'var(--text-secondary)' }}>
                 <p>
                   While FakeShield utilizes state-of-the-art neural engines, forensic analysis is inherently probabilistic. 
                   Our confidence scores are technical indicators intended to support investigations and do not constitute 

@@ -32,10 +32,10 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
     <div className="flex flex-col gap-4">
       {/* Forensic reasons */}
       {reasons && reasons.length > 0 && (
-        <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}>
+        <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)', color: 'var(--text-primary)' }}>
           <div
-            className="px-5 py-4 border-b text-xs font-bold tracking-tight uppercase bg-slate-50"
-            style={{ borderColor: 'var(--panel-border)', color: '#334155' }}
+            className="px-5 py-4 border-b text-xs font-bold tracking-tight uppercase bg-[var(--btn-secondary-bg)]"
+            style={{ borderColor: 'var(--panel-border)', color: 'var(--text-primary)' }}
           >
             Logical Arbiter — Forensic Reasoning
           </div>
@@ -57,9 +57,9 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
                   transition={{ delay: i * 0.08 }}
                   className="flex items-start gap-4 px-5 py-3.5 rounded-xl text-[11px] font-medium leading-relaxed border"
                   style={{ 
-                    background: isPositive ? 'rgba(16,185,129,0.03)' : isNegative ? 'rgba(239,68,68,0.03)' : '#f8fafc', 
-                    borderColor: isPositive ? 'rgba(16,185,129,0.1)' : isNegative ? 'rgba(239,68,68,0.1)' : 'rgba(0,0,0,0.03)',
-                    color: '#334155' 
+                    background: isPositive ? 'rgba(16,185,129,0.06)' : isNegative ? 'rgba(239,68,68,0.06)' : 'var(--btn-secondary-bg)', 
+                    borderColor: isPositive ? 'rgba(16,185,129,0.16)' : isNegative ? 'rgba(239,68,68,0.16)' : 'var(--panel-border)',
+                    color: 'var(--text-primary)' 
                   }}
                 >
                   <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color }} strokeWidth={2.5} />
@@ -73,13 +73,13 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
 
       {/* Per-generator accuracy table */}
       {perGeneratorAccuracy && Object.keys(perGeneratorAccuracy).length > 0 && (
-        <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}>
+        <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)', color: 'var(--text-primary)' }}>
           <div
-            className="px-5 py-4 border-b flex items-center gap-2 bg-slate-50"
+            className="px-5 py-4 border-b flex items-center gap-2 bg-[var(--btn-secondary-bg)]"
             style={{ borderColor: 'var(--panel-border)' }}
           >
             <TrendingUp className="w-4 h-4 text-cyan-500" />
-            <span className="text-xs font-bold tracking-tight uppercase" style={{ color: '#334155' }}>
+            <span className="text-xs font-bold tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>
               Per-Generator Detection Accuracy
             </span>
           </div>
@@ -90,7 +90,7 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
               return (
                 <div key={gen} className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-slate-700">{gen}</span>
+                    <span className="text-[10px] font-bold text-[var(--text-primary)]">{gen}</span>
                     <span className="text-[10px] font-black" style={{ color: col }}>{data.accuracy}</span>
                   </div>
                   <div className="w-full rounded-full overflow-hidden" style={{ height: 4, background: 'rgba(255,255,255,0.06)' }}>
@@ -102,14 +102,14 @@ export default function ImageReportPanel({ reasons, perGeneratorAccuracy, verdic
                       transition={{ duration: 0.8, ease: 'easeOut' }}
                     />
                   </div>
-                  <div className="text-[9px] font-medium text-slate-400 mt-1 uppercase tracking-tighter">{data.notes}</div>
+                  <div className="text-[9px] font-medium text-[var(--text-muted)] mt-1 uppercase tracking-tighter">{data.notes}</div>
                 </div>
               );
             })}
           </div>
           <div
-            className="px-5 py-3 border-t flex items-start gap-2 text-[10px] font-medium leading-relaxed bg-slate-50/50"
-            style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
+            className="px-5 py-3 border-t flex items-start gap-2 text-[10px] font-medium leading-relaxed bg-[var(--btn-secondary-bg)]"
+            style={{ borderColor: 'var(--panel-border)', color: 'var(--text-secondary)' }}
           >
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
             Accuracy varies by compression, platform re-encoding, and steganographic post-processing artifacts.

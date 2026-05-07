@@ -132,7 +132,7 @@ const SettingsPage: React.FC = () => {
                       <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Last name</label><input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
                     </div>
                     <div className="space-y-2 mb-6"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
-                    <div className="pt-8 border-t border-slate-200 flex justify-end"><button onClick={handleSaveProfile} className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#020617] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Save Changes</button></div>
+                    <div className="pt-8 border-t border-slate-200 flex justify-end"><button onClick={handleSaveProfile} className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#000000] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Save Changes</button></div>
                   </section>
                 </div>
               )}
@@ -143,7 +143,7 @@ const SettingsPage: React.FC = () => {
                     <form className="space-y-6">
                       <div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Current Password</label><input type="password" placeholder="••••••••" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">New Password</label><input type="password" placeholder="New password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div><div className="space-y-2"><label className="text-[11px] font-black uppercase tracking-widest text-slate-500 ml-1">Confirm New Password</label><input type="password" placeholder="Repeat new password" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-[#00E5CC] transition-all text-sm font-medium" /></div></div>
-                      <div className="pt-6 flex justify-end"><button type="submit" className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#020617] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Update Password</button></div>
+                      <div className="pt-6 flex justify-end"><button type="submit" className="px-10 py-3 rounded-xl bg-[#00E5CC] text-[#000000] text-sm font-black hover:bg-[#00d1ba] shadow-lg shadow-[#00E5CC]/20 transition-all active:scale-95">Update Password</button></div>
                     </form>
                   </div>
                 </div>
@@ -151,8 +151,8 @@ const SettingsPage: React.FC = () => {
 
               {activeTab === 'Billing information' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
-                   <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#00E5CC] to-[#00b8a5] text-[#020617] overflow-hidden shadow-2xl shadow-[#00E5CC]/20">
-                      <div className="relative z-10 flex justify-between items-center"><div><span className="px-3 py-1 bg-[#020617]/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#020617]/10">Current Plan</span><h3 className="text-4xl font-black mt-3">Pro Forensic</h3></div><div className="text-right"><p className="text-3xl font-black">$29.00</p><p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">per month</p></div></div>
+                   <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#00E5CC] to-[#00b8a5] text-[#000000] overflow-hidden shadow-2xl shadow-[#00E5CC]/20">
+                      <div className="relative z-10 flex justify-between items-center"><div><span className="px-3 py-1 bg-[#000000]/10 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#000000]/10">Current Plan</span><h3 className="text-4xl font-black mt-3">Pro Forensic</h3></div><div className="text-right"><p className="text-3xl font-black">$29.00</p><p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">per month</p></div></div>
                    </div>
                 </div>
               )}
@@ -160,15 +160,15 @@ const SettingsPage: React.FC = () => {
               {activeTab === 'Privacy & Logic' && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
                    {/* Ephemeral Mode */}
-                   <section className="p-8 rounded-[2.5rem] border border-slate-200 bg-slate-50 group hover:border-[#00E5CC]/30 transition-all">
+                   <section className="p-8 rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)] group hover:border-[#00E5CC]/30 transition-all">
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-5">
-                            <div className={`p-4 rounded-2xl transition-colors ${ephemeralMode ? 'bg-[#00E5CC] text-[#020617]' : 'bg-white text-slate-400'}`}>
+                            <div className={`p-4 rounded-2xl transition-colors ${ephemeralMode ? 'bg-[#00E5CC] text-[#000000]' : 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)]'}`}>
                                <Zap size={24} />
                             </div>
                             <div>
-                               <h3 className="text-lg font-bold text-slate-900">Ephemeral Privacy Mode</h3>
-                               <p className="text-xs text-slate-500 mt-1 max-w-[400px]">When active, nothing is saved to the cloud after a scan is finished. This is critical for high-security forensic workflows.</p>
+                               <h3 className="text-lg font-bold text-[var(--text-primary)]">Ephemeral Privacy Mode</h3>
+                               <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-[400px]">When active, nothing is saved to the cloud after a scan is finished. This is critical for high-security forensic workflows.</p>
                             </div>
                          </div>
                          <div onClick={() => setEphemeralMode(!ephemeralMode)} className={`w-14 h-7 rounded-full relative cursor-pointer transition-all duration-300 ${ephemeralMode ? 'bg-[#00E5CC]' : 'bg-slate-300'}`}>
@@ -183,22 +183,22 @@ const SettingsPage: React.FC = () => {
                    </section>
 
                    {/* AI Report Tone */}
-                   <section className="p-8 rounded-[2.5rem] border border-slate-200">
+                   <section className="p-8 rounded-[2.5rem] border border-[var(--panel-border)] bg-[var(--panel-bg)]">
                       <div className="mb-8">
-                         <h3 className="text-lg font-bold text-slate-900">AI Report Tone</h3>
-                         <p className="text-xs text-slate-500 mt-1">Calibrate how the AI Reasoner explains forensic findings in your reports.</p>
+                         <h3 className="text-lg font-bold text-[var(--text-primary)]">AI Report Tone</h3>
+                         <p className="text-xs text-[var(--text-secondary)] mt-1">Calibrate how the AI Reasoner explains forensic findings in your reports.</p>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                          {['Detailed Technical', 'Executive Summary', 'Legal Standard'].map(tone => (
                            <button 
                             key={tone} 
                             onClick={() => setReportTone(tone)}
-                            className={`p-5 rounded-2xl border transition-all text-left ${reportTone === tone ? 'bg-white border-[#00E5CC] shadow-lg shadow-[#00E5CC]/10' : 'bg-slate-50 border-slate-100 hover:border-slate-200'}`}
+                            className={`p-5 rounded-2xl border transition-all text-left ${reportTone === tone ? 'bg-[var(--accent-blue-transparent)] border-[var(--accent-blue-border)] shadow-lg shadow-[#00E5CC]/10' : 'bg-[var(--btn-secondary-bg)] border-[var(--panel-border)] hover:border-[var(--border-hover)]'}`}
                            >
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${reportTone === tone ? 'bg-[#00E5CC]/10 text-[#00E5CC]' : 'bg-white text-slate-400'}`}>
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${reportTone === tone ? 'bg-[#00E5CC]/10 text-[#00E5CC]' : 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)]'}`}>
                                  <Info size={16} />
                               </div>
-                              <p className={`text-xs font-bold ${reportTone === tone ? 'text-slate-900' : 'text-slate-500'}`}>{tone}</p>
+                              <p className={`text-xs font-bold ${reportTone === tone ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{tone}</p>
                            </button>
                          ))}
                       </div>
@@ -210,41 +210,41 @@ const SettingsPage: React.FC = () => {
                 <div className="space-y-6 animate-in fade-in duration-500">
                    <div className="flex justify-between items-center mb-2">
                       <div>
-                         <h3 className="text-xl font-bold text-slate-900">Login Activity Log</h3>
-                         <p className="text-xs text-slate-500 mt-1">Monitor recent access to your forensic laboratory.</p>
+                         <h3 className="text-xl font-bold text-[var(--text-primary)]">Login Activity Log</h3>
+                         <p className="text-xs text-[var(--text-secondary)] mt-1">Monitor recent access to your forensic laboratory.</p>
                       </div>
                       <button className="text-[10px] font-black text-[#00b8a5] uppercase tracking-widest hover:underline">Download full log</button>
                    </div>
 
-                   <div className="overflow-x-auto border border-slate-200 rounded-[2.5rem]">
+                   <div className="overflow-x-auto border border-[var(--panel-border)] rounded-[2.5rem]">
                       <table className="w-full text-left min-w-[600px]">
-                         <thead className="bg-slate-50 border-b border-slate-200">
+                         <thead className="bg-[var(--btn-secondary-bg)] border-b border-[var(--panel-border)]">
                             <tr>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Event</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">IP Address</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Device / OS</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest">Location</th>
-                               <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Time</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">Event</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">IP Address</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">Device / OS</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest">Location</th>
+                               <th className="px-6 py-4 text-[10px] font-black uppercase text-[var(--text-muted)] tracking-widest text-right">Time</th>
                             </tr>
                          </thead>
-                         <tbody className="divide-y divide-slate-100">
+                         <tbody className="divide-y divide-[var(--panel-border)]">
                             {activityLog.map(log => (
-                              <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                              <tr key={log.id} className="hover:bg-[var(--btn-secondary-bg)] transition-colors">
                                  <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
                                        <div className={`w-2 h-2 rounded-full ${log.event.includes('Failed') ? 'bg-red-500' : 'bg-[#00E5CC]'}`} />
-                                       <span className="text-xs font-bold text-slate-900">{log.event}</span>
+                                       <span className="text-xs font-bold text-[var(--text-primary)]">{log.event}</span>
                                     </div>
                                  </td>
-                                 <td className="px-6 py-4 text-[11px] font-mono text-slate-500">{log.ip}</td>
+                                 <td className="px-6 py-4 text-[11px] font-mono text-[var(--text-secondary)]">{log.ip}</td>
                                  <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-slate-600">
+                                    <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                                        <Monitor size={12} />
                                        <span className="text-[11px] font-medium">{log.device}</span>
                                     </div>
                                  </td>
-                                 <td className="px-6 py-4 text-[11px] font-medium text-slate-500">{log.location}</td>
-                                 <td className="px-6 py-4 text-right text-[10px] font-bold text-slate-400">{log.time}</td>
+                                 <td className="px-6 py-4 text-[11px] font-medium text-[var(--text-secondary)]">{log.location}</td>
+                                 <td className="px-6 py-4 text-right text-[10px] font-bold text-[var(--text-muted)]">{log.time}</td>
                               </tr>
                             ))}
                          </tbody>
@@ -254,13 +254,13 @@ const SettingsPage: React.FC = () => {
               )}
 
               {activeTab === 'Messages' && (
-                <div className="space-y-6 animate-in fade-in duration-500">{notifications.map(notif => (<div key={notif.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-200 flex items-start gap-4 hover:bg-white transition-all cursor-pointer"><div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${notif.color}15`, color: notif.color }}><notif.icon size={24} /></div><div className="flex-1"><div className="flex justify-between items-center mb-1"><h4 className="text-sm font-black text-slate-900">{notif.title}</h4><span className="text-[10px] font-bold text-slate-400">{notif.time}</span></div><p className="text-xs text-slate-500">{notif.text}</p></div></div>))}</div>
+                <div className="space-y-6 animate-in fade-in duration-500">{notifications.map(notif => (<div key={notif.id} className="p-6 bg-[var(--btn-secondary-bg)] rounded-3xl border border-[var(--panel-border)] flex items-start gap-4 hover:bg-[var(--border-hover)] transition-all cursor-pointer"><div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${notif.color}15`, color: notif.color }}><notif.icon size={24} /></div><div className="flex-1"><div className="flex justify-between items-center mb-1"><h4 className="text-sm font-black text-[var(--text-primary)]">{notif.title}</h4><span className="text-[10px] font-bold text-[var(--text-muted)]">{notif.time}</span></div><p className="text-xs text-[var(--text-secondary)]">{notif.text}</p></div></div>))}</div>
               )}
 
               {activeTab === 'Data export' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-500">
-                   <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-200 text-center"><div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 text-[#FF00FF]"><Download size={32} /></div><h3 className="text-2xl font-black text-slate-900 mb-2">Export Laboratory Data</h3><p className="text-sm text-slate-500 max-w-md mx-auto">Download a complete, accurate record of all your forensic scans.</p></div>
-                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6"><button className="p-8 bg-white border border-slate-200 rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-500 mb-6"><FileJson size={24} /></div><h4 className="text-lg font-bold text-slate-900 mb-1">Raw JSON Format</h4></button><button className="p-8 bg-white border border-slate-200 rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-green-500 mb-6"><FileSpreadsheet size={24} /></div><h4 className="text-lg font-bold text-slate-900 mb-1">CSV Spreadsheet</h4></button></div>
+                   <div className="p-10 bg-[var(--btn-secondary-bg)] rounded-[2.5rem] border border-[var(--panel-border)] text-center"><div className="w-20 h-20 bg-[var(--bg-secondary)] rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-6 text-[#FF00FF]"><Download size={32} /></div><h3 className="text-2xl font-black text-[var(--text-primary)] mb-2">Export Laboratory Data</h3><p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">Download a complete, accurate record of all your forensic scans.</p></div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6"><button className="p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-blue-500 mb-6"><FileJson size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">Raw JSON Format</h4></button><button className="p-8 bg-[var(--bg-secondary)] border border-[var(--panel-border)] rounded-[2rem] text-left hover:border-[#00E5CC] transition-all group"><div className="w-12 h-12 bg-[var(--btn-secondary-bg)] rounded-2xl flex items-center justify-center text-green-500 mb-6"><FileSpreadsheet size={24} /></div><h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">CSV Spreadsheet</h4></button></div>
                 </div>
               )}
             </div>

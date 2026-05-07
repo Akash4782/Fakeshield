@@ -148,7 +148,7 @@ const TextLabPage: React.FC = () => {
                  <button 
                   onClick={handleDownload}
                   disabled={downloading}
-                  className="px-4 md:px-6 py-2 md:py-2.5 rounded-xl bg-[rgba(0,229,204,0.05)] text-[#00E5CC] border border-[var(--accent-blue-border)] font-bold uppercase text-[9px] md:text-[10px] tracking-widest hover:bg-[#00E5CC] hover:text-[#020617] transition-all flex items-center gap-2"
+                  className="px-4 md:px-6 py-2 md:py-2.5 rounded-xl bg-[rgba(0,229,204,0.05)] text-[#00E5CC] border border-[var(--accent-blue-border)] font-bold uppercase text-[9px] md:text-[10px] tracking-widest hover:bg-[#00E5CC] hover:text-[#000000] transition-all flex items-center gap-2"
                  >
                    {downloading ? "EXPORTING..." : "EXPORT TECHNICAL REPORT"}
                  </button>
@@ -185,7 +185,7 @@ const TextLabPage: React.FC = () => {
                              className={`px-12 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-sm transition-all relative overflow-hidden ${
                                loading || text.trim().length < 20
                                ? 'bg-[var(--btn-secondary-bg)] text-[var(--text-muted)] cursor-not-allowed opacity-50' 
-                               : 'bg-gradient-to-r from-[#00E5CC] to-[#0092ff] text-[#020617] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,229,204,0.3)] active:scale-95'
+                               : 'bg-gradient-to-r from-[#00E5CC] to-[#0092ff] text-[#000000] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,229,204,0.3)] active:scale-95'
                              }`}
                            >
                              {loading ? "PROCESSING PATTERNS..." : "ANALYZE CONTENT"}
@@ -381,4 +381,3 @@ const TextLabPage: React.FC = () => {
 };
 
 export default TextLabPage;
-

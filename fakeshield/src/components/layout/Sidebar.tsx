@@ -185,19 +185,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
 
       {/* Subscription Status Card - Clean Light Theme */}
       <div className="px-6 py-6 mt-2">
-        <div className="group relative p-4 rounded-2xl bg-white border border-slate-200 hover:border-[#00E5CC]/50 transition-all duration-300 shadow-sm overflow-hidden">
+        <div className="group relative p-4 rounded-2xl bg-[var(--panel-bg)] border border-[var(--panel-border)] hover:border-[#00E5CC]/50 transition-all duration-300 shadow-sm overflow-hidden">
           {/* Subtle Background Accent */}
           <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#00E5CC]/5 rounded-full blur-2xl group-hover:bg-[#00E5CC]/10 transition-all duration-500"></div>
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">Account Status</span>
-                <span className={`text-xs font-black tracking-wide ${isPaid ? 'text-[#00E5CC]' : 'text-slate-800'}`}>
+                <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-0.5">Account Status</span>
+                <span className={`text-xs font-black tracking-wide ${isPaid ? 'text-[#00E5CC]' : 'text-[var(--text-primary)]'}`}>
                   {isPaid ? 'PREMIUM SHIELD' : 'STANDARD ACCESS'}
                 </span>
               </div>
-              <div className={`p-1.5 rounded-lg ${isPaid ? 'bg-[#00E5CC]/10' : 'bg-slate-100'}`}>
+              <div className={`p-1.5 rounded-lg ${isPaid ? 'bg-[#00E5CC]/10' : 'bg-[var(--btn-secondary-bg)]'}`}>
                 {isPaid ? <Crown size={14} className="text-[#00E5CC]" /> : <ShieldCheck size={14} className="text-slate-400" />}
               </div>
             </div>
@@ -211,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
                 <ArrowRight size={12} className="opacity-70 group-hover:translate-x-1 transition-transform" />
               </Link>
             ) : (
-              <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden mt-2">
+              <div className="h-1 w-full bg-[var(--btn-secondary-bg)] rounded-full overflow-hidden mt-2">
                 <div className="h-full w-full bg-gradient-to-r from-[#00E5CC] to-indigo-500"></div>
               </div>
             )}

@@ -299,9 +299,9 @@ const ImageLabPage = () => {
                 className="relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all p-12 gap-5"
                 style={{
                   borderColor: isDragging ? '#00E5CC' : 'var(--panel-border)',
-                  background: isDragging ? 'rgba(0,229,204,0.05)' : '#ffffff',
+                  background: isDragging ? 'rgba(0,229,204,0.05)' : 'var(--panel-bg)',
                   boxShadow: isDragging ? '0 0 40px rgba(0,229,204,0.15)' : '0 10px 30px rgba(0,0,0,0.04)',
-                  color: '#1e293b'
+                  color: 'var(--text-primary)'
                 }}
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -354,16 +354,16 @@ const ImageLabPage = () => {
                   className="rounded-2xl p-8 border flex flex-col items-center justify-center gap-6 h-full min-h-[420px]"
                   style={{
                     borderColor: data ? vCfg.border : 'var(--panel-border)',
-                    background: data ? vCfg.bg : '#ffffff',
+                    background: data ? vCfg.bg : 'var(--panel-bg)',
                     boxShadow: data ? vCfg.glow : '0 10px 30px rgba(0,0,0,0.04)',
                     transition: 'all 0.5s ease',
-                    color: '#1e293b'
+                    color: 'var(--text-primary)'
                   }}
                 >
                   {isAnalyzing ? (
                     <div className="flex flex-col items-center gap-3 py-6">
                     <Loader2 className="w-16 h-16 animate-spin text-cyan-500" />
-                    <p className="text-sm font-semibold tracking-wide animate-pulse mt-4 text-slate-600">
+                    <p className="text-sm font-semibold tracking-wide animate-pulse mt-4 text-[var(--text-secondary)]">
                       PROCESSING IMAGE PATTERNS...
                     </p>
                     </div>
@@ -395,7 +395,7 @@ const ImageLabPage = () => {
                           >
                             {Math.round(data.ai_probability * 100)}%
                           </motion.span>
-                          <span className="text-xs font-bold mt-2 tracking-widest text-slate-400 uppercase">AI PROBABILITY SCORE</span>
+                          <span className="text-xs font-bold mt-2 tracking-widest text-[var(--text-muted)] uppercase">AI PROBABILITY SCORE</span>
                         </div>
                       </div>
 
@@ -414,7 +414,7 @@ const ImageLabPage = () => {
                           >
                             {vCfg.badge}
                           </span>
-                          <span className="text-xs font-medium text-slate-500">
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">
                             Confidence: {data.confidence.toFixed(1)}%
                           </span>
                         </div>
@@ -435,17 +435,17 @@ const ImageLabPage = () => {
               
               {/* LEFT: Forensic Scorecard (5/12) */}
               <div className="lg:col-span-5 flex flex-col gap-6">
-                <div className="rounded-2xl border overflow-hidden shadow-sm bg-white" style={{ borderColor: 'var(--panel-border)', color: '#1e293b' }}>
-                  <div className="px-5 py-4 border-b text-sm font-bold flex justify-between items-center bg-slate-50"
-                    style={{ borderColor: 'var(--panel-border)', color: '#334155' }}>
+                <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)', color: 'var(--text-primary)' }}>
+                  <div className="px-5 py-4 border-b text-sm font-bold flex justify-between items-center bg-[var(--btn-secondary-bg)]"
+                    style={{ borderColor: 'var(--panel-border)', color: 'var(--text-primary)' }}>
                     <span>Signal analysis breakdown</span>
-                    <Fingerprint className="w-5 h-5 text-slate-400" />
+                    <Fingerprint className="w-5 h-5 text-[var(--text-muted)]" />
                   </div>
 
                   <div className="p-4 space-y-3">
                     {isAnalyzing ? (
                       [...Array(8)].map((_, i) => (
-                        <div key={i} className="animate-pulse h-12 rounded-xl bg-slate-50" />
+                        <div key={i} className="animate-pulse h-12 rounded-xl bg-[var(--btn-secondary-bg)]" />
                       ))
                     ) : data?.signals ? (
                       MODULE_CONFIG.map((mod) => {
@@ -460,16 +460,16 @@ const ImageLabPage = () => {
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50"
+                            className="px-4 py-3 rounded-xl border border-[var(--panel-border)] bg-[var(--btn-secondary-bg)]"
                           >
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white shadow-sm border border-slate-100">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-secondary)] shadow-sm border border-[var(--panel-border)]">
                                   <Icon className="w-5 h-5" style={{ color: mod.color }} />
                                 </div>
                                 <div>
-                                  <div className="text-sm font-bold text-slate-800">{mod.label}</div>
-                                  <div className="text-[11px] text-slate-500 font-medium">{mod.desc}</div>
+                                  <div className="text-sm font-bold text-[var(--text-primary)]">{mod.label}</div>
+                                  <div className="text-[11px] text-[var(--text-secondary)] font-medium">{mod.desc}</div>
                                 </div>
                               </div>
                               <div className="text-right">
@@ -477,7 +477,7 @@ const ImageLabPage = () => {
                                 <div className="text-[10px] font-bold uppercase tracking-tight" style={{ color: `${col}cc` }}>{scoreLabel(score)}</div>
                               </div>
                             </div>
-                            <div className="w-full h-1.5 rounded-full bg-white border border-slate-100 overflow-hidden">
+                            <div className="w-full h-1.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--panel-border)] overflow-hidden">
                               <motion.div
                                 className="h-full rounded-full"
                                 style={{ background: col }}
@@ -517,10 +517,10 @@ const ImageLabPage = () => {
                 {(data || isAnalyzing) && (
                   <div className="mt-auto">
                     {isAnalyzing ? (
-                      <div className="rounded-2xl border p-6 bg-white animate-pulse" style={{ borderColor: 'var(--panel-border)' }}>
-                        <div className="h-4 bg-slate-100 rounded w-48 mb-4" />
+                      <div className="rounded-2xl border p-6 bg-[var(--panel-bg)] animate-pulse" style={{ borderColor: 'var(--panel-border)' }}>
+                        <div className="h-4 bg-[var(--btn-secondary-bg)] rounded w-48 mb-4" />
                         <div className="grid grid-cols-2 gap-4">
-                          {[...Array(4)].map((_, i) => <div key={i} className="h-12 bg-slate-50 rounded-xl" />)}
+                          {[...Array(4)].map((_, i) => <div key={i} className="h-12 bg-[var(--btn-secondary-bg)] rounded-xl" />)}
                         </div>
                       </div>
                     ) : data?.metadata ? (

@@ -55,17 +55,17 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
   const fields = ['camera', 'gps', 'lens', 'software'] as const;
 
   return (
-    <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b' }}>
+    <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)', color: 'var(--text-primary)' }}>
       {/* Header */}
       <div
         className="px-4 py-3 border-b flex items-center justify-between"
         style={{ borderColor: 'var(--panel-border)' }}
       >
-        <span className="text-xs font-bold tracking-tight text-slate-800 uppercase">
+        <span className="text-xs font-bold tracking-tight text-[var(--text-primary)] uppercase">
           EXIF Metadata Guard
         </span>
         {metadata.dimensions && (
-          <span className="text-[11px] font-semibold text-slate-400">
+          <span className="text-[11px] font-semibold text-[var(--text-muted)]">
             {metadata.dimensions}
           </span>
         )}
@@ -92,7 +92,7 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
 
               {/* Label + note */}
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
                   {FIELD_LABELS[key]}
                 </div>
                 <div
@@ -118,8 +118,8 @@ export default function MetadataInspector({ metadata }: MetadataInspectorProps) 
 
       {/* Forensic note */}
       <div
-        className="px-4 py-3 border-t text-[10px] font-medium leading-relaxed bg-slate-50"
-        style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
+        className="px-4 py-3 border-t text-[10px] font-medium leading-relaxed bg-[var(--btn-secondary-bg)]"
+        style={{ borderColor: 'var(--panel-border)', color: 'var(--text-secondary)' }}
       >
         <span className="font-bold text-cyan-500">FORENSIC NOTE:</span>
         {" "}Camera make/model is a primary indicator. Missing GPS or shutter speed data is common in web-optimized images but remains a diagnostic factor.

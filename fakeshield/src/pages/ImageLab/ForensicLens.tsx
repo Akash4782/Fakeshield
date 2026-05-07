@@ -41,7 +41,7 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
   return (
     <div
       className="rounded-2xl overflow-hidden border flex flex-col shadow-sm"
-      style={{ borderColor: 'var(--panel-border)', background: '#ffffff', color: '#1e293b', minHeight: 420 }}
+      style={{ borderColor: 'var(--panel-border)', background: 'var(--panel-bg)', color: 'var(--text-primary)', minHeight: 420 }}
     >
       {/* Tab bar */}
       <div className="flex border-b shrink-0" style={{ borderColor: 'var(--panel-border)' }}>
@@ -51,7 +51,7 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
             onClick={() => setActiveTab(tab.id)}
             className="relative flex-1 py-3 text-xs font-bold tracking-tight uppercase transition-colors"
             style={{
-              color: activeTab === tab.id ? tab.color : '#64748b',
+              color: activeTab === tab.id ? tab.color : 'var(--text-muted)',
               background: activeTab === tab.id ? `${tab.color}08` : 'transparent',
             }}
           >
@@ -70,8 +70,8 @@ export default function ForensicLens({ originalUrl, fftUrl, heatmapUrl, elaUrl, 
 
       {/* Description bar */}
       <div
-        className="px-5 py-2 text-[11px] font-medium shrink-0 border-b bg-slate-50"
-        style={{ borderColor: 'var(--panel-border)', color: '#64748b' }}
+        className="px-5 py-2 text-[11px] font-medium shrink-0 border-b bg-[var(--btn-secondary-bg)]"
+        style={{ borderColor: 'var(--panel-border)', color: 'var(--text-secondary)' }}
       >
         <span className="font-bold mr-1" style={{ color: activeTabCfg.color }}>ANALYSIS:</span>
         {TAB_DESCRIPTIONS[activeTab]}

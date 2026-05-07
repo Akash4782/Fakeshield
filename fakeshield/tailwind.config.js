@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        obsidian: '#0B0E14',
-        'neutral-dark': '#0A0C10',
+        obsidian: '#000000',
+        'neutral-dark': '#000000',
         'border-dark': '#1A1D23',
         teal: {
           accent: '#00E5CC',

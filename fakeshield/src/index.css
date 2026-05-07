@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --bg-primary: #020617;
-    --bg-secondary: #0B0E14;
-    --page-bg: #020617;
+    --bg-primary: #000000;
+    --bg-secondary: #000000;
+    --page-bg: #000000;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-heading: #ffffff;
@@ -14,10 +14,10 @@
     --text-inactive: #475569;
     --text-muted: #64748b;
     
-    --panel-bg: rgba(11, 14, 20, 0.4);
+    --panel-bg: rgba(0, 0, 0, 0.4);
     --panel-border: rgba(255, 255, 255, 0.08);
     --border-hover: rgba(255, 255, 255, 0.15);
-    --glass-bg: rgba(2, 6, 23, 0.7);
+    --glass-bg: rgba(0, 0, 0, 0.7);
     
     --btn-secondary-bg: rgba(255, 255, 255, 0.05);
     --btn-secondary-border: rgba(255, 255, 255, 0.08);
@@ -61,8 +61,8 @@
     --color-background-warning: rgba(234, 179, 8, 0.1);
     --color-background-info: rgba(0, 229, 204, 0.1);
     --color-background-success: rgba(34, 197, 94, 0.1);
-    --color-background-primary: #020617;
-    --color-background-secondary: #0B0E14;
+    --color-background-primary: #000000;
+    --color-background-secondary: #000000;
     --color-text-danger: #ef4444;
     --color-text-warning: #eab308;
     --color-text-info: #00E5CC;
@@ -79,9 +79,9 @@
   }
 
   :root[data-theme='light'] {
-    --bg-primary: #f8fafc;
+    --bg-primary: #ffffff;
     --bg-secondary: #ffffff;
-    --page-bg: #f1f5f9;
+    --page-bg: #ffffff;
     --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-heading: #0f172a;
@@ -196,6 +196,26 @@
     border-color: var(--border-hover);
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--panel-border);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    background: var(--border-hover);
+    color: var(--text-primary);
+    transform: scale(1.05);
   }
 }
 
