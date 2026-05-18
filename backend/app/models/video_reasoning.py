@@ -11,7 +11,13 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 try:
     from transformers.cache_utils import Cache, DynamicCache
     
-    def get_usable_length_patch(self, layer_idx=0):
+    def get_usable_length_patch(self, *args, **kwargs):
+        layer_idx = 0
+        if len(args) > 1:
+            layer_idx = args[1]
+        elif "layer_idx" in kwargs:
+            layer_idx = kwargs["layer_idx"]
+
         if hasattr(self, "get_seq_length"):
             return self.get_seq_length(layer_idx)
         if hasattr(self, "seen_tokens"):
