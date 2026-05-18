@@ -22,6 +22,9 @@ class VideoReasoningModule:
                 device_map=None
             ).to(DEVICE).eval()
 
+        # Disable KV Cache to avoid 'DynamicCache' compat issues with newer transformers packages
+        self.model.config.use_cache = False
+
         # Explicitly initialize generation config for transformers 4.45+ compatibility
         # This prevents the "'NoneType' object has no attribute '_from_model_config'" error
         try:
