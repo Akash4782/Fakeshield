@@ -124,23 +124,26 @@ async def run_video_pipeline_v10(video_path: str) -> Dict[str, Any]:
     audio_path = sampler.extract_audio(video_path)
     fps = meta.get("fps", 2)
     
-    loop = asyncio.get_event_loop()
     # Subsample frames for deep models to cut processing time in half
     frames_pil_deep = frames_pil[::2]
     frames_np_deep = frames_np[::2]
     
-    # Deep Neural Ensemble (Max Concurrency for Industrial Speed)
-    # We use 4 workers because we have 4 independent heavy tasks
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        t1_spatial   = loop.run_in_executor(executor, clip_module.get_signal, frames_pil_deep)
-        t2_temporal  = loop.run_in_executor(executor, tempo_raft.get_signal, frames_np_deep)
-        # Audio module relies on original FPS timing, so it keeps the original frames
-        t3_audio     = loop.run_in_executor(executor, audio_module.analyze_audio_visual, audio_path, frames_np, fps)
-        t4_reasoning = loop.run_in_executor(executor, reasoning_module.analyze_physics, frames_pil_deep)
-        
-        res_spatial, res_temporal, res_audio, res_reasoning = await asyncio.gather(
-            t1_spatial, t2_temporal, t3_audio, t4_reasoning
-        )
+    # CPU Optimization: Limit PyTorch threads to 1 to prevent core-contention thrashing on Hugging Face Space vCPUs.
+    # Sequential execution prevents severe OOMs and CPU locks under tight resources.
+    import torch
+    torch.set_num_threads(1)
+    
+    print("[v11.0-P3] Executing Spatial Deep Ensemble (SigLIP)...", flush=True)
+    res_spatial = clip_module.get_signal(frames_pil_deep)
+    
+    print("[v11.0-P3] Executing Temporal Optical Flow (RAFT)...", flush=True)
+    res_temporal = tempo_raft.get_signal(frames_np_deep)
+    
+    print("[v11.0-P3] Executing Audio-Visual Lip-Sync (Whisper)...", flush=True)
+    res_audio = audio_module.analyze_audio_visual(audio_path, frames_np, fps)
+    
+    print("[v11.0-P3] Executing Visual Physics Reasoning (Moondream)...", flush=True)
+    res_reasoning = reasoning_module.analyze_physics(frames_pil_deep)
     
     signals_map = {
         "spatial": res_spatial.get("score", 0.5),
