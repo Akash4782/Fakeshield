@@ -39,7 +39,7 @@ async def analyze_video_async(
         try:
             # Run the v10.0 Consistency Engine analysis
             report = await run_video_pipeline_v10(temp_path)
-            _jobs[job_id] = {**report, "status": "complete"}
+            _jobs[job_id] = {**report, "status": "complete", "user_email": user_email}
             
             # Persist to MongoDB
             try:
@@ -71,7 +71,7 @@ async def analyze_video_async(
                 print(f"Failed to persist video scan to DB: {db_err}")
 
         except Exception as e:
-            _jobs[job_id] = {"status": "error", "detail": str(e)}
+            _jobs[job_id] = {"status": "error", "detail": str(e), "user_email": user_email}
         finally:
             # Clean up the temp file
             if os.path.exists(temp_path):

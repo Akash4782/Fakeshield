@@ -94,7 +94,7 @@ async def analyze_async(
         try:
             # analyze_audio is synchronous and heavy, run it in a thread
             result = await asyncio.to_thread(analyze_audio, audio_bytes, filename)
-            job_store[job_id] = {"status": "complete", "result": result}
+            job_store[job_id] = {"status": "complete", "result": result, "user_email": user_email}
             logger.info(f"Job complete: {job_id}")
 
             # Persist to MongoDB
@@ -123,7 +123,7 @@ async def analyze_async(
             import traceback
             tb = traceback.format_exc()
             logger.error(f"Job failed: {job_id}\n{tb}")
-            job_store[job_id] = {"status": "error", "error": str(e)}
+            job_store[job_id] = {"status": "error", "error": str(e), "user_email": user_email}
 
     background_tasks.add_task(run)
     return {"job_id": job_id, "status": "processing"}
