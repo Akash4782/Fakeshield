@@ -62,16 +62,16 @@ class VideoFusionEngine:
         
         # --- Categorization ---
         if ai_prob >= 0.75:
-            verdict = "AI-Generated"
+            verdict = "DEEPFAKE"
             threat = "CRITICAL"
         elif ai_prob >= 0.55:
-            verdict = "AI-Generated"
+            verdict = "LIKELY FAKE"
             threat = "HIGH"
         elif ai_prob >= 0.35:
-            verdict = "Suspicious"
+            verdict = "UNCERTAIN"
             threat = "MEDIUM"
         else:
-            verdict = "Authentic"
+            verdict = "LIKELY REAL"
             threat = "LOW"
             
         # --- Explainability (Phase 3: Deep Analysis) ---
@@ -102,7 +102,7 @@ class VideoFusionEngine:
             "ai_probability": ai_prob,
             "confidence": round(ai_prob * 100, 1),
             "agreement_count": f"{sum([1 for s in available_signals.values() if s > 0.5])}/{len(available_signals)}",
-            "signals": signals,
+            "signals": {**signals, "temporal_flow": signals.get("temporal", 0.5)},
             "reasons": reasons,
             "logic_version": "v11.0-PhasedForensics"
         }
