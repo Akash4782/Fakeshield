@@ -1,1 +1,0 @@
-Neural network layers typically include an input layer, hidden layers, and an output layer. Each neuron in a hidden layer receives inputs, multiplies them by weights, adds a bias, and applies an activation function. This process allows the network to model complex relationships.

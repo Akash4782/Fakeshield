@@ -20,6 +20,9 @@ build/
 backend/eval_samples/
 backend/test_data/
 **/test_data/
+backend/dataset/
+backend/evaluation_dataset/
+backend/pt_models/face_landmarker.task
 *.mp4
 *.wav
 *.mp3
