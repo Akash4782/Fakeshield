@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     ffmpeg \
     libmagic1 \
+    libgles2-mesa \
+    libegl1-mesa \
     && rm -rf /var/lib/apt/lists/*
 
 COPY backend/requirements.txt .
