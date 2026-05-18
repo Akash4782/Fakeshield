@@ -62,6 +62,26 @@ class VideoReasoningModule:
                 patch_recursive(child, f"{path}.{name}")
 
         patch_recursive(self.model)
+
+        # Enforce use_cache=False dynamically on both generation layers to bypass DynamicCache instantiation
+        try:
+            if hasattr(self.model, "text_model") and self.model.text_model is not None:
+                orig_text_gen = self.model.text_model.generate
+                def patched_text_gen(*args, **kwargs):
+                    kwargs["use_cache"] = False
+                    return orig_text_gen(*args, **kwargs)
+                self.model.text_model.generate = patched_text_gen
+        except Exception as e:
+            print(f"[VideoReasoning] Text model generate patch warning: {e}", flush=True)
+
+        try:
+            orig_model_gen = self.model.generate
+            def patched_model_gen(*args, **kwargs):
+                kwargs["use_cache"] = False
+                return orig_model_gen(*args, **kwargs)
+            self.model.generate = patched_model_gen
+        except Exception as e:
+            print(f"[VideoReasoning] Model generate patch warning: {e}", flush=True)
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, revision=self.revision, use_fast=True)
 
