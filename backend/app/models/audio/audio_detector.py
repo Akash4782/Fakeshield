@@ -15,6 +15,12 @@ import concurrent.futures
 
 
 def analyze_audio(audio_bytes: bytes, filename: str = "audio.wav") -> dict:
+    import torch
+    import librosa
+    import numpy as np
+    
+    # Restrict PyTorch to a single thread to eliminate thread thrashing on CPU
+    torch.set_num_threads(1)
     
     # Step 1: Load and Preprocess (Normalize to 16kHz, VAD)
     audio = load_audio(audio_bytes, filename)
@@ -29,34 +35,72 @@ def analyze_audio(audio_bytes: bytes, filename: str = "audio.wav") -> dict:
         "file_size_bytes": audio.file_size_bytes,
     }
     
+    # Limit standard chunks to 3 chunks (15 seconds) to guarantee sub-3s speed on CPU
+    standard_chunks = audio.chunks[:3]
+    
+    # Telephony simulation for robustness (resample first chunk to 8kHz and back to 16kHz)
+    if standard_chunks:
+        first_chunk = standard_chunks[0]
+        y_8k = librosa.resample(first_chunk, orig_sr=16000, target_sr=8000, res_type='kaiser_fast')
+        telephony_chunk = librosa.resample(y_8k, orig_sr=8000, target_sr=16000, res_type='kaiser_fast')
+        wlm_chunks = standard_chunks + [telephony_chunk]
+    else:
+        wlm_chunks = []
+    
     # Step 2 & 3: Run Sequential ML and DSP pipelines CONCURRENTLY
     print("Dispatching Parallel Signal Analyzers (WavLM, AST, Speaker, Prosody, Spectral, Robustness)...")
     
-    with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
-        f_wlm = executor.submit(signal_wavlm, audio.chunks)
-        f_w2v = executor.submit(signal_wav2vec, audio.chunks)
-        f_spk = executor.submit(signal_speaker_consistency, audio.waveform, audio.sr, audio.chunks)
-        f_pros = executor.submit(signal_prosody, audio.waveform, audio.sr, audio.chunks)
-        f_spec = executor.submit(signal_spectral, audio.waveform, audio.sr, audio.chunks)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        f_wlm = executor.submit(signal_wavlm, wlm_chunks)
+        f_w2v = executor.submit(signal_wav2vec, standard_chunks)
+        f_spk = executor.submit(signal_speaker_consistency, audio.waveform, audio.sr, standard_chunks)
+        f_pros = executor.submit(signal_prosody, audio.waveform, audio.sr, standard_chunks)
+        f_spec = executor.submit(signal_spectral, audio.waveform, audio.sr, standard_chunks)
         f_codec = executor.submit(signal_codec_artifacts, audio.waveform, audio.sr)
         
-        # Robustness Check also dispatched concurrently
-        def wlm_scoring_pass(y, sr):
-            # Speed over breath for robustness check
-            y_sample = y[:int(sr*8)] # 8s instead of 12s
-            tmp_chunks = [y_sample[i:i+int(sr*4)] for i in range(0, len(y_sample), int(sr*4))]
-            return signal_wavlm(tmp_chunks).get("score", 0.5)
-            
-        f_robust = executor.submit(analyze_robustness, audio.waveform, audio.sr, wlm_scoring_pass)
-        
         # Collect parallel results
-        wlm_result = f_wlm.result()
+        wlm_result_raw = f_wlm.result()
         w2v_result = f_w2v.result()
         spk_result = f_spk.result()
         pros_result = f_pros.result()
         spec_result = f_spec.result()
         codec_result = f_codec.result()
-        robustness = f_robust.result()
+
+    # Parse batched WavLM results to extract original chunks vs telephony chunk
+    wlm_per_chunk_raw = wlm_result_raw.get("per_chunk", [])
+    if len(wlm_per_chunk_raw) > len(standard_chunks):
+        wlm_orig_scores = wlm_per_chunk_raw[:len(standard_chunks)]
+        wlm_telephony_score = wlm_per_chunk_raw[-1]
+    else:
+        wlm_orig_scores = wlm_per_chunk_raw
+        wlm_telephony_score = 0.5
+
+    wlm_arr = np.array(wlm_orig_scores) if wlm_orig_scores else np.array([0.5])
+    wlm_result = {
+        "score": round(float(np.mean(wlm_arr)), 3),
+        "per_chunk": [round(s, 3) for s in wlm_orig_scores],
+        "detail": {
+            "max": round(float(np.max(wlm_arr)), 3),
+            "var": round(float(np.var(wlm_arr)), 4),
+            "model": "wavlm-itw",
+        },
+    }
+
+    # Calculate stability score directly from single batched inference
+    score_orig = wlm_orig_scores[0] if wlm_orig_scores else 0.5
+    score_telephony = wlm_telephony_score
+    max_delta = abs(score_orig - score_telephony)
+    
+    stability = 1.0 - min(1.0, max_delta / 0.40)
+    robustness = {
+        "stability_score": round(stability, 3),
+        "is_stable": stability >= 0.70,
+        "scores": {
+            "original": round(score_orig, 3),
+            "telephony": round(score_telephony, 3),
+        },
+        "max_delta": round(max_delta, 3),
+    }
 
     
     # Step 4: Hierarchical Fusion
