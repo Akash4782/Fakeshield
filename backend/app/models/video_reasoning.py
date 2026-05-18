@@ -91,33 +91,15 @@ class VideoReasoningModule:
 
         patch_recursive(self.model)
 
-        # Enforce use_cache=False dynamically on both generation layers to bypass DynamicCache instantiation
-        try:
-            if hasattr(self.model, "text_model") and self.model.text_model is not None:
-                orig_text_gen = self.model.text_model.generate
-                def patched_text_gen(*args, **kwargs):
-                    kwargs["use_cache"] = False
-                    return orig_text_gen(*args, **kwargs)
-                self.model.text_model.generate = patched_text_gen
-        except Exception as e:
-            print(f"[VideoReasoning] Text model generate patch warning: {e}", flush=True)
-
-        try:
-            orig_model_gen = self.model.generate
-            def patched_model_gen(*args, **kwargs):
-                kwargs["use_cache"] = False
-                return orig_model_gen(*args, **kwargs)
-            self.model.generate = patched_model_gen
-        except Exception as e:
-            print(f"[VideoReasoning] Model generate patch warning: {e}", flush=True)
-        
+        # Since Cache/DynamicCache.get_usable_length is successfully monkeypatched globally,
+        # we can leverage full KV caching (use_cache=True) for blazing-fast inference!
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, revision=self.revision, use_fast=True)
 
     def ask(self, pil_image: Image.Image, question: str) -> str:
         """Asks a question about a frame-level physics inconsistency"""
         try:
             enc_image = self.model.encode_image(pil_image)
-            answer = self.model.answer_question(enc_image, question, self.tokenizer, use_cache=False, max_new_tokens=30)
+            answer = self.model.answer_question(enc_image, question, self.tokenizer, use_cache=True, max_new_tokens=30)
             return answer.strip()
         except Exception as e:
             print(f"[VideoReasoning] Ask Error: {e}")
