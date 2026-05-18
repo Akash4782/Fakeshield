@@ -44,7 +44,7 @@ RUN pip install --no-cache-dir c2pa-python
 RUN pip install --no-cache-dir "protobuf~=4.25.3" python-magic email-validator
 
 # Step 8: Extra ML Engines & Libraries
-RUN pip install --no-cache-dir "optimum[onnxruntime]" diffusers mediapipe asyncpg reportlab sentencepiece
+RUN pip install --no-cache-dir "optimum[onnxruntime]" diffusers mediapipe asyncpg reportlab sentencepiece openai-whisper
 
 # Step 9: Retina-Face (Isolated to prevent OpenCV dependency conflicts)
 RUN pip install --no-cache-dir retina-face --no-deps
