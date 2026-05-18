@@ -6,6 +6,28 @@ from app.models.loader_sync import MODEL_LOAD_LOCK
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
+# Monkeypatch Cache and DynamicCache to restore deprecated get_usable_length method in newer transformers.
+# This prevents 'DynamicCache' attribute crashes in older model remote files under transformers 4.45+.
+try:
+    from transformers.cache_utils import Cache, DynamicCache
+    
+    def get_usable_length_patch(self, layer_idx=0):
+        if hasattr(self, "get_seq_length"):
+            return self.get_seq_length(layer_idx)
+        if hasattr(self, "seen_tokens"):
+            return self.seen_tokens
+        if hasattr(self, "key_cache") and len(self.key_cache) > layer_idx:
+            k = self.key_cache[layer_idx]
+            if hasattr(k, "shape"):
+                return k.shape[-2]
+        return 0
+
+    Cache.get_usable_length = get_usable_length_patch
+    DynamicCache.get_usable_length = get_usable_length_patch
+    print("[VideoReasoning] Successfully monkeypatched Cache.get_usable_length for transformers 4.45+ compatibility.", flush=True)
+except Exception as e:
+    print(f"[VideoReasoning] Cache monkeypatch warning: {e}", flush=True)
+
 class VideoReasoningModule:
     """Uses Moondream2 (VLM) for visual consistency reasoning"""
     
