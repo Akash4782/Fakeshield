@@ -24,3 +24,4 @@ resampy>=0.4.2
 pyannote.audio>=3.1.0
 mediapipe
 protobuf~=4.25.3
+asyncpg
