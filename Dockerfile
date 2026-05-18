@@ -43,6 +43,9 @@ RUN pip install --no-cache-dir c2pa-python
 # Step 7: Final Misc
 RUN pip install --no-cache-dir "protobuf~=4.25.3" python-magic email-validator
 
+# Step 8: Catch-all for requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY backend/ .
 
 EXPOSE 7860
