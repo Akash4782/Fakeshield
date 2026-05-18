@@ -46,6 +46,11 @@ class VideoReasoningModule:
                         (m.__class__, GenerationMixin), 
                         {}
                     )
+                # Propagate valid generation config to prevent child-level config lookup exceptions
+                try:
+                    m.generation_config = self.model.generation_config
+                except Exception:
+                    pass
             
             for name, child in m.named_children():
                 patch_recursive(child, f"{path}.{name}")
