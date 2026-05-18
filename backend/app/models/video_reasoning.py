@@ -24,6 +24,9 @@ class VideoReasoningModule:
 
         # Disable KV Cache to avoid 'DynamicCache' compat issues with newer transformers packages
         self.model.config.use_cache = False
+        if hasattr(self.model, "text_model") and self.model.text_model is not None:
+            if hasattr(self.model.text_model, "config") and self.model.text_model.config is not None:
+                self.model.text_model.config.use_cache = False
 
         # Explicitly initialize generation config for transformers 4.45+ compatibility
         # This prevents the "'NoneType' object has no attribute '_from_model_config'" error
@@ -66,7 +69,7 @@ class VideoReasoningModule:
         """Asks a question about a frame-level physics inconsistency"""
         try:
             enc_image = self.model.encode_image(pil_image)
-            answer = self.model.answer_question(enc_image, question, self.tokenizer)
+            answer = self.model.answer_question(enc_image, question, self.tokenizer, use_cache=False)
             return answer.strip()
         except Exception as e:
             print(f"[VideoReasoning] Ask Error: {e}")
