@@ -117,7 +117,7 @@ class VideoReasoningModule:
         """Asks a question about a frame-level physics inconsistency"""
         try:
             enc_image = self.model.encode_image(pil_image)
-            answer = self.model.answer_question(enc_image, question, self.tokenizer, use_cache=False)
+            answer = self.model.answer_question(enc_image, question, self.tokenizer, use_cache=False, max_new_tokens=30)
             return answer.strip()
         except Exception as e:
             print(f"[VideoReasoning] Ask Error: {e}")

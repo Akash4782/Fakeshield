@@ -23,8 +23,8 @@ class VideoTempoRaft:
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         h, w = img_rgb.shape[:2]
         
-        # Max resolution constraint (512x512 max) to prevent massive RAFT slowdowns on CPU
-        max_dim = 512
+        # Max resolution constraint (224x224 max) to prevent massive RAFT slowdowns on CPU
+        max_dim = 224
         if max(h, w) > max_dim:
             scale = max_dim / max(h, w)
             img_rgb = cv2.resize(img_rgb, (int(w * scale), int(h * scale)))
