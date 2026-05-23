@@ -40,7 +40,10 @@ const LoginPage: React.FC = () => {
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'GitHub login failed');
+      if (!response.ok) {
+        const errorMsg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+        throw new Error(errorMsg || 'GitHub login failed');
+      }
       
       login(data.access_token, data.user);
       navigate(from);
