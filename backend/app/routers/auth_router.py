@@ -29,7 +29,7 @@ class UserLogin(BaseModel):
 
 class OAuthLogin(BaseModel):
     provider: str
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     name: Optional[str] = None
     profile_pic: Optional[str] = None
     code: Optional[str] = None
