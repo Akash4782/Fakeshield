@@ -110,7 +110,7 @@ const LoginPage: React.FC = () => {
   });
 
   const handleGitHubLogin = () => {
-    const GITHUB_CLIENT_ID = "Ov23lihg68uH06ro0UFU"; 
+    const GITHUB_CLIENT_ID = "Ov23lihg68uHO6roOUFU"; 
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`;
   };
 
