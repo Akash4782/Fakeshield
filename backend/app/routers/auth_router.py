@@ -263,4 +263,8 @@ async def get_me(user: dict = Depends(get_current_user)):
 
 @router.get("/test")
 async def auth_test():
-    return {"message": "Auth router is reachable!"}
+    return {
+        "message": "Auth router is reachable!",
+        "version": "production-oauth-v3",
+        "handshake_type": "raw_dict"
+    }
