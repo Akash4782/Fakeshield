@@ -90,7 +90,7 @@ const SignupPage: React.FC = () => {
   });
 
   const handleGitHubLogin = () => {
-    const GITHUB_CLIENT_ID = "Ov23li64VlPrSj1cR3kY"; 
+    const GITHUB_CLIENT_ID = "Ov23lihg68uHO6roOUFU"; 
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`;
   };
 
