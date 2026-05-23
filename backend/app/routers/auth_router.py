@@ -158,18 +158,25 @@ async def oauth_login(oauth_data: OAuthLogin):
                     "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
                     "code": oauth_data.code
                 },
-                headers={"Accept": "application/json"}
+                headers={
+                    "Accept": "application/json",
+                    "User-Agent": "FakeShield-Auth"
+                }
             )
             token_data = token_res.json()
             access_token = token_data.get("access_token")
             
             if not access_token:
-                raise HTTPException(status_code=400, detail="Failed to verify GitHub code")
+                print(f"[AUTH] GitHub token exchange failed: {token_data}", flush=True)
+                raise HTTPException(status_code=400, detail="Failed to verify GitHub code. Please check your Client ID/Secret.")
 
             # Get User Profile
             user_res = await client.get(
                 "https://api.github.com/user",
-                headers={"Authorization": f"Bearer {access_token}"}
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "User-Agent": "FakeShield-Auth"
+                }
             )
             github_user = user_res.json()
             name = github_user.get("name") or github_user.get("login")
@@ -178,7 +185,10 @@ async def oauth_login(oauth_data: OAuthLogin):
             # Get Primary Email (often private in Profile)
             email_res = await client.get(
                 "https://api.github.com/user/emails",
-                headers={"Authorization": f"Bearer {access_token}"}
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "User-Agent": "FakeShield-Auth"
+                }
             )
             emails = email_res.json()
             email = next((e["email"] for e in emails if e["primary"]), None)
