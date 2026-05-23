@@ -1,129 +1,48 @@
 """
-PostgreSQL integration using asyncpg.
+MongoDB integration proxy for text scans.
+Replaces the old PostgreSQL system to use the unified MongoDB Atlas database.
 """
-import asyncpg
+from app.database import text_results_collection
 import json
-from app.config import settings
 
-_pool = None
-
-async def get_pool():
-    global _pool
-    if _pool is None:
-        try:
-            _pool = await asyncpg.create_pool(
-                dsn=settings.DATABASE_URL,
-                min_size=2,
-                max_size=5,
-                command_timeout=5,
-                timeout=5,
-            )
-            await _create_table()
-            print("[DB] PostgreSQL connected.")
-        except Exception as e:
-            print(f"[DB] Connection failed: {e}")
-            print("[DB] Running without database (results not saved).")
-            _pool = None
-    return _pool
-
-
-async def _create_table():
-    pool = await get_pool()
-    if not pool:
-        return
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS text_scans (
-                id               SERIAL PRIMARY KEY,
-                user_email       TEXT NOT NULL,
-                scan_id          TEXT UNIQUE NOT NULL,
-                verdict          TEXT,
-                threat_level     TEXT,
-                confidence       FLOAT,
-                confidence_level TEXT,
-                agreement_score  INTEGER,
-                stability_score  FLOAT,
-                signals          JSONB,
-                linguistic_profile JSONB,
-                word_count       INTEGER,
-                processing_time  TEXT,
-                text_preview     TEXT,
-                created_at       TIMESTAMPTZ DEFAULT NOW()
-            );
-            
-            -- Ensure existing tables have new columns
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS user_email TEXT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS confidence_level TEXT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS agreement_score  INTEGER;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stability_score  FLOAT;
-            ALTER TABLE text_scans ADD COLUMN IF NOT EXISTS stylometric_details JSONB;
-            
-            CREATE INDEX IF NOT EXISTS idx_text_scans_user_email ON text_scans(user_email);
-        """)
-
-
-async def save_scan(
-    user_email: str,
-    scan_id: str,
-    verdict: str,
-    threat_level: str,
-    confidence: float,
-    confidence_level: str,
-    agreement_score: int,
-    stability_score: float,
-    signals: dict,
-    linguistic_profile: dict,
-    stylometric_details: dict,
-    word_count: int,
-    processing_time: str,
-    text_preview: str,
-):
-    pool = await get_pool()
-    if not pool:
-        print("[DB] No database — skipping save.")
-        return
-
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            INSERT INTO text_scans
-                (user_email, scan_id, verdict, threat_level, confidence,
-                 confidence_level, agreement_score, stability_score,
-                 signals, linguistic_profile, stylometric_details,
-                 word_count, processing_time, text_preview)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-            ON CONFLICT (scan_id) DO NOTHING;
-        """,
-            user_email, scan_id, verdict, threat_level, confidence,
-            confidence_level, agreement_score, stability_score,
-            json.dumps(signals),
-            json.dumps(linguistic_profile),
-            json.dumps(stylometric_details),
-            word_count, processing_time, text_preview
-        )
-
+async def save_scan(*args, **kwargs):
+    # This was historically used to save to PostgreSQL.
+    # It has been deprecated because text scans are now saved centrally
+    # to MongoDB via `save_scan_internal` in dashboard_router.py.
+    pass
 
 async def get_scan_history(user_email: str, limit: int = 50) -> list:
-    pool = await get_pool()
-    if not pool:
-        return []
-    async with pool.acquire() as conn:
-        rows = await conn.fetch("""
-            SELECT scan_id, verdict, threat_level, confidence,
-                   word_count, text_preview, created_at
-            FROM text_scans
-            WHERE user_email = $1
-            ORDER BY created_at DESC
-            LIMIT $2;
-        """, user_email, limit)
-        return [dict(r) for r in rows]
-
+    cursor = text_results_collection.find({"user_email": user_email}).sort("created_at", -1).limit(limit)
+    docs = await cursor.to_list(length=limit)
+    
+    history = []
+    for d in docs:
+        res = d.get("full_result", {})
+        
+        # Format created_at to string if it's a datetime object
+        created_at = d.get("created_at")
+        if hasattr(created_at, "isoformat"):
+            created_at = created_at.isoformat()
+            
+        history.append({
+            "scan_id": d.get("scan_id"),
+            "verdict": d.get("verdict"),
+            "threat_level": d.get("threat_level"),
+            "confidence": d.get("confidence") or res.get("confidence"),
+            "word_count": res.get("word_count"),
+            "text_preview": res.get("text_preview") or d.get("extra", {}).get("textPreview", ""),
+            "created_at": created_at
+        })
+    return history
 
 async def get_scan_by_id(scan_id: str) -> dict:
-    pool = await get_pool()
-    if not pool:
+    doc = await text_results_collection.find_one({"scan_id": scan_id})
+    if not doc:
         return {}
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT * FROM text_scans WHERE scan_id = $1", scan_id
-        )
-        return dict(row) if row else {}
+        
+    res = doc.get("full_result", {})
+    # For backward compatibility, ensure scan_id is in the top level of the returned dict
+    if "scan_id" not in res:
+        res["scan_id"] = scan_id
+        
+    return res

@@ -13,7 +13,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from app.models.new_forensic_engine import analyze_forensic as analyze
-from app.services.database    import save_scan
 from app.services.pdf_report  import generate_pdf
 from app.config               import settings
 
@@ -66,34 +65,6 @@ def run_detection(text: str, mode: str, include_highlights: bool) -> dict:
         text=text,
         mode=mode
     )
-
-
-# ─────────────────────────────────────────────────────────────
-# STEP 3 — SAVE TO POSTGRESQL
-# Replaces n8n's Postgres node
-# ─────────────────────────────────────────────────────────────
-async def save_to_database(user_email: str, scan_id: str, result: dict, text: str):
-    try:
-        await save_scan(
-            user_email=user_email,
-            scan_id=scan_id,
-            verdict=result["verdict"],
-            threat_level=result["threat_level"],
-            confidence=result["confidence"],
-            confidence_level=result["confidence_level"],
-            agreement_score=result.get("agreement_score", 100),
-            stability_score=result.get("stability_score", 1.0),
-            signals=result["signals"],
-            linguistic_profile=result["linguistic_profile"],
-            stylometric_details=result.get("stylometric_details", {}),
-            word_count=result["word_count"],
-            processing_time=result["processing_time"],
-            text_preview=text[:200],
-        )
-        print(f"[DB] Scan {scan_id} saved.")
-    except Exception as e:
-        # Non-critical — don't fail the whole request if DB is down
-        print(f"[DB] Save failed (non-critical): {e}")
 
 
 # ─────────────────────────────────────────────────────────────
@@ -209,10 +180,8 @@ async def run_text_pipeline(
     result["completed_at"] = datetime.utcnow().isoformat() + "Z"
     result["text_preview"] = clean_text[:150] + "..."
 
-    # ── Step 4: Save to DB (background — non-blocking) ───────
-    asyncio.create_task(
-        save_to_database(user_email, scan_id, result, clean_text)
-    )
+    # ── Step 4: Save to DB (handled centrally by dashboard_router) ─
+    pass
 
     # ── Step 5: CRITICAL alert (background — non-blocking) ───
     if result.get("threat_level") == "CRITICAL":
