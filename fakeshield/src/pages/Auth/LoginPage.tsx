@@ -31,19 +31,16 @@ const LoginPage: React.FC = () => {
   const handleGitHubCallback = async (code: string) => {
     setIsLoading(true);
     try {
-      // In a real production app, the backend would exchange this code for a token.
-      // For this project, we notify the backend that a GitHub login succeeded.
       const response = await fetch(`${API_BASE_URL}/auth/oauth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           provider: 'GitHub', 
-          email: 'virdiakash77@gmail.com', // Official developer email
-          name: 'GitHub User' 
+          code: code 
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error('GitHub login failed');
+      if (!response.ok) throw new Error(data.detail || 'GitHub login failed');
       
       login(data.access_token, data.user);
       navigate(from);
@@ -113,8 +110,7 @@ const LoginPage: React.FC = () => {
   });
 
   const handleGitHubLogin = () => {
-    // Actual Client ID from your GitHub Developer Settings
-    const GITHUB_CLIENT_ID = "Ov23li64VlPrSj1cR3kY"; 
+    const GITHUB_CLIENT_ID = "Ov23lihg68uH06ro0UFU"; 
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`;
   };
 

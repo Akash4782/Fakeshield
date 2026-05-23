@@ -7,6 +7,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 import jwt
 import os
+import httpx
 from app.database import users_collection
 from app.dependencies import get_current_user
 
@@ -28,9 +29,10 @@ class UserLogin(BaseModel):
 
 class OAuthLogin(BaseModel):
     provider: str
-    email: EmailStr
-    name: str
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
     profile_pic: Optional[str] = None
+    code: Optional[str] = None
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -138,29 +140,82 @@ async def login(user: UserLogin):
 @router.post("/oauth")
 async def oauth_login(oauth_data: OAuthLogin):
     """
-    Mock OAuth endpoint for Github/Google. 
+    OAuth endpoint for Github/Google. 
+    In production, this verifies the code with the provider.
     """
-    db_user = await users_collection.find_one({"email": oauth_data.email})
+    email = oauth_data.email
+    name = oauth_data.name
+    profile_pic = oauth_data.profile_pic
+
+    # 1. Handle Real GitHub Auth
+    if oauth_data.provider.lower() == "github" and oauth_data.code:
+        async with httpx.AsyncClient() as client:
+            # Exchange code for access token
+            token_res = await client.post(
+                "https://github.com/login/oauth/access_token",
+                params={
+                    "client_id": os.getenv("GITHUB_CLIENT_ID"),
+                    "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
+                    "code": oauth_data.code
+                },
+                headers={"Accept": "application/json"}
+            )
+            token_data = token_res.json()
+            access_token = token_data.get("access_token")
+            
+            if not access_token:
+                raise HTTPException(status_code=400, detail="Failed to verify GitHub code")
+
+            # Get User Profile
+            user_res = await client.get(
+                "https://api.github.com/user",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            github_user = user_res.json()
+            name = github_user.get("name") or github_user.get("login")
+            profile_pic = github_user.get("avatar_url")
+            
+            # Get Primary Email (often private in Profile)
+            email_res = await client.get(
+                "https://api.github.com/user/emails",
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            emails = email_res.json()
+            email = next((e["email"] for e in emails if e["primary"]), None)
+            
+            if not email:
+                raise HTTPException(status_code=400, detail="No public/primary email found on GitHub")
+
+    # 2. Proceed with user lookup/creation
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required for OAuth login")
+
+    db_user = await users_collection.find_one({"email": email})
     
     if not db_user:
         # Auto-signup OAuth users
-        tier = get_subscription_tier(oauth_data.email)
+        tier = get_subscription_tier(email)
         user_dict = {
-            "fullName": oauth_data.name,
-            "email": oauth_data.email,
+            "fullName": name or email.split("@")[0],
+            "email": email,
             "auth_provider": oauth_data.provider,
-            "profile_pic": oauth_data.profile_pic,
+            "profile_pic": profile_pic,
             "subscription_tier": tier,
             "created_at": datetime.utcnow()
         }
         await users_collection.insert_one(user_dict)
         db_user = user_dict
     else:
+        # Update profile info if changed
+        update_data = {"auth_provider": oauth_data.provider}
+        if profile_pic: update_data["profile_pic"] = profile_pic
+        
         # Update tier if missing
         if "subscription_tier" not in db_user:
-            tier = get_subscription_tier(db_user["email"])
-            await users_collection.update_one({"_id": db_user["_id"]}, {"$set": {"subscription_tier": tier}})
-            db_user["subscription_tier"] = tier
+            update_data["subscription_tier"] = get_subscription_tier(db_user["email"])
+            
+        await users_collection.update_one({"_id": db_user["_id"]}, {"$set": update_data})
+        db_user.update(update_data)
         
     access_token = create_access_token(data={"sub": db_user["email"]})
     return {

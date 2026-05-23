@@ -28,3 +28,4 @@ asyncpg
 reportlab
 sentencepiece
 openai-whisper
+httpx
