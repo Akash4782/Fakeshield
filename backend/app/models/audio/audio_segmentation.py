@@ -46,30 +46,40 @@ def build_audio_timeline(
 
     timeline = []
 
+    # Compute global means for smarter fallbacks
+    w_mean  = float(np.mean(wav2vec_chunks))  if wav2vec_chunks  else (overall_ai_prob if overall_ai_prob is not None else 0.5)
+    sp_mean = float(np.mean(spectral_chunks)) if spectral_chunks else (overall_ai_prob if overall_ai_prob is not None else 0.5)
+    pr_mean = float(np.mean(prosody_chunks))  if prosody_chunks  else (overall_ai_prob if overall_ai_prob is not None else 0.5)
+    sk_mean = float(np.mean(speaker_chunks))  if speaker_chunks  else (overall_ai_prob if overall_ai_prob is not None else 0.5)
+
     for i in range(n):
-        # Safely access each list with fallback to 0.5 (neutral)
-        w  = float(wav2vec_chunks[i])  if i < len(wav2vec_chunks)  else 0.5
-        sp = float(spectral_chunks[i]) if i < len(spectral_chunks) else 0.5
-        pr = float(prosody_chunks[i])  if i < len(prosody_chunks)  else 0.5
-        sk = float(speaker_chunks[i])  if i < len(speaker_chunks)  else 0.5
+        # Safely access each list with fallback to global means
+        w  = float(wav2vec_chunks[i])  if i < len(wav2vec_chunks)  else w_mean
+        sp = float(spectral_chunks[i]) if i < len(spectral_chunks) else sp_mean
+        pr = float(prosody_chunks[i])  if i < len(prosody_chunks)  else pr_mean
+        sk = float(speaker_chunks[i])  if i < len(speaker_chunks)  else sk_mean
 
         # Weighted chunk score — Weights balanced with fusion engine
         chunk_score = 0.50 * w + 0.10 * sp + 0.20 * pr + 0.20 * sk
         
         # Pull chunk score towards overall probability to prevent UX disconnect
+        # We increase the 'pull' for unanalyzed segments to ensure consistency
         if overall_ai_prob is not None:
-            if abs(chunk_score - overall_ai_prob) > 0.15:
-                # Weighted blend: 40% raw chunk, 60% overall fusion
-                chunk_score = (0.4 * chunk_score) + (0.6 * overall_ai_prob)
+            is_fallback = (i >= n_signals)
+            threshold = 0.05 if is_fallback else 0.15
+            if abs(chunk_score - overall_ai_prob) > threshold:
+                blend_factor = 0.8 if is_fallback else 0.6
+                chunk_score = ((1.0 - blend_factor) * chunk_score) + (blend_factor * overall_ai_prob)
 
         chunk_score = max(0.0, min(1.0, chunk_score))
 
         start_t, end_t = chunk_times[i] if i < len(chunk_times) else (i * 5, i * 5 + 5)
 
+        # Calibrated levels matching UI: Authentic (Low), Suspicious (Med), High Risk (High), Synthetic (Crit)
         level = (
-            "critical" if chunk_score >= 0.65 else
-            "high"     if chunk_score >= 0.50 else
-            "medium"   if chunk_score >= 0.40 else
+            "critical" if chunk_score >= 0.75 else
+            "high"     if chunk_score >= 0.55 else
+            "medium"   if chunk_score >= 0.38 else
             "low"
         )
 
