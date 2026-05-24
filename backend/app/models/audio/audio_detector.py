@@ -130,6 +130,7 @@ def analyze_audio(audio_bytes: bytes, filename: str = "audio.wav") -> dict:
         prosody_chunks=pros_result.get("per_chunk", []),
         speaker_chunks=spk_result.get("per_chunk", []),
         chunk_times=audio.chunk_times,
+        overall_ai_prob=fusion.get("ai_probability", 0) / 100.0,
     )
     
     # Step 6: Startup-Level Explainability

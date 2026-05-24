@@ -12,6 +12,7 @@ def build_audio_timeline(
     prosody_chunks:  list,
     speaker_chunks:  list,
     chunk_times:     list,
+    overall_ai_prob: float = None,
 ) -> list:
     """
     Fuse per-chunk scores into timeline segments.
@@ -38,7 +39,7 @@ def build_audio_timeline(
     )
 
     # n = number of segments we can build (bounded by chunk_times)
-    n = min(n_times, n_signals) if n_times > 0 and n_signals > 0 else 0
+    n = n_times if n_times > 0 else 0
 
     if n == 0:
         return []
@@ -52,15 +53,22 @@ def build_audio_timeline(
         pr = float(prosody_chunks[i])  if i < len(prosody_chunks)  else 0.5
         sk = float(speaker_chunks[i])  if i < len(speaker_chunks)  else 0.5
 
-        # Weighted chunk score — WavLM is the strongest indicator
-        chunk_score = 0.45 * w + 0.25 * sp + 0.20 * pr + 0.10 * sk
+        # Weighted chunk score — Weights balanced with fusion engine
+        chunk_score = 0.50 * w + 0.10 * sp + 0.20 * pr + 0.20 * sk
+        
+        # Pull chunk score towards overall probability to prevent UX disconnect
+        if overall_ai_prob is not None:
+            if abs(chunk_score - overall_ai_prob) > 0.15:
+                # Weighted blend: 40% raw chunk, 60% overall fusion
+                chunk_score = (0.4 * chunk_score) + (0.6 * overall_ai_prob)
+
         chunk_score = max(0.0, min(1.0, chunk_score))
 
         start_t, end_t = chunk_times[i] if i < len(chunk_times) else (i * 5, i * 5 + 5)
 
         level = (
-            "critical" if chunk_score >= 0.80 else
-            "high"     if chunk_score >= 0.65 else
+            "critical" if chunk_score >= 0.65 else
+            "high"     if chunk_score >= 0.50 else
             "medium"   if chunk_score >= 0.40 else
             "low"
         )
