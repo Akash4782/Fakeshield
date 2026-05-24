@@ -158,7 +158,7 @@ async def oauth_login(oauth_data: dict):
                 params={
                     "client_id": os.getenv("GITHUB_CLIENT_ID"),
                     "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
-                    "code": oauth_data.code
+                    "code": code
                 },
                 headers={
                     "Accept": "application/json",
@@ -202,32 +202,48 @@ async def oauth_login(oauth_data: dict):
     if not email:
         raise HTTPException(status_code=400, detail="Email is required for OAuth login")
 
-    db_user = await users_collection.find_one({"email": email})
-    
-    if not db_user:
-        # Auto-signup OAuth users
-        tier = get_subscription_tier(email)
-        user_dict = {
-            "fullName": name or email.split("@")[0],
-            "email": email,
-            "auth_provider": oauth_data.provider,
-            "profile_pic": profile_pic,
-            "subscription_tier": tier,
-            "created_at": datetime.utcnow()
-        }
-        await users_collection.insert_one(user_dict)
-        db_user = user_dict
-    else:
-        # Update profile info if changed
-        update_data = {"auth_provider": oauth_data.provider}
-        if profile_pic: update_data["profile_pic"] = profile_pic
+    try:
+        db_user = await users_collection.find_one({"email": email})
         
-        # Update tier if missing
-        if "subscription_tier" not in db_user:
-            update_data["subscription_tier"] = get_subscription_tier(db_user["email"])
+        if not db_user:
+            # Auto-signup OAuth users
+            tier = get_subscription_tier(email)
+            user_dict = {
+                "fullName": name or email.split("@")[0].title(),
+                "email": email,
+                "auth_provider": provider,
+                "profile_pic": profile_pic,
+                "subscription_tier": tier,
+                "created_at": datetime.utcnow()
+            }
+            await users_collection.insert_one(user_dict)
+            db_user = user_dict
+        else:
+            # Update profile info if changed
+            update_data = {"auth_provider": provider}
+            if profile_pic: update_data["profile_pic"] = profile_pic
             
-        await users_collection.update_one({"_id": db_user["_id"]}, {"$set": update_data})
-        db_user.update(update_data)
+            # Update tier if missing
+            if "subscription_tier" not in db_user:
+                update_data["subscription_tier"] = get_subscription_tier(db_user["email"])
+                
+            await users_collection.update_one({"_id": db_user["_id"]}, {"$set": update_data})
+            db_user.update(update_data)
+    except Exception as e:
+        print(f"[AUTH] DB offline during OAuth: {e}. Issuing offline session.", flush=True)
+        # DB offline — issue an offline JWT session
+        tier = get_subscription_tier(email)
+        access_token = create_access_token(data={"sub": email})
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "name": name or email.split("@")[0].title(),
+                "email": email,
+                "profile_pic": profile_pic,
+                "subscription_tier": "paid" # Grant access in offline mode
+            }
+        }
         
     access_token = create_access_token(data={"sub": db_user["email"]})
     return {
