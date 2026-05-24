@@ -12,6 +12,8 @@ class DummyCollection:
     async def create_index(self, *args, **kwargs): return None
     async def insert_one(self, *args, **kwargs): return type('obj', (), {'inserted_id': 'offline_id'})
     async def find_one(self, *args, **kwargs): return None
+    async def update_one(self, *args, **kwargs): return type('obj', (), {'modified_count': 1})
+    async def count_documents(self, *args, **kwargs): return 0
     def find(self, *args, **kwargs):
         class DummyCursor:
             async def to_list(self, *args, **kwargs): return []

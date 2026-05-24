@@ -45,6 +45,8 @@ def create_access_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    if isinstance(encoded_jwt, bytes):
+        encoded_jwt = encoded_jwt.decode('utf-8')
     return encoded_jwt
 
 def get_subscription_tier(email: str):
@@ -148,6 +150,8 @@ async def oauth_login(oauth_data: dict):
     email = oauth_data.get("email")
     name = oauth_data.get("name")
     profile_pic = oauth_data.get("profile_pic")
+    
+    print(f"[AUTH] OAuth Request: provider={provider}, email={email}, name={name}, has_code={bool(code)}", flush=True)
 
     # 1. Handle Real GitHub Auth
     if provider.lower() == "github" and code:
