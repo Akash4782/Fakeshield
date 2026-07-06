@@ -43,7 +43,7 @@ RUN pip install --no-cache-dir "pyannote.audio>=3.1.0"
 RUN pip install --no-cache-dir c2pa-python
 
 # Step 7: Final Misc
-RUN pip install --no-cache-dir "protobuf~=4.25.3" python-magic email-validator
+RUN pip install --no-cache-dir "protobuf~=4.25.3" python-magic email-validator aiosmtplib
 
 # Step 8: Extra ML Engines & Libraries
 RUN pip install --no-cache-dir "optimum[onnxruntime]" diffusers mediapipe asyncpg reportlab sentencepiece openai-whisper
