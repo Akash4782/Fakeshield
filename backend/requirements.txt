@@ -2,8 +2,6 @@ fastapi
 uvicorn[standard]
 transformers
 torch
---extra-index-url https://download.pytorch.org/whl/cpu
-torchcodec
 numpy
 scipy
 optimum[onnxruntime]
