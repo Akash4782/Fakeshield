@@ -3,7 +3,10 @@ FROM python:3.10-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONUTF8=1 \
     PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python \
-    FAKESHIELD_SKIP_WARMUP=0
+    # On Hugging Face CPU Spaces, warmup of heavy ML models can exceed container
+    # startup time and cause apparent hangs. Set to 1 to skip warmup during
+    # container start (models still lazy-load on first request).
+    FAKESHIELD_SKIP_WARMUP=1
 
 WORKDIR /app
 
@@ -29,6 +32,12 @@ RUN pip install --no-cache-dir fastapi "uvicorn[standard]" python-multipart pyth
 
 # Step 2: Heavy ML Engines (CPU Only)
 RUN pip install --no-cache-dir torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Ensure any optional native extensions that might pull CUDA builds use the
+# CPU wheels instead. TorchCodec can auto-pick a CUDA wheel which then tries
+# to load libnvrtc (missing on CPU-only Spaces). Force-install the CPU wheel
+# from the PyTorch CPU index to avoid libnvrtc dependency.
+RUN pip install --no-cache-dir --force-reinstall --no-deps --index-url https://download.pytorch.org/whl/cpu torchcodec || true
 
 # Step 3: Transformers & Scipy
 RUN pip install --no-cache-dir transformers accelerate "sentence-transformers" scikit-learn numpy scipy
