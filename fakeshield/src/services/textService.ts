@@ -48,8 +48,7 @@ export interface TextResult {
   semantic_details:    SemanticDetails;
   linguistic_profile:  LinguisticProfile;
   sentence_highlights: SentenceHighlight[];
-  indicators:          string[];
-  forensic_reasoning?: string;
+  indicators:          string[];  improvement_suggestions?: string[];  forensic_reasoning?: string;
   word_count:          number;
   processing_time:     string;
   rule_applied?:       string;

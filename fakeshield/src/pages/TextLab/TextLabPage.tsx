@@ -69,6 +69,15 @@ const TextLabPage: React.FC = () => {
   const [result, setResult] = useState<TextResult | null>(null);
   const [downloading, setDownloading] = useState(false);
 
+  // Precompute badge classes to avoid complex inline template literals
+  const verdictBadgeClass = result && (result.threat_level === 'CRITICAL' || result.threat_level === 'HIGH')
+    ? 'bg-[rgba(239,68,68,0.06)] text-red-500 border border-[rgba(239,68,68,0.08)]'
+    : 'bg-[rgba(16,185,129,0.04)] text-green-400 border border-[rgba(16,185,129,0.06)]';
+
+  const indexBadgeClass = result && (result.threat_level === 'CRITICAL' || result.threat_level === 'HIGH')
+    ? 'bg-red-50 text-red-500'
+    : 'bg-green-50 text-green-500';
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const scanId = params.get('scan_id');
@@ -358,6 +367,41 @@ const TextLabPage: React.FC = () => {
                        ))}
                     </div>
                   </div>
+               </div>
+
+               <div className="col-span-1 md:col-span-12">
+                 <div className="p-6 md:p-8 rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-bg)]">
+                   <div className="flex items-start justify-between gap-3 mb-4">
+                     <div>
+                       <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--text-secondary)]">Improvement suggestions</h3>
+                       <p className="text-[11px] text-[var(--text-muted)] mt-2">Guidance based on whether the text appears AI-generated or human-written.</p>
+                     </div>
+                     <div className="flex items-center gap-3">
+                       <span className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-xl ${verdictBadgeClass}`}>{result?.verdict}</span>
+                     </div>
+                   </div>
+
+                   <div className="space-y-4">
+                     {(result.improvement_suggestions && result.improvement_suggestions.length > 0) ? (
+                       result.improvement_suggestions.map((suggestion, index) => (
+                         <div key={index} className="rounded-2xl bg-[rgba(0,229,204,0.03)] border border-[var(--panel-border)] p-4 flex items-start gap-4">
+                           <div className="flex-shrink-0">
+                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono font-bold ${indexBadgeClass}`}>
+                               {index + 1}
+                             </div>
+                           </div>
+                           <div className="flex-1">
+                             <p className="text-sm leading-6 text-[var(--text-primary)]">{suggestion}</p>
+                           </div>
+                           
+                           {/* per-item copy button removed for cleaner UI */}
+                         </div>
+                       ))
+                     ) : (
+                       <p className="text-sm text-[var(--text-muted)]">No suggestions available for this scan.</p>
+                     )}
+                   </div>
+                 </div>
                </div>
 
             </div>

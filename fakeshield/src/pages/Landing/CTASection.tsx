@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.tsx';
+import { API_BASE_URL } from '../../config';
 
 const CTASection = () => {
   const { isAuthenticated } = useAuth();
   const [showContact, setShowContact] = useState(false);
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
 
   // Close on Esc
@@ -16,11 +19,29 @@ const CTASection = () => {
     return () => window.removeEventListener('keydown', h);
   }, [showContact]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production this would POST to a backend endpoint
-    setSent(true);
-    setTimeout(() => { setSent(false); setShowContact(false); setForm({ name: '', email: '', phone: '', message: '' }); }, 3000);
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.detail || 'Unable to send your message. Please try again.');
+      }
+      setSent(true);
+      setForm({ name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to send your message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -88,6 +109,8 @@ const CTASection = () => {
                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Full Name</label>
                         <input
                           required
+                          minLength={2}
+                          maxLength={100}
                           value={form.name}
                           onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                           placeholder="Akash Virdi"
@@ -99,6 +122,8 @@ const CTASection = () => {
                       <div>
                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Phone Number</label>
                         <input
+                          type="tel"
+                          maxLength={30}
                           value={form.phone}
                           onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
                           placeholder="+91-7973066831"
@@ -127,6 +152,8 @@ const CTASection = () => {
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>How can we help?</label>
                       <textarea
                         required
+                        minLength={10}
+                        maxLength={5000}
                         rows={3}
                         value={form.message}
                         onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
@@ -138,6 +165,12 @@ const CTASection = () => {
                     </div>
 
                     <div style={{ height: 1, background: 'var(--panel-border)', margin: '0.25rem 0' }} />
+
+                    {error && (
+                      <p role="alert" style={{ margin: 0, color: '#ef4444', fontSize: '0.75rem', textAlign: 'center', fontWeight: 600 }}>
+                        {error}
+                      </p>
+                    )}
 
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                       <button
@@ -151,12 +184,14 @@ const CTASection = () => {
                       >Cancel</button>
                       <button
                         type="submit"
+                        disabled={submitting}
                         style={{
                           flex: 1, padding: '0.625rem', borderRadius: '0.5rem',
                           border: 'none', background: '#00E5CC', color: '#000',
-                          fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                          fontWeight: 700, fontSize: '0.8rem', cursor: submitting ? 'not-allowed' : 'pointer',
+                          opacity: submitting ? 0.65 : 1,
                         }}
-                      >Send Message</button>
+                      >{submitting ? 'Sending...' : 'Send Message'}</button>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', justifyContent: 'center' }}>
@@ -233,7 +268,7 @@ const CTASection = () => {
                 </Link>
 
                 <button
-                  onClick={() => setShowContact(true)}
+                  onClick={() => { setError(''); setSent(false); setShowContact(true); }}
                   style={{
                     background: 'transparent',
                     border: '1px solid var(--btn-secondary-border)',

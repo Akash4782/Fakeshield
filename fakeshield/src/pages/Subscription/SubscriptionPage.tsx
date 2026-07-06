@@ -1,67 +1,207 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Shield, Zap, Crown, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Check, Shield, Zap, Crown, ArrowRight, Loader2, ArrowLeft, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '../../hooks/useAuth.tsx';
+import { useAuth } from '../../hooks/useAuth.tsx';
+import { API_BASE_URL } from '../../config';
+
+interface RazorpayOrderResponse {
+  key_id: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+}
+
+interface PaymentConfig {
+  amount: number;
+  currency: string;
+  name: string;
+  duration_days: number;
+}
+
+interface RazorpaySuccessResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayCheckoutOptions extends RazorpayOrderResponse {
+  key: string;
+  order_id: string;
+  handler: (response: RazorpaySuccessResponse) => void;
+  theme?: { color: string };
+  modal?: { ondismiss: () => void };
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayCheckoutOptions) => {
+      open: () => void;
+      on: (event: string, handler: (response: unknown) => void) => void;
+    };
+  }
+}
+
+const loadRazorpayCheckout = () =>
+  new Promise<void>((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Unable to load Razorpay Checkout.'));
+    document.body.appendChild(script);
+  });
+
+const DEFAULT_PAYMENT_CONFIG: PaymentConfig = {
+  amount: 100,
+  currency: 'INR',
+  name: 'FakeShield Pro Shield',
+  duration_days: 120,
+};
+
+const formatPaymentAmount = (amountPaise: number, currency: string) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  }).format(amountPaise / 100);
 
 const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token, user: authUser, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plans' | 'payment' | 'success'>('plans');
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
-  const [transactionId] = useState('');
-  const [orderId] = useState(() => `FS-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`);
-  const user = JSON.parse(localStorage.getItem('fakeshield_user') || '{}');
-  
-  // --- MERCHANT ACCOUNT CONFIGURATION ---
-  // Change these values to update where the money goes and what message is shown
-  const MERCHANT_CONFIG = {
-    upiId: 'virdisaab419@okhdfcbank',
-    name: 'FakeShield Forensics',
-    amount: '999.00',
-    note: 'Invoice FS-999: Pro Shield Activation'
-  };
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig>(DEFAULT_PAYMENT_CONFIG);
+  const [transactionId, setTransactionId] = useState('');
+  const [orderId, setOrderId] = useState(() => `FS-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`);
+  const user = authUser || JSON.parse(localStorage.getItem('fakeshield_user') || '{}');
+  const paymentAmount = formatPaymentAmount(paymentConfig.amount, paymentConfig.currency);
+  const planDurationMonths = Math.round(paymentConfig.duration_days / 30);
+  const planPeriodLabel = `${planDurationMonths} months`;
+  const subscriptionExpiry = user.subscription_expires_at
+    ? new Date(user.subscription_expires_at).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
 
   useEffect(() => {
-    if (paymentStep === 'payment' && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [paymentStep, timeLeft]);
+    const loadPaymentConfig = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/payments/razorpay/config`);
+        if (!response.ok) return;
+        const config: PaymentConfig = await response.json();
+        setPaymentConfig(config);
+      } catch (err) {
+        console.warn('Using default payment config because backend config could not be loaded.', err);
+      }
+    };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+    loadPaymentConfig();
+  }, []);
 
   const handleUpgrade = async () => {
+    if (!token) {
+      navigate('/login', { state: { from: '/subscription' } });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:8001/api/v1/auth/upgrade?email=${user.email}`, {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        // Update local storage for immediate UI synchronization
-        const updatedUser = { ...user, subscription_tier: 'paid' };
-        localStorage.setItem('fakeshield_user', JSON.stringify(updatedUser));
-        
-        // Multi-step simulated verification
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      await loadRazorpayCheckout();
 
-        setPaymentStep('success');
-      } else {
-        alert('Verification failed. Please ensure the payment was successful or try again.');
+      const orderResponse = await fetch(`${API_BASE_URL}/auth/payments/razorpay/order`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!orderResponse.ok) {
+        const error = await orderResponse.json().catch(() => ({}));
+        throw new Error(error.detail || 'Could not create Razorpay order.');
       }
+
+      const order: RazorpayOrderResponse = await orderResponse.json();
+      setOrderId(order.order_id);
+      setPaymentConfig({
+        amount: order.amount,
+        currency: order.currency,
+        name: order.description,
+        duration_days: paymentConfig.duration_days,
+      });
+
+      const Razorpay = window.Razorpay;
+      if (!Razorpay) {
+        throw new Error('Razorpay Checkout did not load.');
+      }
+
+      const razorpay = new Razorpay({
+        ...order,
+        key: order.key_id,
+        order_id: order.order_id,
+        handler: async (response) => {
+          setIsLoading(true);
+          try {
+            const verifyResponse = await fetch(`${API_BASE_URL}/auth/payments/razorpay/verify`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(response),
+            });
+
+            if (!verifyResponse.ok) {
+              const error = await verifyResponse.json().catch(() => ({}));
+              throw new Error(error.detail || 'Payment verification failed.');
+            }
+
+            const verified = await verifyResponse.json();
+            if (!verified.user || verified.user.subscription_tier !== 'paid') {
+              throw new Error('Payment verified, but the server did not activate Pro. Please contact support.');
+            }
+            updateUser(verified.user);
+            setTransactionId(response.razorpay_payment_id);
+            setOrderId(response.razorpay_order_id);
+            setPaymentStep('success');
+          } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : 'Payment verification failed.');
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        theme: { color: '#00E5CC' },
+        modal: {
+          ondismiss: () => setIsLoading(false),
+        },
+      });
+
+      razorpay.on('payment.failed', (response) => {
+        console.error('Razorpay payment failed', response);
+        alert('Payment failed or was cancelled. Please try again.');
+        setIsLoading(false);
+      });
+
+      razorpay.open();
     } catch (err) {
       console.error(err);
-      alert('Network error during verification. Our servers are checking your transaction.');
-    } finally {
+      alert(err instanceof Error ? err.message : 'Unable to start Razorpay checkout.');
       setIsLoading(false);
-    }
+    } 
   };
 
   const handleDownloadInvoice = () => {
@@ -77,14 +217,14 @@ Customer Email: ${user.email || 'N/A'}
 -----------------------------------------
 ITEM DESCRIPTION              AMOUNT
 -----------------------------------------
-Pro Shield License (1 Year)   ₹999.00
+Pro Shield License (${planPeriodLabel})   ${paymentAmount}
 Full Access to:
 - Image Forensic Lab
 - Audio Deepfake Lab
 - Video Consistency Lab
 - Neural Pattern Matching
 -----------------------------------------
-TOTAL PAID:                   ₹999.00
+TOTAL PAID:                   ${paymentAmount}
 -----------------------------------------
 
 Status: COMPLETED & VERIFIED
@@ -126,9 +266,9 @@ Secure your digital perimeter with FakeShield.
     },
     {
       name: 'Pro Shield',
-      price: '₹999',
-      period: '/year',
-      description: 'The complete forensic arsenal for professionals',
+      price: paymentAmount,
+      period: `/${planPeriodLabel}`,
+      description: `The complete forensic arsenal for ${planPeriodLabel}`,
       features: [
         'Everything in Free',
         'Full Image Forensic Lab',
@@ -246,18 +386,18 @@ Secure your digital perimeter with FakeShield.
                 <div className="space-y-8">
                   <div>
                     <h2 className="text-3xl font-black text-slate-900 mb-2">Secure Checkout</h2>
-                    <p className="text-slate-500 text-sm leading-relaxed">Verification protocol initialized. Please complete the UPI transfer below.</p>
+                    <p className="text-slate-500 text-sm leading-relaxed">Verification protocol initialized. Complete payment securely through Razorpay Checkout.</p>
                   </div>
                   
                   <div className="p-6 bg-white rounded-3xl space-y-4 border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Tier</span>
-                      <span className="text-sm font-bold text-slate-900">Pro Shield (Yearly)</span>
+                      <span className="text-sm font-bold text-slate-900">Pro Shield ({planPeriodLabel})</span>
                     </div>
                     <div className="h-px bg-slate-100"></div>
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Liability</span>
-                      <span className="text-2xl font-black text-[#00E5CC]">₹999.00</span>
+                      <span className="text-2xl font-black text-[#00E5CC]">{paymentAmount}</span>
                     </div>
                   </div>
 
@@ -274,7 +414,7 @@ Secure your digital perimeter with FakeShield.
                 </div>
               </div>
 
-              {/* Right Side: QR Payment */}
+              {/* Right Side: Razorpay Payment */}
               <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col min-w-0">
                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-100">
                   <div>
@@ -282,82 +422,46 @@ Secure your digital perimeter with FakeShield.
                       onClick={() => setPaymentStep('plans')}
                       className="text-[10px] font-bold text-slate-400 hover:text-slate-900 flex items-center gap-1 transition-all uppercase tracking-widest mb-1"
                     >
-                      <ArrowLeft size={10} /> Go Back (QrPayX)
+                      <ArrowLeft size={10} /> Go Back (Razorpay)
                     </button>
                     <p className="text-[10px] text-slate-400 font-mono">Order Id: {orderId}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Amount</p>
-                    <p className="text-sm font-black text-slate-900">₹999.00</p>
+                    <p className="text-sm font-black text-slate-900">{paymentAmount}</p>
                   </div>
                 </div>
 
                 <div className="flex-1 flex flex-col items-center justify-center py-4">
-                  <div className="mb-6 text-center">
-                    <p className="text-[11px] font-bold text-slate-700 mb-4 px-4">
-                      Scan QR code using BHIM or your preferred UPI app
+                  <div className="mb-8 text-center">
+                    <p className="text-[11px] font-bold text-slate-700 mb-6 px-4">
+                      Razorpay supports UPI, cards, net banking, wallets, and other enabled payment methods.
                     </p>
-                    
-                    <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-4 sm:gap-6 mb-8 md:mb-10 min-h-7 px-4">
-                      <div className="flex items-center justify-center min-w-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg" alt="GPay" className="h-[20px] object-contain" />
-                      </div>
-                      <div className="flex items-center justify-center min-w-0">
-                        <img src="https://cdn.worldvectorlogo.com/logos/paytm-1.svg" alt="Paytm" className="h-[22px] object-contain" />
-                      </div>
-                      <div className="flex items-center justify-center min-w-0">
-                        <img src="https://cdn.worldvectorlogo.com/logos/phonepe-1.svg" alt="PhonePe" className="h-[22px] object-contain" />
-                      </div>
-                      <div className="flex items-center justify-center min-w-0">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Amazon_Pay_logo.svg" alt="Amazon Pay" className="h-[18px] object-contain" />
-                      </div>
-                    </div>
 
                     <div className="relative group mx-auto w-fit">
                       <div className="absolute -inset-4 bg-[#00E5CC]/10 rounded-[2.5rem] blur-2xl group-hover:bg-[#00E5CC]/20 transition-all duration-500"></div>
-                      <div className="relative w-44 h-44 sm:w-52 sm:h-52 bg-white p-4 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center overflow-hidden shadow-inner">
-                        <img 
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=H&data=${encodeURIComponent(`upi://pay?pa=${MERCHANT_CONFIG.upiId}&am=${MERCHANT_CONFIG.amount}&cu=INR&tn=${MERCHANT_CONFIG.note}`)}`}
-                          alt="Payment QR Code"
-                          className="w-full h-full object-contain"
-                        />
-                        
-                        {/* Smaller Shield Logo Overlay - Ensures perfect scan-ability with ECC=H */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-10 h-10 bg-white rounded-full p-1.5 shadow-xl border border-slate-50 flex items-center justify-center">
-                            <div className="w-full h-full bg-[#00E5CC] rounded-full flex items-center justify-center">
-                              <Shield size={16} className="text-white" />
-                            </div>
-                          </div>
+                      <div className="relative w-44 h-44 sm:w-52 sm:h-52 bg-white p-6 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center overflow-hidden shadow-inner">
+                        <div className="w-20 h-20 bg-[#00E5CC]/10 rounded-full flex items-center justify-center mb-5">
+                          <CreditCard size={42} className="text-[#00E5CC]" />
                         </div>
-
-                        <div className="absolute bottom-2 right-2 bg-white p-1 rounded-md shadow-sm border border-slate-100">
-                           <div className="w-4 h-4 bg-[#00E5CC] rounded-[2px] flex items-center justify-center">
-                             <Shield size={10} className="text-white" />
-                           </div>
-                        </div>
+                        <p className="text-xs font-black uppercase tracking-widest text-slate-900">Razorpay Secure Checkout</p>
+                        <p className="text-[10px] text-slate-400 mt-2">Order created server-side</p>
                       </div>
-                    </div>
-                    
-                    <div className="mt-6">
-                      <p className={`text-[11px] font-bold ${timeLeft < 60 ? 'text-rose-500' : 'text-slate-600'}`}>
-                        This QR code will expire in {formatTime(timeLeft)}
-                      </p>
                     </div>
                   </div>
 
                   <div className="w-full space-y-4">
                     <button
                       onClick={handleUpgrade}
-                      disabled={isLoading || timeLeft === 0}
+                      disabled={isLoading}
                       className="w-full bg-[#00E5CC] text-black font-black py-4 rounded-2xl shadow-xl shadow-[#00E5CC]/20 hover:bg-[#00d1ba] hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? <Loader2 size={20} className="animate-spin mx-auto" /> : (timeLeft === 0 ? 'QR EXPIRED' : 'CONFIRM TRANSACTION')}
+                      {isLoading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'PAY WITH RAZORPAY'}
                     </button>
                     
                     <p className="text-[9px] text-slate-400 text-center leading-relaxed">
-                      By confirming, you agree that your transaction will be <br /> 
-                      manually verified against our merchant logs.
+                      Your subscription activates only after Razorpay signature <br /> 
+                      and captured payment status are verified by our server. Access lasts {planPeriodLabel}.
                     </p>
                   </div>
                 </div>
@@ -378,7 +482,7 @@ Secure your digital perimeter with FakeShield.
             </div>
             <h2 className="text-4xl font-black text-slate-900 mb-4 font-display">Upgrade Successful!</h2>
             <p className="text-slate-500 mb-10 leading-relaxed text-lg">
-              The Forensic Perimeter is now fully active. Your access to <span className="font-bold text-slate-900">Pro Shield</span> features has been synchronized.
+              The Forensic Perimeter is now fully active. Your <span className="font-bold text-slate-900">Pro Shield</span> access is active for {planPeriodLabel}.
             </p>
             <div className="bg-slate-50 rounded-3xl p-6 mb-10 border border-slate-100">
               <div className="flex justify-between items-center mb-2">
@@ -389,6 +493,12 @@ Secure your digital perimeter with FakeShield.
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reference</span>
                 <span className="text-xs font-mono text-slate-600">{transactionId}</span>
               </div>
+              {subscriptionExpiry && (
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Valid Until</span>
+                  <span className="text-xs font-bold text-slate-700">{subscriptionExpiry}</span>
+                </div>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <button 

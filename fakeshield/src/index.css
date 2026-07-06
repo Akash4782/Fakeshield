@@ -158,11 +158,15 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  html,
+  html {
+    scroll-behavior: smooth;
+  }
+
   body,
   #root {
     min-width: 0;
-    overflow-x: hidden;
+    /* `hidden` creates a scroll container and breaks window-based sticky elements. */
+    overflow-x: clip;
   }
 
   img,

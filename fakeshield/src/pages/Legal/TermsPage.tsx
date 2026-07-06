@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeft, Gavel, Scale, AlertCircle, Terminal, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Gavel, Scale, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import Footer from '../../components/Footer';
@@ -92,8 +92,9 @@ const TermsPage: React.FC = () => {
               <div className="space-y-6 leading-relaxed font-medium" style={{ color: 'var(--text-secondary)' }}>
                 <p>
                   While FakeShield utilizes state-of-the-art neural engines, forensic analysis is inherently probabilistic. 
-                  Our confidence scores are technical indicators intended to support investigations and do not constitute 
-                  absolute legal proof. Users are responsible for how they interpret and act upon these forensic signals.
+                  Our confidence scores, verdict labels, and improvement suggestions are technical indicators intended to 
+                  support investigations and content review. They do not constitute absolute legal proof or mandatory 
+                  editing instructions. Users are responsible for how they interpret and act upon these forensic signals.
                 </p>
                 <div className="border-l-4 border-[#00E5CC] pl-6 py-2 italic text-sm">
                   "The user retains all ownership of original content, while FakeShield retains ownership of the forensic 
@@ -108,8 +109,9 @@ const TermsPage: React.FC = () => {
                  <div>
                    <h3 className="text-xl font-bold mb-2">Compliance & Liability</h3>
                    <p className="text-slate-800 text-sm leading-relaxed font-medium">
-                     FakeShield is a tool for investigative assistance. We do not provide legal advice, 
-                     and we are not liable for decisions made based on forensic confidence scores.
+                     FakeShield is a tool for investigative assistance and content review support. We do not provide legal advice, 
+                     and we are not liable for decisions made based on forensic confidence scores, verdicts, reports, or 
+                     improvement suggestions.
                    </p>
                  </div>
               </div>

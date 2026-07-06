@@ -13,6 +13,8 @@ import ContactPage from './pages/Contact/ContactPage';
 import SubscriptionPage from './pages/Subscription/SubscriptionPage';
 import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import PrivacyPage from './pages/Legal/PrivacyPage';
 import TermsPage from './pages/Legal/TermsPage';
@@ -66,8 +68,10 @@ function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/faq" element={<FAQPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login"           element={<LoginPage />} />
+            <Route path="/signup"          element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password"  element={<ResetPasswordPage />} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

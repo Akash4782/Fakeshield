@@ -42,8 +42,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, isOpen, onClose }) => {
   }, [showConfirm]);
 
   const handleLogout = () => {
-    logout();
+    setShowConfirm(false);
     navigate('/', { replace: true });
+    setTimeout(() => {
+      logout();
+    }, 10);
   };
   
   const menuItems = [

@@ -3,25 +3,42 @@ import { Mail, Phone, MapPin, MessageSquare, ArrowLeft, Send, CheckCircle } from
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import Footer from '../../components/Footer';
+import { API_BASE_URL } from '../../config';
 
 const ContactPage: React.FC = () => {
   const navigate = useNavigate();
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call
-    setSent(true);
-    setTimeout(() => {
-      setSent(false);
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.detail || 'Unable to send your message. Please try again.');
+      }
+      setSent(true);
       setForm({ name: '', email: '', phone: '', message: '' });
-      navigate('/');
-    }, 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to send your message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputStyle = "w-full px-4 py-3 rounded-xl border bg-[var(--panel-bg)] text-[var(--text-primary)] text-sm outline-none focus:border-[#00E5CC] transition-all";
@@ -177,11 +194,17 @@ const ContactPage: React.FC = () => {
 
                     <button 
                       type="submit"
-                      className="w-full py-5 rounded-2xl text-slate-900 font-bold text-base hover:brightness-110 transition-all flex items-center justify-center gap-3 group shadow-xl shadow-[#00E5CC]/20"
+                      disabled={submitting}
+                      className="w-full py-5 rounded-2xl text-slate-900 font-bold text-base hover:brightness-110 transition-all flex items-center justify-center gap-3 group shadow-xl shadow-[#00E5CC]/20 disabled:cursor-not-allowed disabled:opacity-60"
                       style={{ background: '#00E5CC' }}
                     >
-                      Initialize Contact <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      {submitting ? 'Sending Message...' : 'Initialize Contact'}
+                      {!submitting && <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
                     </button>
+
+                    {error && (
+                      <p role="alert" className="text-center text-sm font-medium text-red-500">{error}</p>
+                    )}
 
                     <p className="text-center text-xs leading-relaxed px-8" style={{ color: 'var(--text-muted)' }}>
                       By submitting this form, you agree to our privacy policy and terms of service.

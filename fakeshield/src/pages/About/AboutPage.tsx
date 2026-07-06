@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
-import { Shield, ArrowRight, ArrowLeft, Github, Linkedin, Mail, Terminal, Code2, Database, BrainCircuit, Activity, User } from 'lucide-react';
+import { Shield, ArrowRight, ArrowLeft, Github, Linkedin, Mail, Terminal, Code2, Database, BrainCircuit, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import logo from '../../assets/logo.png';
+import akashPortrait from '../../assets/akash-virdi.png';
 import Footer from '../../components/Footer';
 
 const AboutPage: React.FC = () => {
@@ -89,15 +91,29 @@ const AboutPage: React.FC = () => {
         <section className="py-32 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row gap-20">
-              <div className="md:w-1/3 sticky top-32 h-fit">
+              <motion.div
+                className="md:w-1/3 h-fit md:sticky md:top-36 md:self-start"
+                initial={{ opacity: 0, x: -24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              >
                 <h2 className="text-xs font-bold text-[#00E5CC] uppercase tracking-[0.3em] mb-4">Engineering</h2>
                 <h3 className="text-3xl font-black mb-6" style={{ color: 'var(--text-heading)' }}>How we verify.</h3>
                 <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   Generic AI detectors look for "vibes". We look for mathematical impossibility.
                 </p>
-              </div>
-              <div className="md:w-2/3 space-y-24">
-                <div className="group">
+              </motion.div>
+              <div className="md:w-2/3 relative space-y-12 md:space-y-20 md:pl-10">
+                <div className="hidden md:block absolute left-0 top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-[#00E5CC]/50 to-transparent" />
+                <motion.article
+                  className="group relative rounded-3xl border p-7 md:p-9"
+                  style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}
+                  initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.55, ease: 'easeOut' }}
+                  whileHover={{ y: -6, boxShadow: '0 22px 45px -28px rgba(0, 229, 204, 0.55)' }}
+                >
+                  <span className="hidden md:block absolute -left-[45px] top-12 w-2.5 h-2.5 rounded-full bg-[#00E5CC] ring-4 ring-[#00E5CC]/15 transition-transform group-hover:scale-150" />
                   <div className="text-5xl font-black mb-6 transition-colors" style={{ color: 'var(--text-muted)' }}>01</div>
                   <h4 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Frequency Domain Analysis</h4>
                   <p className="leading-relaxed max-w-lg" style={{ color: 'var(--text-secondary)' }}>
@@ -105,8 +121,15 @@ const AboutPage: React.FC = () => {
                     We analyze DCT (Discrete Cosine Transform) coefficients to identify patterns 
                     consistent with GAN and Diffusion generators.
                   </p>
-                </div>
-                <div className="group">
+                </motion.article>
+                <motion.article
+                  className="group relative rounded-3xl border p-7 md:p-9"
+                  style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}
+                  initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.55, ease: 'easeOut' }}
+                  whileHover={{ y: -6, boxShadow: '0 22px 45px -28px rgba(0, 229, 204, 0.55)' }}
+                >
+                  <span className="hidden md:block absolute -left-[45px] top-12 w-2.5 h-2.5 rounded-full bg-[#00E5CC] ring-4 ring-[#00E5CC]/15 transition-transform group-hover:scale-150" />
                   <div className="text-5xl font-black mb-6 transition-colors" style={{ color: 'var(--text-muted)' }}>02</div>
                   <h4 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Neural Artifact Localization</h4>
                   <p className="leading-relaxed max-w-lg" style={{ color: 'var(--text-secondary)' }}>
@@ -114,15 +137,22 @@ const AboutPage: React.FC = () => {
                     pupil reflection, and background noise. Our engines isolate these regions for 
                     pixel-perfect scrutiny.
                   </p>
-                </div>
-                <div className="group">
+                </motion.article>
+                <motion.article
+                  className="group relative rounded-3xl border p-7 md:p-9"
+                  style={{ background: 'var(--panel-bg)', borderColor: 'var(--panel-border)' }}
+                  initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }} transition={{ duration: 0.55, ease: 'easeOut' }}
+                  whileHover={{ y: -6, boxShadow: '0 22px 45px -28px rgba(0, 229, 204, 0.55)' }}
+                >
+                  <span className="hidden md:block absolute -left-[45px] top-12 w-2.5 h-2.5 rounded-full bg-[#00E5CC] ring-4 ring-[#00E5CC]/15 transition-transform group-hover:scale-150" />
                   <div className="text-5xl font-black mb-6 transition-colors" style={{ color: 'var(--text-muted)' }}>03</div>
                   <h4 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Multi-Signal Consensus</h4>
                   <p className="leading-relaxed max-w-lg" style={{ color: 'var(--text-secondary)' }}>
                     A video might pass a texture check but fail on frame-to-frame temporal consistency. 
                     FakeShield correlates signals across time and space to provide a unified confidence score.
                   </p>
-                </div>
+                </motion.article>
               </div>
             </div>
           </div>
@@ -185,9 +215,9 @@ const AboutPage: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row gap-16 items-center">
                <div className="relative group">
-                 <div className="absolute -inset-4 bg-[#00E5CC]/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-                 <div className="relative w-48 h-48 rounded-[3rem] flex items-center justify-center overflow-hidden grayscale hover:grayscale-0 transition-all duration-500" style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--panel-border)' }}>
-                    <User size={64} style={{ color: 'var(--text-muted)' }} />
+                 <div className="absolute -inset-4 bg-[#00E5CC]/25 rounded-[3rem] blur-2xl opacity-40 group-hover:opacity-80 transition-all duration-700"></div>
+                 <div className="relative w-52 h-64 rounded-[2.5rem] overflow-hidden transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-2xl" style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--panel-border)', boxShadow: '0 20px 45px -25px rgba(0, 229, 204, 0.55)' }}>
+                    <img src={akashPortrait} alt="Akash Virdi under a moonlit sky" className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105" />
                  </div>
                </div>
                <div className="flex-grow">
